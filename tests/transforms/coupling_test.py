@@ -4,9 +4,9 @@ import unittest
 
 import torch
 
-from nflows.nn import nets
-from nflows.transforms import coupling
-from nflows.utils import torchutils
+from enflows.nn import nets
+from enflows.transforms import coupling
+from enflows.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 

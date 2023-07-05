@@ -5,7 +5,7 @@ import unittest
 import torch
 import torchtestcase
 
-from nflows.flows import realnvp
+from enflows.flows import realnvp
 
 
 class SimpleRealNVPTest(torchtestcase.TorchTestCase):

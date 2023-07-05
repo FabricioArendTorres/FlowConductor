@@ -5,7 +5,7 @@ import unittest
 import torch
 import torchtestcase
 
-from nflows.transforms import made
+from enflows.transforms import made
 
 
 class ShapeTest(torchtestcase.TorchTestCase):

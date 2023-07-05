@@ -17,6 +17,7 @@ dependencies:
   - jupyter
   - matplotlib
   - numpy
+  - parameterized
   - pip
   - pip:
     - torchtestcase

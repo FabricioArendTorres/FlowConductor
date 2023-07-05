@@ -5,10 +5,13 @@ from unittest.mock import MagicMock
 
 import torch
 
-from nflows.transforms import linear
-from nflows.transforms.linear import Linear
-from nflows.utils import torchutils
+from enflows.transforms import linear
+from enflows.transforms.linear import Linear, ScalarScale, ScalarShift
+from enflows.utils import torchutils
 from tests.transforms.transform_test import TransformTest
+
+from enflows.utils import torchutils
+from parameterized import parameterized_class
 
 
 class LinearTest(TransformTest):
@@ -247,6 +250,90 @@ class NaiveLinearTest(TransformTest):
     def test_forward_inverse_are_consistent(self):
         batch_size = 10
         inputs = torch.randn(batch_size, self.features)
+        self.assert_forward_inverse_are_consistent(self.transform, inputs)
+
+
+@parameterized_class(('batch_size', 'features', 'scale'), [
+    (10, 2, 1),
+    (2, 4, 2),
+    (10, 2, 15.),
+    (16, 3, 0.01),
+    (10, 20, 142),
+    (1, 3, 4),
+])
+class ScalarScaleTest(TransformTest):
+    def setUp(self):
+        # self.features = 2
+        self.transform = ScalarScale(self.scale)
+        # self.batch_size = 10
+        self.inputs = torch.randn(self.batch_size, self.features).requires_grad_(True)
+        self.eps = 1e-5
+
+    def test_forward(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [self.batch_size])
+
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+
+        self.assertEqual(logabsdet, logabsdet_ref)
+
+    def test_inverse(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+        outputs = outputs.detach().requires_grad_(True)
+        inputs_rec, logabsdet_inverse = self.transform.inverse(outputs)
+
+        self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        self.assertEqual(logabsdet_inverse, logabsdet_ref)
+
+    def test_forward_inverse_are_consistent(self):
+        inputs = self.inputs
+        self.assert_forward_inverse_are_consistent(self.transform, inputs)
+
+
+@parameterized_class(('batch_size', 'features', 'scale'), [
+    (10, 2, 1.),
+    (2, 4, 2.),
+    (10, 2, 15.),
+    (16, 3, 0.01),
+    (10, 20, 142),
+    (1, 3, 4.),
+])
+class ScalarShiftTest(TransformTest):
+    def setUp(self):
+        # self.features = 2
+        self.transform = ScalarShift(self.scale)
+        # self.batch_size = 10
+        self.inputs = torch.randn(self.batch_size, self.features).requires_grad_(True)
+        self.eps = 1e-5
+
+    def test_forward(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [self.batch_size])
+
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+
+        self.assertEqual(logabsdet, logabsdet_ref)
+        self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
+
+    def test_inverse(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+        outputs = outputs.detach().requires_grad_(True)
+        inputs_rec, logabsdet_inverse = self.transform.inverse(outputs)
+
+        self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        self.assertEqual(logabsdet_inverse, logabsdet_ref)
+        self.assertEqual(logabsdet_inverse, torch.zeros_like(logabsdet_inverse))
+
+    def test_forward_inverse_are_consistent(self):
+        inputs = self.inputs
         self.assert_forward_inverse_are_consistent(self.transform, inputs)
 
 

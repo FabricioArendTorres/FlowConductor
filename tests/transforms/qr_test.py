@@ -2,8 +2,8 @@ import unittest
 
 import torch
 
-from nflows.transforms import qr
-from nflows.utils import torchutils
+from enflows.transforms import qr
+from enflows.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 

@@ -5,7 +5,7 @@ import unittest
 import torch
 import torchtestcase
 
-from nflows.distributions import discrete
+from enflows.distributions import discrete
 
 
 class ConditionalIndependentBernoulliTest(torchtestcase.TorchTestCase):

@@ -5,9 +5,9 @@ import unittest
 import torch
 import torchtestcase
 
-from nflows.distributions.normal import StandardNormal
-from nflows.flows import base
-from nflows.transforms.standard import AffineScalarTransform
+from enflows.distributions.normal import StandardNormal
+from enflows.flows import base
+from enflows.transforms.standard import AffineScalarTransform
 
 
 class FlowTest(torchtestcase.TorchTestCase):

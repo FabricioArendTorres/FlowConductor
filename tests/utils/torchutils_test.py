@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from nflows.utils import torchutils
+from enflows.utils import torchutils
 import torchtestcase
 
 

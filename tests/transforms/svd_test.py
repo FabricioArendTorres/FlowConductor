@@ -2,8 +2,8 @@ import unittest
 
 import torch
 
-from nflows.transforms.svd import SVDLinear
-from nflows.utils import torchutils
+from enflows.transforms.svd import SVDLinear
+from enflows.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 

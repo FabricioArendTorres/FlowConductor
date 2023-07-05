@@ -4,20 +4,42 @@
 <a href="https://github.com/bayesiains/nflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/bayesiains/nflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
 
 `nflows` is a comprehensive collection of [normalizing flows](https://arxiv.org/abs/1912.02762) using [PyTorch](https://pytorch.org).
+nflows-extended, or `enflows`, is as the name suggests an extension of this package. 
+The main focus lies in implementing more flow layers from the literature in one consistent framework.
 
-## Installation
 
-To install from PyPI:
+## Setting up the Environment.
+The environment set-up was tested with [mamba](https://github.com/mamba-org/mamba).
+We assume cuda is available, and did not explicitely test a CPU setup.
+In principle, it should also work with [conda](https://docs.conda.io/en/latest/) (just a lot slower), but we did not explicitely test that.
+For using conda, exchange `mamba` with `conda` in the following commands.
+
+The `.yml` file for the environment is given in `env/conda_env.yml`, and can be created from the base directory via:
+
 ```
-pip install nflows
+(base) $  mamba env create --file env/conda_env.yml
+(base) $  conda activate lflows_neurips
+# This code should then work:
+(enflows) $  python examples/lflows_conditional_moons.py
 ```
+
+If you do not create it from the base directory, the pip install of the local package will not work.
+In that case, you can try fixing it by running afterwards:
+
+`(lflows_neurips) /lagrangian_flow_net$ pip install -e .`
+
+Ideally, after a successfull install you should  be able to run and pass the unit tests with:
+
+` 
+(lflows_neurips) /lagrangian_flow_net$  pytest
+`
 
 ## Usage
 
 To define a flow:
 
 ```python
-from nflows import transforms, distributions, flows
+from enflows import transforms, distributions, flows
 
 # Define an invertible transformation.
 transform = transforms.CompositeTransform([
@@ -44,51 +66,27 @@ samples = flow.sample(num_samples)
 ```
 
 Additional examples of the workflow are provided in [examples folder](examples/).
+# Changes and added features compared to nflows
 
-## Development
+The core logic of the code for LFlows (i.e. the `nflows/` directory) is based on the [nflows package](https://github.com/bayesiains/nflows).
 
-To install all the dependencies for development:
-```
-pip install -r requirements.txt
-```
+Main changes compared to the nflows repository include:
 
-## Citing nflows
+1. The addition of a few transformations.
 
-To cite the package:
-```bibtex
-@software{nflows,
-  author       = {Conor Durkan and
-                  Artur Bekasov and
-                  Iain Murray and
-                  George Papamakarios},
-  title        = {{nflows}: normalizing flows in {PyTorch}},
-  month        = nov,
-  year         = 2020,
-  publisher    = {Zenodo},
-  version      = {v0.14},
-  doi          = {10.5281/zenodo.4296287},
-  url          = {https://doi.org/10.5281/zenodo.4296287}
-}
-```
+- Sum-of-Sigmoid Layers
+- [DeepSigmoid Layers / Neural Autoregressive Flows] (https://proceedings.mlr.press/v80/huang18d.html)
+- Transformations for which the inverse is only known to exist, but not available: 
+  - [Planar Flow](https://arxiv.org/abs/1912.02762) 
+  - [Sylvester Flow](https://arxiv.org/abs/1803.05649)
+- Conditional Versions of existing non-conditional transformations from nflows. Can be found for imports at `nflows.transforms.conditional.*`:
+    - Planar Flow, Sylvester Flow
+    - LU Transform
+    - Orthogonal Transforms based on parameterized Householder projections
+    - SVD based on the Orthogonal transforms
+    - Shift Transform
+- Conditional Versions of existing auto-regressive Variations, i.e. getting rid of the autoregressive parts.
+    - [ConditionalPiecewiseRationalQuadraticTransform](https://proceedings.neurips.cc/paper/2019/hash/7ac71d433f282034e088473244df8c02-Abstract.html)
+    - [ConditionalUMNNTransform](https://arxiv.org/abs/1908.05164)
 
-The version number is intended to be the one from `nflows/version.py`. The year/month correspond to the date of the release. BibTeX entries for other versions could be found on [Zenodo](https://doi.org/10.5281/zenodo.4296286).
-
-If you're using spline-based flows in particular, consider citing the _Neural Spline Flows_ paper: [[bibtex]](https://papers.nips.cc/paper/2019/file/7ac71d433f282034e088473244df8c02-Bibtex.bib).
-
-## References
-`nflows` is derived from [bayesiains/nsf](https://github.com/bayesiains/nsf) originally published with
-> C. Durkan, A. Bekasov, I. Murray, G. Papamakarios, _Neural Spline Flows_, NeurIPS 2019.
-> [[arXiv]](https://arxiv.org/abs/1906.04032) [[bibtex]](https://papers.nips.cc/paper/2019/file/7ac71d433f282034e088473244df8c02-Bibtex.bib)
-
-
-`nflows` has been used in 
-> Conor Durkan, Iain Murray, George Papamakarios, _On Contrastive Learning for Likelihood-free Inference_, ICML 2020.
-> [[arXiv]](https://arxiv.org/abs/2002.03712).
-
-> Artur Bekasov, Iain Murray, _Ordering Dimensions with Nested Dropout Normalizing Flows_.
-> [[arXiv]](https://arxiv.org/abs/2006.08777).
-
-> Tim Dockhorn, James A. Ritchie, Yaoliang Yu, Iain Murray, _Density Deconvolution with Normalizing Flows_.
-> [[arXiv]](https://arxiv.org/abs/2006.09396).
-
-`nflows` is used by the conditional density estimation package [pyknos](https://github.com/mackelab/pyknos), and in turn the likelihood-free inference framework [sbi](https://github.com/mackelab/sbi).
+2. Some extensions and fixes of the unit tests provided in `tests`.

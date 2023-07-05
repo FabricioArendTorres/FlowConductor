@@ -11,3 +11,4 @@ pytest
 pyyaml
 torchtestcase
 umnn
+parameterized

@@ -4,11 +4,14 @@ import unittest
 
 import torch
 
-from nflows.transforms import nonlinearities as nl
-from nflows.transforms import standard
-from nflows.transforms.base import InputOutsideDomain
+from enflows.transforms import nonlinearities as nl
+from enflows.transforms import standard
+from enflows.transforms.base import InputOutsideDomain
+from enflows.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
+
+from parameterized import parameterized_class
 
 class ExpTest(TransformTest):
     def test_raises_domain_exception(self):
@@ -162,6 +165,49 @@ class NonlinearitiesTest(TransformTest):
         for transform in transforms:
             with self.subTest(transform=transform):
                 self.assert_forward_inverse_are_consistent(transform, inputs)
+
+
+
+
+@parameterized_class(('batch_size', 'features', 'scale'), [
+    (10, 2),
+    (2, 4),
+    (10, 2),
+    (16, 3),
+    (10, 20),
+    (1, 3),
+])
+class SoftplusTest(TransformTest):
+    def setUp(self):
+        # self.features = 2
+        self.transform = nl.Softplus(threshold=20)
+        # self.batch_size = 10
+        self.inputs = torch.randn(self.batch_size, self.features).requires_grad_(True)
+        self.eps = 1e-5
+
+    def test_forward(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [self.batch_size])
+
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+
+        self.assertEqual(logabsdet, logabsdet_ref)
+
+    def test_inverse(self):
+        outputs, logabsdet = self.transform.forward(self.inputs)
+        outputs = outputs.detach().requires_grad_(True)
+        inputs_rec, logabsdet_inverse = self.transform.inverse(outputs)
+
+        self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        self.assertEqual(logabsdet_inverse, logabsdet_ref)
+
+    def test_forward_inverse_are_consistent(self):
+        inputs = self.inputs
+        self.assert_forward_inverse_are_consistent(self.transform, inputs)
 
 
 if __name__ == "__main__":

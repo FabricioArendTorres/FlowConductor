@@ -4,11 +4,12 @@ import unittest
 import numpy as np
 import torch
 
-from nflows.transforms import base, standard
+from enflows.transforms import base, standard, ConditionalTransform, InverseTransform
 from tests.transforms.transform_test import TransformTest
 
 
 class CompositeTransformTest(TransformTest):
+
     def test_forward(self):
         batch_size = 10
         shape = [2, 3, 4]
@@ -95,7 +96,7 @@ class MultiscaleCompositeTransformTest(TransformTest):
             with self.subTest(shape=shape):
                 transform = self.create_transform(shape)
                 inputs = torch.randn(batch_size, *shape).view(batch_size, -1)
-                self.assert_forward_inverse_are_consistent(transform, inputs)
+                self.assert_forward_inverse_are_consistent(InverseTransform(transform), inputs)
 
 
 class InverseTransformTest(TransformTest):
@@ -124,6 +125,23 @@ class InverseTransformTest(TransformTest):
         self.assert_tensor_is_good(logabsdet, [batch_size])
         self.assertEqual(outputs, outputs_ref)
         self.assertEqual(logabsdet, logabsdet_ref)
+
+
+class ConditionalTransformTest(TransformTest):
+    def setUp(self):
+        self.features = 3
+        self.batch_size = 10
+
+        self.random_input = torch.randn((self.batch_size, self.features))
+
+        self.transform = ConditionalTransform(features=self.features, conditional_net=torch.nn.Identity())
+
+    def test_no_condition(self):
+        with self.assertRaises(expected_exception=TypeError) as cm:
+            self.transform.forward(self.random_input)
+
+        with self.assertRaises(expected_exception=TypeError) as cm:
+            self.transform.inverse(self.random_input)
 
 
 if __name__ == "__main__":
