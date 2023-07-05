@@ -25,12 +25,12 @@ The `.yml` file for the environment is given in `env/conda_env.yml`, and can be 
 If you do not create it from the base directory, the pip install of the local package will not work.
 In that case, you can try fixing it by running afterwards:
 
-`(lflows_neurips) /lagrangian_flow_net$ pip install -e .`
+`(enflows) /lagrangian_flow_net$ pip install -e .`
 
 Ideally, after a successfull install you should  be able to run and pass the unit tests with:
 
 ` 
-(lflows_neurips) /lagrangian_flow_net$  pytest
+(enflows) /lagrangian_flow_net$  pytest
 `
 
 ## Usage
