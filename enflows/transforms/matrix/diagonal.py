@@ -7,7 +7,8 @@ from enflows.transforms.base import Transform
 from enflows.transforms.conditional import ConditionalTransform
 from enflows.transforms import Transform, ConditionalTransform, Exp, Sigmoid, ScalarScale, CompositeTransform, \
     ScalarShift, Softplus
-from enflows.transforms.adaptive_sigmoids import SumOfSigmoids, ExtendedSoftplus
+from enflows.transforms.adaptive_sigmoids import SumOfSigmoids
+from enflows.transforms.nonlinearities import ExtendedSoftplus
 from torch.nn import init
 from enflows.utils import torchutils
 

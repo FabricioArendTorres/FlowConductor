@@ -22,7 +22,7 @@ CONTINUE_TRAINING = False
 base_dist = StandardNormal(shape=[2])
 MB_SIZE = 2 * 8 * 1024
 # selected_data = "diamond"
-selected_data = "eight_gaussians"
+selected_data = "diamond"
 
 num_layers = {"eight_gaussians": 6,
               "diamond": 10,
@@ -32,7 +32,7 @@ num_layers = {"eight_gaussians": 6,
               "checkerboard": 4,
               "two_spirals": 6
               }.get(selected_data, 4)
-num_sigmoids = {"eight_gaussians": 30,
+num_sigmoids = {"eight_gaussians": 10,
                 "diamond": 30,
                 "crescent": 30,
                 "four_circles": 30,
@@ -73,7 +73,7 @@ def plot_model(flow, x):
     with torch.no_grad():
         zgrid = flow.log_prob(xyinput).exp().reshape(nsamples, nsamples)
 
-        samples = flow.sample(num_samples=1_000)
+        # samples = flow.sample(num_samples=1_000)
     # plt.contourf(xgrid.detach().cpu().numpy(), ygrid.detach().cpu().numpy(), zgrid.detach().cpu().numpy())
     plt.imshow(zgrid.detach().cpu().numpy(), origin='lower')
     plt.axis('off')
@@ -102,7 +102,7 @@ hypernet_kwargs = dict(features=2, hidden_features=128, num_blocks=2)
 
 for _ in range(num_layers):
     transforms.append(ReversePermutation(features=2))
-    transforms.append(LULinear(features=2, identity_init=True))
+    # transforms.append(LULinear(features=2, identity_init=True))
     transforms.append(ActNorm(features=2))
 
     # transforms.append(

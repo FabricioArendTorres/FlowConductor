@@ -25,21 +25,21 @@ base_dist = StandardNormal(shape=[2])
 
 transforms = []
 
-hypernet_kwargs = dict(features=2, hidden_features=256, num_blocks=2)
+hypernet_kwargs = dict(features=2, hidden_features=64, num_blocks=2)
 # made_RQ = MaskedPiecewiseRationalQuadraticAutoregressiveTransform(num_bins=8, tails='linear', tail_bound=3,
 #                                                                   **hypernet_kwargs)
 # made_sigmoids = MaskedSumOfSigmoidsTransform(n_sigmoids=8, **hypernet_kwargs)
 
 for _ in range(num_layers):
     transforms.append(ReversePermutation(features=2))
-    transforms.append(LULinear(features=2, identity_init=True))
+    # transforms.append(LULinear(features=2, identity_init=True))
     transforms.append(ActNorm(features=2))
 
     # transforms.append(
     #     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(features=2, hidden_features=256, num_bins=8,
     #                                                             tails='linear', num_blocks=2, tail_bound=3,
     #                                                             ))
-    transforms.append(MaskedSumOfSigmoidsTransform(n_sigmoids=20, **hypernet_kwargs))
+    transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=5, **hypernet_kwargs))
     # transforms.append(AdaptiveSigmoidFixedOffset(n_sigmoids=200, features=2))
     # transforms.append(ActNorm(features=2))
     #
@@ -78,10 +78,10 @@ for i in range(num_iter):
         with torch.no_grad():
             zgrid = flow.log_prob(xyinput).exp().reshape(nsamples, nsamples)
 
-            samples = flow.sample(num_samples=1_000)
+            # samples = flow.sample(num_samples=1_000)
 
         plt.contourf(xgrid.detach().cpu().numpy(), ygrid.detach().cpu().numpy(), zgrid.detach().cpu().numpy())
         # plt.scatter(*samples.detach().cpu().numpy().T, marker='+', alpha=0.5, color="black")
-        # plt.title('iteration {}'.format(i + 1))
+        plt.title('iteration {}'.format(i + 1))
         plt.show()
         flow.train()

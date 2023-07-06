@@ -170,22 +170,22 @@ class Sigmoid(Transform):
 
 
 class Softplus(Transform):
-    def __init__(self, threshold=20):
+    def __init__(self, threshold=20, eps=0.):
         super().__init__()
 
+        self.eps = eps
         self.softplus = torch.nn.Softplus(beta=1, threshold=threshold)
         self.log_sigmoid = torch.nn.LogSigmoid()
 
     def forward(self, inputs, context=None):
-        outputs = self.softplus(inputs)
+        outputs = self.softplus(inputs) + self.eps
         logabsdet = self.log_sigmoid(inputs).sum(-1)
         return outputs, logabsdet
 
     def inverse(self, inputs, context=None):
+        inputs = inputs - self.eps
         outputs = torch.where(inputs > self.softplus.threshold, inputs, inputs.expm1().log())
         logabsdet = -torch.log(-torch.expm1(-inputs)).sum(-1)
-        if torch.any(torch.isnan(logabsdet)):
-            breakpoint()
         return outputs, logabsdet
 
 
@@ -485,3 +485,68 @@ class PiecewiseRationalQuadraticCDF(Transform):
 
     def inverse(self, inputs, context=None):
         return self._spline(inputs, inverse=True)
+
+
+class ExtendedSoftplus(torch.nn.Module):
+    """
+    Combination of a (shifted and scaled) softplus and the same softplus flipped around the origin
+
+    Softplus(scale * (x-shift)) - Softplus(-scale * (x + shift))
+
+    Linear outside of origin, flat around origin.
+    """
+
+    def __init__(self, features, shift=None):
+        self.features = features
+        super(ExtendedSoftplus, self).__init__()
+        if shift is None:
+            self.shift = torch.nn.Parameter(torch.ones(1, features) * 3, requires_grad=True)
+            # self.log_scale = torch.nn.Parameter(torch.zeros(1, features), requires_grad=True)
+        elif torch.is_tensor(shift):
+            self.shift = shift.reshape(-1, features)
+            # self.log_scale = log_scale.reshape(-1, features)
+        else:
+            self.shift = torch.nn.Parameter(torch.tensor(shift), requires_grad=True)
+            # self.log_scale = torch.nn.Parameter(torch.tensor(log_scale), requires_grad=True)
+
+        self._softplus = torch.nn.Softplus()
+
+    # def get_shift_and_scale(self):
+    #     # return self._softplus(self.shift), torch.exp(self.log_scale)
+    #     return self.shift, torch.exp(self.log_scale) + 1e-3
+    #     # return 5, torch.exp(self.log_scale)
+
+    def get_shift(self):
+        return self._softplus(self.shift) + 1e-1
+
+    def softplus(self, x, shift):
+        return self._softplus((x - shift))
+
+    def softminus(self, x, shift):
+        return - self._softplus(-(x + shift))
+
+    def diag_jacobian_pos(self, x, shift):
+        # (b e^(b x))/(e^(a b) + e^(b x))
+        return torch.exp(x) / (torch.exp(shift) + torch.exp(x))
+
+    def log_diag_jacobian_pos(self, x, shift):
+        # -log(e^(a b) + e^(b x)) + b x + log(b)
+        log_jac = -torch.logaddexp(shift, x) + x
+        return log_jac
+
+    def diag_jacobian_neg(self, x, shift):
+        return torch.sigmoid(- (shift + x))
+
+    def log_diag_jacobian_neg(self, x, shift):
+        return - self._softplus((shift + x))
+
+    def forward(self, inputs):
+        # inputs = inputs.requires_grad_()
+        shift = self.get_shift()
+        outputs = self.softplus(inputs, shift) + self.softminus(inputs, shift)
+        # ref_batch_jacobian = torchutils.batch_jacobian(outputs, inputs)
+        # ref_logabsdet = torchutils.logabsdet(ref_batch_jacobian)
+        # breakpoint()
+        diag_jacobian = torch.logaddexp(self.log_diag_jacobian_pos(inputs, shift),
+                                        self.log_diag_jacobian_neg(inputs, shift))
+        return outputs, diag_jacobian  # torch.log(diag_jacobian).sum(-1)

@@ -65,7 +65,7 @@ from enflows.transforms.standard import (
     IdentityTransform,
     PointwiseAffineTransform,
 )
-from enflows.transforms.adaptive_sigmoids import SumOfSigmoids
+from enflows.transforms.adaptive_sigmoids import (SumOfSigmoids, DeepSigmoid)
 from enflows.transforms.svd import SVDLinear
 from enflows.transforms.conditional import (
     ConditionalTransform,

@@ -2,7 +2,7 @@
 # conda env create --file environment.yml
 # update:
 # conda env update --file environment.yml --prune
-name: nflows
+name: enflows
 
 channels:
   - conda-forge
@@ -18,6 +18,8 @@ dependencies:
   - matplotlib
   - numpy
   - parameterized
+  - scikit-learn
+  - scikit-image
   - pip
   - pip:
     - torchtestcase

@@ -306,64 +306,12 @@ class MaskedSumOfSigmoidsTransform(AutoregressiveTransform):
                                                                             self._output_dim_multiplier()))
 
         z, logabsdet = transformer(inputs)
-        return z, logabsdet
+        return z - 0.5, logabsdet
 
     def _elementwise_inverse(self, inputs, autoregressive_params):
         # self.transformer.set_raw_params(self.features, autoregressive_params.reshape(inputs.shape[0], -1))
+        inputs = inputs + 0.5
         transformer = SumOfSigmoids(n_sigmoids=self.n_sigmoids, features=self.features,
-                                    raw_params=autoregressive_params.view(inputs.shape[0], self.features,
-                                                                            self._output_dim_multiplier()))
-        x, logabsdet = transformer.inverse(inputs)
-        return x, logabsdet
-
-class MaskedDeepSigmoidTransform(AutoregressiveTransform):
-    """An unconstrained monotonic neural networks autoregressive layer that transforms the variables.
-        """
-
-    def __init__(
-            self,
-            features,
-            hidden_features,
-            n_sigmoids=30,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
-    ):
-        self.features = features
-        self.n_sigmoids = n_sigmoids
-
-        made = made_module.MADE(
-            features=features,
-            hidden_features=hidden_features,
-            context_features=context_features,
-            num_blocks=num_blocks,
-            output_multiplier=self._output_dim_multiplier(),
-            use_residual_blocks=use_residual_blocks,
-            random_mask=random_mask,
-            activation=activation,
-            dropout_probability=dropout_probability,
-            use_batch_norm=use_batch_norm,
-        )
-        super().__init__(made)
-
-    def _output_dim_multiplier(self):
-        return 3 * self.n_sigmoids
-
-    def _elementwise_forward(self, inputs, autoregressive_params):
-        transformer = DeepSigmoid(n_sigmoids=self.n_sigmoids, features=self.features,
-                                    raw_params=autoregressive_params.view(inputs.shape[0], self.features,
-                                                                            self._output_dim_multiplier()))
-
-        z, logabsdet = transformer(inputs)
-        return z, logabsdet
-
-    def _elementwise_inverse(self, inputs, autoregressive_params):
-        # self.transformer.set_raw_params(self.features, autoregressive_params.reshape(inputs.shape[0], -1))
-        transformer = DeepSigmoid(n_sigmoids=self.n_sigmoids, features=self.features,
                                     raw_params=autoregressive_params.view(inputs.shape[0], self.features,
                                                                             self._output_dim_multiplier()))
         x, logabsdet = transformer.inverse(inputs)

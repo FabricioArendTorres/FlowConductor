@@ -1,79 +1,19 @@
+import abc
+
 import torch
 import torch.nn as nn
+import numpy as np
+from abc import abstractmethod
 
 from enflows.transforms.no_analytic_inv.base import MonotonicTransform
-from enflows.utils import torchutils
-
-
-class ExtendedSoftplus(torch.nn.Module):
-    """
-    Combination of a (shifted and scaled) softplus and the same softplus flipped around the origin
-
-    Softplus(scale * (x-shift)) - Softplus(-scale * (x + shift))
-
-    Linear outside of origin, flat around origin.
-    """
-
-    def __init__(self, features, shift=None):
-        self.features = features
-        super(ExtendedSoftplus, self).__init__()
-        if shift is None:
-            self.shift = torch.nn.Parameter(torch.ones(1, features) * 3, requires_grad=True)
-            # self.log_scale = torch.nn.Parameter(torch.zeros(1, features), requires_grad=True)
-        elif torch.is_tensor(shift):
-            self.shift = shift.reshape(-1, features)
-            # self.log_scale = log_scale.reshape(-1, features)
-        else:
-            self.shift = torch.nn.Parameter(torch.tensor(shift), requires_grad=True)
-            # self.log_scale = torch.nn.Parameter(torch.tensor(log_scale), requires_grad=True)
-
-        self._softplus = torch.nn.Softplus()
-
-    # def get_shift_and_scale(self):
-    #     # return self._softplus(self.shift), torch.exp(self.log_scale)
-    #     return self.shift, torch.exp(self.log_scale) + 1e-3
-    #     # return 5, torch.exp(self.log_scale)
-
-    def get_shift(self):
-        return self._softplus(self.shift) + 1e-3
-
-    def softplus(self, x, shift):
-        return self._softplus((x - shift))
-
-    def softminus(self, x, shift):
-        return - self._softplus(-(x + shift))
-
-    def diag_jacobian_pos(self, x, shift):
-        # (b e^(b x))/(e^(a b) + e^(b x))
-        return torch.exp(x) / (torch.exp(shift) + torch.exp(x))
-
-    def log_diag_jacobian_pos(self, x, shift):
-        # -log(e^(a b) + e^(b x)) + b x + log(b)
-        log_jac = -torch.logaddexp(shift, x) + x
-        return log_jac
-
-    def diag_jacobian_neg(self, x, shift):
-        return torch.sigmoid(- (shift + x))
-
-    def log_diag_jacobian_neg(self, x, shift):
-        return - self._softplus((shift + x))
-
-    def forward(self, inputs):
-        # inputs = inputs.requires_grad_()
-        shift = self.get_shift()
-        outputs = self.softplus(inputs, shift) + self.softminus(inputs, shift)
-        # ref_batch_jacobian = torchutils.batch_jacobian(outputs, inputs)
-        # ref_logabsdet = torchutils.logabsdet(ref_batch_jacobian)
-        # breakpoint()
-        diag_jacobian = torch.logaddexp(self.log_diag_jacobian_pos(inputs, shift),
-                                        self.log_diag_jacobian_neg(inputs, shift))
-        return outputs, diag_jacobian  # torch.log(diag_jacobian).sum(-1)
+from enflows.transforms.base import Transform
+from enflows.transforms.nonlinearities import ExtendedSoftplus, Sigmoid, Softplus
 
 
 class SumOfSigmoids(MonotonicTransform):
     PREACT_SCALE_MIN = .1
     PREACT_SCALE_MAX = 10.
-    PREACT_SHIFT_MAX = 2
+    PREACT_SHIFT_MAX = 10
 
     def __init__(self, features, n_sigmoids=10, num_iterations=50, lim=120,
                  raw_params: torch.Tensor = None):
@@ -148,7 +88,7 @@ class SumOfSigmoids(MonotonicTransform):
     def get_params(self):
         soft_max = torch.nn.functional.softmax(self.raw_softmax, dim=-1) + self.eps
         soft_max /= soft_max.sum(-1).unsqueeze(-1)
-        scale_postact = torch.exp(self.log_scale_postact) *soft_max
+        scale_postact = torch.exp(self.log_scale_postact) * soft_max
 
         scale_preact = torch.sigmoid(self.log_scale_preact)
         scale_preact = scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
@@ -156,3 +96,97 @@ class SumOfSigmoids(MonotonicTransform):
         shift_preact = torch.tanh(self.shift_preact) * self.PREACT_SHIFT_MAX
 
         return shift_preact, scale_preact, scale_postact
+
+
+
+
+class DeepSigmoidModule(Transform):
+    @staticmethod
+    def softmax(x, dim=-1):
+        e_x = torch.exp(x - x.max(dim=dim, keepdim=True)[0])
+        out = e_x / e_x.sum(dim=dim, keepdim=True)
+        return out
+
+    def __init__(self, n_sigmoids=4, mollify=0., eps=1e-4, num_inverse_iterations=100, lim=10):
+        super(DeepSigmoidModule, self).__init__()
+
+        self.n_sigmoids = n_sigmoids
+
+        self.act_a = torch.nn.Softplus()
+        self.act_b = torch.nn.Identity()
+        self.act_w = torch.nn.Softmax(dim=-1)
+        self._mollify = mollify
+        self.eps = eps
+
+        self.softplus_ = nn.Softplus()
+        self.softplus = lambda x: self.softplus_(x) + self.eps
+        self.sigmoid_ = nn.Sigmoid()
+        self.sigmoid = lambda x: self.sigmoid_(x) * (
+                    1 - self.delta) + 0.5 * self.delta
+        self.logsigmoid = lambda x: -self.softplus(-x)
+        self.log = lambda x: torch.log(x * 1e2) - np.log(1e2)
+        self.logit = lambda x: self.log(x) - self.log(1 - x)
+
+    @abstractmethod
+    def forward(self, inputs, context=None):
+        dsparams = self.get_params(inputs, context)
+        return self.forward_given_params(inputs, dsparams=dsparams)
+
+    def forward_given_params(self, inputs, dsparams=None):
+        scale_ = self.act_a(self.raw_scales(dsparams))
+        shift_ = self.act_b(self.raw_shifts(dsparams))
+        weight = self.act_w(self.raw_weights(dsparams))
+
+        scale, shift = self.mollify(scale_, shift_)
+
+        pre_sigm = scale * inputs.unsqueeze(-1) + shift
+        x_pre = torch.sum(weight * torch.sigmoid(pre_sigm), dim=-1)
+        x_pre_clipped = x_pre * (1 - self.eps) + self.eps * 0.5
+        x_ = self.logit(x_pre_clipped)
+        outputs = x_
+
+        logdet = self._forward_logabsdet(scale, dsparams, self.n_sigmoids, pre_sigm, x_pre_clipped)
+
+        return outputs, logdet
+
+    def raw_scales(self, dsparams):
+        return dsparams[..., 0 * self.n_sigmoids:1 * self.n_sigmoids]
+
+    def raw_shifts(self, dsparams):
+        return dsparams[..., 1 * self.n_sigmoids:2 * self.n_sigmoids]
+
+    def raw_weights(self, dsparams):
+        return dsparams[..., 2 * self.n_sigmoids:3 * self.n_sigmoids]
+
+    def _forward_logabsdet(self, a, dsparams, ndim, pre_sigm, x_pre_clipped):
+        logj = torch.nn.functional.log_softmax(self.raw_weights(dsparams), dim=-1) + \
+               self.logsigmoid(pre_sigm) + \
+               self.logsigmoid(-pre_sigm) + self.log(a)
+
+        logj = torch.logsumexp(logj, -1)
+        logabsdet_ = logj + np.log(1 - self.eps) - (self.log(x_pre_clipped) + self.log(-x_pre_clipped + 1))
+        return logabsdet_.sum(-1)
+
+    def mollify(self, a_, b_):
+        a = a_ * (1 - self._mollify) + 1.0 * self._mollify
+        b = b_ * (1 - self._mollify) + 0.0 * self._mollify
+        return a, b
+
+    def inverse(self, inputs, context=None):
+        raise NotImplementedError("..")
+
+class DeepSigmoid(DeepSigmoidModule):
+    def __init__(self, features, *args, **kwargs):
+        self.features = features
+        super().__init__(*args, **kwargs)
+        _a_preact = -2*torch.ones(self.features, self.n_sigmoids)  # scale
+        _b_preact = torch.zeros(self.features, self.n_sigmoids)  # shift
+        _w_preact = torch.ones(self.features, self.n_sigmoids)  # softmax
+
+        self.dsparams = torch.nn.Parameter(torch.concatenate([_a_preact + 1e-5 * torch.randn_like(_a_preact),
+                                                              _b_preact + 1e-5 * torch.randn_like(_b_preact),
+                                                              _w_preact + 1e-3 * torch.randn_like(_w_preact)], -1),
+                                           requires_grad=True)
+
+    def forward(self, inputs, context=None) -> torch.Tensor:
+        return self.forward_given_params(inputs=inputs, dsparams=self.dsparams)

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import sklearn.datasets as datasets
 
 import torch
-from enflows.transforms.autoregressive import MaskedDeepSigmoidTransform
+from enflows.transforms.autoregressive import MaskedDeepSigmoidTransform, MaskedSumOfSigmoidsTransform
 from torch import nn
 from torch import optim
 
@@ -30,11 +30,12 @@ context_features = 5
 for _ in range(num_layers):
     transforms.append(ReversePermutation(features=2))
     transforms.append(ActNorm(2))
-    transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=64))
+    # transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=64))
 
-    transforms.append(MaskedSumOfSigmoidsTransform(features=2, n_sigmoids=10,
-                                                        context_features=context_features, hidden_features=64))
-transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=32))
+    transforms.append(MaskedSumOfSigmoidsTransform(features=2, n_sigmoids=20,
+                                                 context_features=context_features, hidden_features=64))
+    # transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=32))
+    # transforms.append(ConditionalScaleTransform(features=2, context_features=context_features, hidden_features=32))
 transforms.append(ActNorm(2))
 
 transform = CompositeTransform(transforms)
@@ -43,7 +44,7 @@ embedding_net = ResidualNet(in_features=1, out_features=context_features, hidden
                             num_blocks=2,
                             activation=torch.nn.functional.silu)
 
-flow = LagrangeFlow(transform, base_dist, embedding_net=embedding_net)
+flow = Flow(transform, base_dist, embedding_net=embedding_net)
 optimizer = optim.Adam(flow.parameters(), lr=1e-4)
 
 num_iter = 5000
@@ -59,7 +60,7 @@ for i in range(num_iter):
         print('iteration {}; Loss: {:.2e}'.format(i + 1, loss.item()))
 
     if (i + 1) % 500 == 0:
-        fig, ax = plt.subplots(1, 5,  figsize=(20, 4))
+        fig, ax = plt.subplots(1, 5, figsize=(20, 4))
         ax = ax.flatten()
         xline = torch.linspace(-1.5, 2.5, 100)
         yline = torch.linspace(-.75, 1.25, 100)
@@ -75,16 +76,15 @@ for i in range(num_iter):
             zgrid2 = flow.log_prob(xyinput, 0.5 * torch.ones(10000, 1)).exp().reshape(100, 100)
             zgrid3 = flow.log_prob(xyinput, 0.75 * torch.ones(10000, 1)).exp().reshape(100, 100)
             zgrid4 = flow.log_prob(xyinput, torch.ones(10000, 1)).exp().reshape(100, 100)
+            #
+            # vels = [flow.velocity(xyinput_vel, t * torch.ones(xyinput_vel.shape[0], 1)).detach().cpu().numpy() for t in
+            #         [0., 0.25, 0.5, 0.75, 1.]]
 
-            vels = [flow.velocity(xyinput_vel, t*torch.ones(xyinput_vel.shape[0], 1)).detach().cpu().numpy() for t in [0., 0.25, 0.5, 0.75, 1.]]
-
-        for i, (zgrid, vel) in enumerate(zip([zgrid0, zgrid1, zgrid2, zgrid3, zgrid4],
-                                             vels)):
+        for i, zgrid in enumerate([zgrid0, zgrid1, zgrid2, zgrid3, zgrid4]):
             ax[i].contourf(xgrid.numpy(), ygrid.numpy(), zgrid.numpy(), cmap="Blues")
-            ax[i].quiver(xgrid_vel.numpy(), ygrid_vel.numpy(), vel[:, 0], vel[:, 1], angles='xy', scale_units='xy')
+            # ax[i].quiver(xgrid_vel.numpy(), ygrid_vel.numpy(), vel[:, 0], vel[:, 1], angles='xy', scale_units='xy')
             # ax[i].axis('equal')
             ax[i].set_ylim(-1.5, 1.5)
-
 
         # ax[1].contourf(xgrid.numpy(), ygrid.numpy(), zgrid1.numpy())
         plt.title('iteration {}'.format(i + 1))
