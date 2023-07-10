@@ -72,8 +72,8 @@ def logabsdet(x):
 
 def batch_JTJ_logabsdet(inputs, outputs):
     jacs = batch_jacobian(outputs, inputs)
-    logabsdet = 0.5 *torch.slogdet(torch.bmm(torch.transpose(jacs, -2, -1), jacs))[1]
-    return  logabsdet
+    logabsdet = 0.5 * torch.slogdet(torch.bmm(torch.transpose(jacs, -2, -1), jacs))[1]
+    return logabsdet
 
 
 def random_orthogonal(size):
@@ -210,6 +210,10 @@ def batch_jacobian(g, x):
     return torch.cat(jac, 1)
 
 
+def batch_trace(M):
+    return M.view(M.shape[0], -1)[:, ::M.shape[1] + 1].sum(1)
+
+
 def sech2(x):
     return 1 / torch.cosh(x) ** 2
 
@@ -232,3 +236,22 @@ def tensor_to_np(tensor: torch.Tensor) -> ArrayLike:
         return tensor
     else:
         raise ValueError("Unknown Type: " + str(type(tensor)))
+
+
+
+def sample_rademacher_like(y):
+    return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1
+
+
+def safe_detach(tensor):
+    return tensor.detach().requires_grad_(tensor.requires_grad)
+
+
+def _flatten(sequence):
+    flat = [p.reshape(-1) for p in sequence]
+    return torch.cat(flat) if len(flat) > 0 else torch.tensor([])
+
+
+def _flatten_convert_none_to_zeros(sequence, like_sequence):
+    flat = [p.reshape(-1) if p is not None else torch.zeros_like(q).view(-1) for p, q in zip(sequence, like_sequence)]
+    return torch.cat(flat) if len(flat) > 0 else torch.tensor([])
