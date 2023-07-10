@@ -106,8 +106,8 @@ class DeepSigmoidTest(TransformTest):
 
     def test_logabsdet(self):
         self.assert_jacobian_correct(transform=self.transform, inputs=self.inputs)
-        # outputs, _ = self.transform.forward(self.inputs)
-        # self.assert_inverse_jacobian_correct(transform=self.transform, outputs = outputs.detach())
+        outputs, _ = self.transform.forward(self.inputs)
+        self.assert_inverse_jacobian_correct(transform=self.transform, outputs = outputs.detach())
 
     # def test_forward_inverse_are_consistent(self):
     #     self.assert_forward_inverse_are_consistent(self.transform, self.inputs)
