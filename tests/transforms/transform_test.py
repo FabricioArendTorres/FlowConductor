@@ -33,8 +33,9 @@ class TransformTest(torchtestcase.TorchTestCase):
 
         self.assert_tensor_is_good(logabsdet, shape=inputs.shape[:1])
         self.assert_tensor_is_good(ref_logabsdet, shape=inputs.shape[:1])
+        self.assert_tensor_equal(logabsdet, ref_logabsdet,
+                                 msg=f"Jacobian mismatch by max abs error={(logabsdet - ref_logabsdet).abs().max():.2e}.")
 
-        self.assert_tensor_equal(logabsdet, ref_logabsdet, msg="Jacobian mismatch.")
 
     def assert_jacobian_correct_context(self, transform, inputs, context):
         inputs = inputs.requires_grad_(True)
@@ -52,9 +53,8 @@ class TransformTest(torchtestcase.TorchTestCase):
         _, ref_inv_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(inputs_reconstructed, outputs))
         self.assert_tensor_is_good(inv_logabsdet, shape=outputs.shape[:1])
         self.assert_tensor_is_good(ref_inv_logabsdet, shape=outputs.shape[:1])
-
-        self.assert_tensor_equal(inv_logabsdet, ref_inv_logabsdet, msg="Inverse jacobian mismatch.")
-
+        self.assert_tensor_equal(inv_logabsdet, ref_inv_logabsdet,
+                                 msg=f"Jacobian mismatch by max abs error={(inv_logabsdet - ref_inv_logabsdet).abs().max():.2e}.")
 
     def assertNotEqual(self, first, second, msg=None):
         if (self._eps and (first - second).abs().max().item() < self._eps) or (
