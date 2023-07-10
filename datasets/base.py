@@ -61,7 +61,8 @@ def load_plane_dataset(name, num_points, flip_axes=False):
             'two_circles': TwoCircles,
             'two_moons': TwoMoonsDataset,
             'pinwheel': PinWheelDataset,
-            'swissroll': SwissRollDataset
+            'swissroll': SwissRollDataset,
+            'ConcentricRingsDataset' : ConcentricRingsDataset
         }[name](num_points=num_points, flip_axes=flip_axes)
 
     except KeyError:

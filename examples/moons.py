@@ -6,12 +6,14 @@ from torch import nn
 from torch import optim
 
 from enflows.flows.base import Flow
+from enflows.nn.nets import *
 from enflows.distributions.normal import StandardNormal
 from enflows.transforms.base import CompositeTransform
 from enflows.transforms import *
 from enflows.transforms.autoregressive import *
 from enflows.transforms.permutations import ReversePermutation
 import numpy as np
+
 device = "cuda"
 
 
@@ -19,16 +21,19 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-
-num_layers = 2
+num_layers = 10
 base_dist = StandardNormal(shape=[2])
 
 transforms = []
 
 hypernet_kwargs = dict(features=2, hidden_features=64, num_blocks=2)
-# made_RQ = MaskedPiecewiseRationalQuadraticAutoregressiveTransform(num_bins=8, tails='linear', tail_bound=3,
-#                                                                   **hypernet_kwargs)
-# made_sigmoids = MaskedSumOfSigmoidsTransform(n_sigmoids=8, **hypernet_kwargs)
+
+
+densenet_builder = LipschitzDenseNetBuilder(input_channels=2,
+                                            densenet_depth=3,
+                                            activation_function=Sin(),
+                                            lip_coeff=.97,
+                                            )
 
 for _ in range(num_layers):
     transforms.append(ReversePermutation(features=2))
@@ -39,7 +44,11 @@ for _ in range(num_layers):
     #     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(features=2, hidden_features=256, num_bins=8,
     #                                                             tails='linear', num_blocks=2, tail_bound=3,
     #                                                             ))
-    transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=5, **hypernet_kwargs))
+
+    # transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=5, **hypernet_kwargs))
+    # transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=10, **hypernet_kwargs))
+    transforms.append(iResBlock(densenet_builder.build_network(),
+                                brute_force=True))
     # transforms.append(AdaptiveSigmoidFixedOffset(n_sigmoids=200, features=2))
     # transforms.append(ActNorm(features=2))
     #
