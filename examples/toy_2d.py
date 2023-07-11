@@ -21,7 +21,7 @@ CONTINUE_TRAINING = False
 
 base_dist = StandardNormal(shape=[2])
 MB_SIZE =  500
-selected_data = "checkerboard"
+selected_data = "four_circles"
 
 num_layers = {"eight_gaussians": 6,
               "diamond": 10,
@@ -80,7 +80,7 @@ def plot_model(flow, x):
     # flow.train()
     # flow.eval()
     with torch.no_grad():
-        zgrid = flow.log_prob(xyinput).exp().reshape(nsamples, nsamples)
+        zgrid = flow.log_prob(xyinput).reshape(nsamples, nsamples)
 
         samples = flow.sample(num_samples=5_000)
     # plt.contourf(xgrid.detach().cpu().numpy(), ygrid.detach().cpu().numpy(), zgrid.detach().cpu().numpy())
@@ -140,9 +140,8 @@ for _ in range(num_layers):
     transforms.append(ActNorm(features=2))
 
     transforms.append(iResBlock(densenet_builder.build_network(),
-                                brute_force=True,
+                                brute_force=False,
                                 # unbiased_estimator=True,
-                                exact_trace=False,
                                 n_exact_terms=1,
                                 n_samples=1))
     # transforms.append(

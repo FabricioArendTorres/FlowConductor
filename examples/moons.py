@@ -16,7 +16,6 @@ import numpy as np
 
 device = "cuda"
 
-
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
@@ -39,14 +38,6 @@ for _ in range(num_layers):
     transforms.append(ReversePermutation(features=2))
     # transforms.append(LULinear(features=2, identity_init=True))
     transforms.append(ActNorm(features=2))
-
-    # transforms.append(
-    #     MaskedPiecewiseRationalQuadraticAutoregressiveTransform(features=2, hidden_features=256, num_bins=8,
-    #                                                             tails='linear', num_blocks=2, tail_bound=3,
-    #                                                             ))
-
-    # transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=5, **hypernet_kwargs))
-    # transforms.append(MaskedDeepSigmoidTransform(n_sigmoids=10, **hypernet_kwargs))
     transforms.append(iResBlock(densenet_builder.build_network(),
                                 brute_force=True))
     # transforms.append(AdaptiveSigmoidFixedOffset(n_sigmoids=200, features=2))

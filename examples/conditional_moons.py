@@ -18,25 +18,46 @@ from enflows.distributions.normal import DiagonalNormal
 from enflows.transforms.base import CompositeTransform
 from enflows.transforms.conditional import *
 from enflows.transforms import *
+from enflows.nn.nets import *
 from enflows.transforms.permutations import ReversePermutation
 from enflows.nn.nets import ResidualNet
 
 num_layers = 4
 base_dist = DiagonalNormal(shape=[2])
+context_features = 5
+
+densenet_builder = LipschitzDenseNetBuilder(input_channels=2,
+                                            densenet_depth=3,
+                                            activation_function=Sin(w0=20),
+                                            lip_coeff=.97,
+                                            context_features=context_features
+                                            )
+
+class TimeNetwork(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.tanh = torch.nn.Sigmoid()
+        self.scaler = torch.nn.Linear(context_features, 1)
+
+    def forward(self, inputs):
+        return self.tanh(self.scaler((inputs - 0.5) * 2))
+
 
 transforms = []
-context_features = 5
 # transforms.append(ConditionalLUTransform(features=2, context_features=1, hidden_features=32))
-for _ in range(num_layers):
-    transforms.append(ReversePermutation(features=2))
+for i in range(num_layers):
+    # transforms.append(ReversePermutation(features=2))
     transforms.append(ActNorm(2))
-    # transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=64))
+    # transforms.append(ConditionalLUTransform(features=2, context_features=context_features, hidden_features=64))
+    #
+    # transforms.append(ConditionalSumOfSigmoidsTransform(features=2, n_sigmoids=20,
+    #                                                     context_features=context_features, hidden_features=64))
 
-    transforms.append(MaskedSumOfSigmoidsTransform(features=2, n_sigmoids=20,
-                                                 context_features=context_features, hidden_features=64))
+    transforms.append(iResBlock(densenet_builder.build_network(),
+                                time_nnet=TimeNetwork(),
+                                brute_force=False))
     # transforms.append(ConditionalShiftTransform(features=2, context_features=context_features, hidden_features=32))
     # transforms.append(ConditionalScaleTransform(features=2, context_features=context_features, hidden_features=32))
-transforms.append(ActNorm(2))
 
 transform = CompositeTransform(transforms)
 
