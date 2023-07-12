@@ -239,17 +239,30 @@ class ApproxTraceDeterminantEstimator(DeterminantEstimator):
         else:
             raise NotImplementedError(f"Unknown estimator '{trace_estimator}'.")
 
-    def logabsdet_and_g(self, x, training, **kwargs):
+    def logabsdet_and_g(self, x, training, time_multiplier=None, context=None, **kwargs):
         coeff_fn, n_power_series = self.parameter_generator.sample_parameters(training=training)
         if training and self.grad_in_forward:
             return self._logabsdet_and_g_grad_in_forward(coeff_fn=coeff_fn, n_power_series=n_power_series, x=x)
         else:
-            return self._g_and_logabsdet(coeff_fn=coeff_fn, n_power_series=n_power_series, x=x)
+            return self._g_and_logabsdet(coeff_fn=coeff_fn, n_power_series=n_power_series, x=x,
+                                         time_multiplier=time_multiplier,
+                                         context=context)
 
-    def _g_and_logabsdet(self, coeff_fn, n_power_series, x) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _g_and_logabsdet(self, coeff_fn, n_power_series, x, time_multiplier=None, context=None) -> Tuple[
+        torch.Tensor, torch.Tensor]:
         vareps = torch.randn_like(x)
         x = x.requires_grad_(True)
-        g = self.nnet(x)
+
+        if context is not None:
+            _x = torch.concat([x, context], -1)
+        else:
+            _x = x
+
+        if time_multiplier is not None:
+            g = self.nnet(_x) * time_multiplier
+        else:
+            g = self.nnet(_x)
+
         logdetgrad = self.trace_estimator(g, x, n_power_series, vareps, coeff_fn, self.training)
         return g, logdetgrad
 
@@ -343,7 +356,7 @@ class iResBlock(Transform):
             brute_force: Computes the exact logdet. Only available for 2D inputs.
         """
         super().__init__()
-        exact_trace = False # not working with True..
+        exact_trace = False  # not working with True..
 
         self.time_nnet = time_nnet
         self.nnet = nnet
