@@ -1,0 +1,6 @@
+Obtained and adapted from
+https://github.com/rtqichen/ffjord/tree/master/lib/layers
+https://github.com/facebookresearch/neural_stpp
+
+Will Grathwohl*, Ricky T. Q. Chen*, Jesse Bettencourt, Ilya Sutskever, David Duvenaud. "FFJORD: Free-form Continuous Dynamics for Scalable Reversible Generative Models." International Conference on Learning Representations (2019)
+Chen, Ricky TQ, Brandon Amos, and Maximilian Nickel. "Neural Spatio-Temporal Point Processes." International Conference on Learning Representations. 2020.
