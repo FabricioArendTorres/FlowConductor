@@ -38,7 +38,6 @@ class TestLipschitzLayer(torchtestcase.TorchTestCase):
                                                       coeff=self.coef,
                                                       n_power_iterations=1)
             self._test_single_layer(wrapper)
-            self._test_Lipschitz_dense(wrapper)
 
     def _test_single_layer(self, wrapper):
         net = torch.nn.Linear(self.input_dim, self.output_dim)

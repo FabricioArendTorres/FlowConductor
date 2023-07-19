@@ -140,7 +140,7 @@ for _ in range(num_layers):
     transforms.append(ActNorm(features=2))
 
     transforms.append(iResBlock(densenet_builder.build_network(),
-                                brute_force=False,
+                                brute_force=True,
                                 # unbiased_estimator=True,
                                 n_exact_terms=1,
                                 n_samples=1))

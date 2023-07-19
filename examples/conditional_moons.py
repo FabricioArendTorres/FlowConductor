@@ -90,8 +90,8 @@ for i in range(num_iter):
         xyinput = torch.cat([xgrid.reshape(-1, 1), ygrid.reshape(-1, 1)], dim=1)
         xyinput_vel = torch.cat([xgrid_vel.reshape(-1, 1), ygrid_vel.reshape(-1, 1)], dim=1)
 
+        flow.eval()
         with torch.no_grad():
-
             zgrid0 = flow.log_prob(xyinput, torch.zeros(10000, 1)).exp().reshape(100, 100)
             zgrid1 = flow.log_prob(xyinput, 0.25 * torch.ones(10000, 1)).exp().reshape(100, 100)
             zgrid2 = flow.log_prob(xyinput, 0.5 * torch.ones(10000, 1)).exp().reshape(100, 100)
@@ -106,7 +106,7 @@ for i in range(num_iter):
             # ax[i].quiver(xgrid_vel.numpy(), ygrid_vel.numpy(), vel[:, 0], vel[:, 1], angles='xy', scale_units='xy')
             # ax[i].axis('equal')
             ax[i].set_ylim(-1.5, 1.5)
-
+        flow.train()
         # ax[1].contourf(xgrid.numpy(), ygrid.numpy(), zgrid1.numpy())
         plt.title('iteration {}'.format(i + 1))
         # plt.show()

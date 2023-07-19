@@ -379,7 +379,6 @@ class iResBlock(Transform):
         # self.register_buffer('last_secmom', torch.zeros(1))
 
     def forward(self, x, context=None):
-
         if self.time_nnet is not None:
             time_multiplier = self.time_nnet(context)
         else:
@@ -395,15 +394,37 @@ class iResBlock(Transform):
             return self.test_time_determinant_estimator
 
     def inverse(self, y, context=None):
-        x = self._inverse_fixed_point(y)
-        return x, -self._logabsdet(x)[1]
+        if self.time_nnet is not None:
+            time_multiplier = self.time_nnet(context)
+        else:
+            time_multiplier = None
 
-    def _inverse_fixed_point(self, y, atol=1e-5, rtol=1e-5):
-        x, x_prev = y - self.nnet(y), y
+        x = self._inverse_fixed_point(y, context)
+        return x, -self._logabsdet(x, time_multiplier=time_multiplier, context=context)[1]
+
+    def g_from_nnet(self, x, context=None):
+        if context is not None:
+            _x = torch.concat([x, context], -1)
+        else:
+            _x = x
+
+        if self.time_nnet is not None:
+            time_multiplier = self.time_nnet(context)
+        else:
+            time_multiplier = None
+
+        if time_multiplier is not None:
+            g = self.nnet(_x) * time_multiplier
+        else:
+            g = self.nnet(_x)
+        return g
+
+    def _inverse_fixed_point(self, y, context=None, atol=1e-5, rtol=1e-5):
+        x, x_prev = y - self.g_from_nnet(y, context), y
         i = 0
         tol = atol + y.abs() * rtol
         while not torch.all((x - x_prev) ** 2 / tol < 1):
-            x, x_prev = y - self.nnet(x), x
+            x, x_prev = y - self.g_from_nnet(x, context), x
             i += 1
             if i > 1000:
                 logger.info('Iterations exceeded 1000 for inverse.')
