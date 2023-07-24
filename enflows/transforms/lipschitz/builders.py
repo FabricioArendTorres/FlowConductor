@@ -10,6 +10,7 @@ from torch.nn.utils.parametrize import is_parametrized
 from enflows.nn.nets import activations
 from enflows.nn.nets.lipschitz_dense import LipschitzDenseLayer
 from enflows.nn.nets.lipschitz import scaled_spectral_norm_induced, scaled_spectral_norm_powerits
+from enflows.nn.nets.extended_basic_nets import ExtendedSequential, ExtendedLinear
 
 from siren_pytorch import Siren
 
@@ -105,26 +106,27 @@ class LipschitzDenseNetBuilder:
 
     def set_activation(self, activation):
         # Change growth size for CLipSwish:
-        if isinstance(self.act_fun, activations.CLipSwish):
+        if isinstance(self.act_fun, activations.CLipSwish)  or isinstance(
+                self.act_fun, activations.CSin):
             assert self.densenet_growth % 2 == 0, "Select an even densenet growth size for CLipSwish!"
             self.output_channels = self.densenet_growth // 2
         else:
             self.output_channels = self.densenet_growth
         self.act_fun = activation
 
-    def build_network(self) -> torch.nn.Sequential:
+    def build_network(self) -> ExtendedSequential:
         nnet = []
         total_in_channels = self.input_channels + self.context_features
         for i in range(self.densenet_depth):
             part_net = []
 
             part_net.append(
-                self.wrapper(torch.nn.Linear(total_in_channels, self.output_channels))
+                self.wrapper(ExtendedLinear(total_in_channels, self.output_channels))
             )
             part_net.append(self.activation)
             nnet.append(
                 LipschitzDenseLayer(
-                    torch.nn.Sequential(*part_net),
+                    ExtendedSequential(*part_net),
                     learnable_concat=self.learnable_concat,
                     lip_coeff=self.lip_coeff
                 )
@@ -132,9 +134,9 @@ class LipschitzDenseNetBuilder:
 
             total_in_channels += self.densenet_growth
         nnet.append(
-            self.wrapper(torch.nn.Linear(total_in_channels, self.input_channels))
+            self.wrapper(ExtendedLinear(total_in_channels, self.input_channels))
         )
-        return torch.nn.Sequential(*nnet)
+        return ExtendedSequential(*nnet)
 
 
 class LipschitzFCNNBuilder:
