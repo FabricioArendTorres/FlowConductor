@@ -54,3 +54,44 @@ class LipschitzDenseLayer(torch.nn.Module):
         out = self.network(x)
         eta1_normalized, eta2_normalized = self.get_eta1_eta2()
         return torch.cat([x * eta1_normalized, out * eta2_normalized], dim=1)
+
+    def build_clone(self):
+        class LipschitzDenseLayerClone(torch.nn.Module):
+            def __init__(self, network, eta1, eta2):
+                super(LipschitzDenseLayerClone, self).__init__()
+                self.network = network
+                self.eta1_normalized = eta1_normalized
+                self.eta2_normalized = eta2_normalized
+
+            def forward(self, x, concat=True):
+                out = self.network(x)
+                if concat:
+                    return torch.cat([x * self.eta1_normalized, out * self.eta2_normalized], dim=1)
+                else:
+                    return x * self.eta1_normalized, out * self.eta2_normalized
+
+        with torch.no_grad():
+            eta1_normalized, eta2_normalized = self.get_eta1_eta2()
+            return LipschitzDenseLayerClone(self.network.build_clone(), eta1_normalized, eta2_normalized)
+
+    def build_jvp_net(self, x, concat=True):
+        class LipschitzDenseLayerJVP(torch.nn.Module):
+            def __init__(self, network, eta1_normalized, eta2_normalized):
+                super(LipschitzDenseLayerJVP, self).__init__()
+                self.network = network
+                self.eta1_normalized = eta1_normalized
+                self.eta2_normalized = eta2_normalized
+
+            def forward(self, v):
+                out = self.network(v)
+                return torch.cat([v * self.eta1_normalized, out * self.eta2_normalized], dim=1)
+
+        with torch.no_grad():
+            eta1_normalized, eta2_normalized = self.get_eta1_eta2()
+            network, out = self.network.build_jvp_net(x)
+            if concat:
+                y = torch.cat([x * eta1_normalized, out * eta2_normalized], dim=1)
+                return LipschitzDenseLayerJVP(network, eta1_normalized, eta2_normalized), y
+            else:
+                return LipschitzDenseLayerJVP(network, eta1_normalized,
+                                              eta2_normalized), x * eta1_normalized, out * eta2_normalized
