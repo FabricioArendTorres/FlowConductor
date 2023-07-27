@@ -93,7 +93,7 @@ class LipschitzDenseNetBuilder:
         self.lip_coeff = lip_coeff
         self.n_lipschitz_iters = n_lipschitz_iters
 
-        self.context_features = context_features
+        self.context_features = context_features if context_features is not None else 0
         self.wrapper = lambda network: scaled_spectral_norm_induced(network,
                                                                     n_power_iterations=self.n_lipschitz_iters,
                                                                     domain=2, codomain=2)
