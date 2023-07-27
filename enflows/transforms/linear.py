@@ -233,7 +233,7 @@ class ScalarScale(Transform):
     def __init__(self, scale=1., trainable=True, eps=1e-4):
         super().__init__()
         assert np.all(scale > 1e-6), "Scale too small.."
-        self._scale = nn.Parameter(torch.tensor(np.log(scale)), requires_grad=trainable)
+        self._scale = nn.Parameter(torch.log(torch.tensor(scale, dtype=torch.get_default_dtype())), requires_grad=trainable)
         self.eps = eps
 
     @property
@@ -243,19 +243,19 @@ class ScalarScale(Transform):
     def forward(self, inputs, context=None):
         outputs = self.scale * inputs
 
-        logabsdet = inputs.new_ones(inputs.shape[0]) * torch.log(self.scale) * np.sum(inputs.shape[1:])
+        logabsdet = inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
         return outputs, logabsdet
 
     def inverse(self, inputs, context=None):
         outputs = inputs * (1. / self.scale)
-        logabsdet = - inputs.new_ones(inputs.shape[0]) * torch.log(self.scale) * np.sum(inputs.shape[1:])
+        logabsdet = - inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
         return outputs, logabsdet
 
 
 class ScalarShift(Transform):
     def __init__(self, shift=0., trainable=True):
         super().__init__()
-        self.shift = nn.Parameter(torch.tensor(shift, dtype=torch.float), requires_grad=trainable)
+        self.shift = nn.Parameter(torch.tensor(shift, dtype=torch.get_default_dtype()), requires_grad=trainable)
 
     def forward(self, inputs, context=None):
         outputs = inputs + self.shift
