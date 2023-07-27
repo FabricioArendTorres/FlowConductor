@@ -232,7 +232,7 @@ class NaiveLinear(Linear):
 class ScalarScale(Transform):
     def __init__(self, scale=1., trainable=True, eps=1e-4):
         super().__init__()
-        assert scale > 1e-6, "Scale too small.."
+        assert np.all(scale > 1e-6), "Scale too small.."
         self._scale = nn.Parameter(torch.tensor(np.log(scale)), requires_grad=trainable)
         self.eps = eps
 
@@ -253,7 +253,7 @@ class ScalarScale(Transform):
 
 
 class ScalarShift(Transform):
-    def __init__(self, shift=1., trainable=True):
+    def __init__(self, shift=0., trainable=True):
         super().__init__()
         self.shift = nn.Parameter(torch.tensor(shift, dtype=torch.float), requires_grad=trainable)
 
