@@ -1,18 +1,11 @@
-import argparse
-import os
-import time
 import math
-import numpy as np
 
 import torch
-from torch.nn.utils.parametrize import is_parametrized
 
 from enflows.nn.nets import activations
-from enflows.nn.nets.lipschitz_dense import LipschitzDenseLayer
-from enflows.nn.nets.lipschitz import scaled_spectral_norm_induced, scaled_spectral_norm_powerits
 from enflows.nn.nets.extended_basic_nets import ExtendedSequential, ExtendedLinear
-
-from siren_pytorch import Siren
+from enflows.nn.nets.lipschitz import scaled_spectral_norm_induced
+from enflows.nn.nets.lipschitz_dense import LipschitzDenseLayer
 
 coeff = 0.9
 
