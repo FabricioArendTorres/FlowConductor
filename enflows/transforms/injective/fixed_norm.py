@@ -18,8 +18,8 @@ def r_given_norm(thetas, norm, q):
     norm_2 = torch.stack(norm_2_, dim=-1).sum(-1)
     norm_3 = torch.abs(torch.prod(sin_thetas, dim=-1)) ** q
 
-    return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
-    # return thetas.mean(1)
+    # return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
+    return thetas.mean(1)
 
 def inflate_radius(inputs, norm, q):
     r = r_given_norm(inputs, norm, q)
@@ -68,7 +68,7 @@ def spherical_to_cartesian_torch(arr):
 
 def logabsdet_sph_to_car(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
-    eps = 1e-7
+    eps = 1e-8
     n = arr.shape[1]
     r = arr[:, -1]
     angles = arr[:, :-2]
@@ -79,6 +79,7 @@ def logabsdet_sph_to_car(arr):
     logabsdet_sin = torch.sum(sin_exp * torch.log(torch.abs(sin_angles) + eps), dim=1)
 
     return logabsdet_r + logabsdet_sin
+
 
 # def sherman_morrison_inverse(M):
 #     N = M.shape[-1]
@@ -111,6 +112,7 @@ def sherman_morrison_inverse(A):
     eye = torch.eye(*A.shape[1:]).repeat(A.shape[0], 1, 1)
     # A_triu_inv = torch.triangular_solve(eye, A_triu)[0]
     A_triu_inv = torch.linalg.solve_triangular(A_triu, eye, upper=True)
+    # A_triu_inv = torch.linalg.inv(A_triu)
 
     u = torch.zeros_like(A[:, :, -1:])
     u[:, -1, :] = 1.
@@ -120,7 +122,6 @@ def sherman_morrison_inverse(A):
     assert torch.all(A == A_triu + u @ v)
 
     num = ((A_triu_inv @ u) @ v) @ A_triu_inv
-    # num = torch.linalg.multi_dot((A_triu_inv, u, v, A_triu_inv))
     den = 1 + (v @ A_triu_inv) @ u
 
     return A_triu_inv - num / den
@@ -236,13 +237,13 @@ class FixedNorm(Transform):
         jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
         # assert torch.allclose(jac, jac_)
         jac_inv = sherman_morrison_inverse(jac.mT)
-        jac_inv_ = torch.inverse(jac.mT)
+        # jac_inv = torch.inverse(jac.mT)
 
-        abs_diff = torch.abs(jac_inv-jac_inv_)
-        plt.hist(abs_diff.detach().numpy().ravel(), bins=50)
-        plt.xscale('log')
-        plt.show()
-        print(abs_diff.max(), abs_diff.min(), abs_diff.mean())
+        # abs_diff = torch.abs(jac_inv-jac_inv_)
+        # plt.hist(abs_diff.detach().numpy().ravel(), bins=50)
+        # plt.xscale('log')
+        # plt.show()
+        # print(abs_diff.max(), abs_diff.min(), abs_diff.mean())
         # assert torch.allclose(jacobian_inv, torch.linalg.inv(jacobian.mT))
 
         grad_r = gradient_r(inputs, self.norm, self.q)
@@ -251,6 +252,8 @@ class FixedNorm(Transform):
 
         logabsdet_fro_norm = torch.log(torch.abs(fro_norm))
         logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
+        # print(logabsdet_fro_norm)
+        # print(logabsdet_s_to_c)
 
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
