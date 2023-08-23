@@ -1,25 +1,29 @@
 import torch
 from torch.autograd.functional import jacobian
 import sympy as sym
+import numpy as np
 import sympytorch
-from enflows.transforms import Transform, ConditionalTransform, Exp, Sigmoid, ScalarScale, CompositeTransform, \
-    ScalarShift, Softplus
+from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarScale, CompositeTransform, ScalarShift
 import matplotlib.pyplot as plt
 
 
 
 def r_given_norm(thetas, norm, q):
+    eps = 1e-5
+    assert thetas.shape[1] >= 1
     n = thetas.shape[-1]
     sin_thetas = torch.sin(thetas)
     cos_thetas = torch.cos(thetas)
     norm_1 = torch.abs(cos_thetas[:, 0]) ** q
-    norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
-               range(2, n + 1)]
-    norm_2 = torch.stack(norm_2_, dim=-1).sum(-1)
     norm_3 = torch.abs(torch.prod(sin_thetas, dim=-1)) ** q
-
-    # return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
-    return thetas.mean(1)
+    if thetas.shape[1] == 1:
+        return norm / ((norm_1 + norm_3) ** (1. / q))
+    else:
+        norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
+                   range(2, n + 1)]
+        norm_2 = torch.stack(norm_2_, dim=-1).sum(-1)
+        return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
+    #return thetas.mean(1)
 
 def inflate_radius(inputs, norm, q):
     r = r_given_norm(inputs, norm, q)
@@ -57,6 +61,7 @@ def sph_to_cart_jacobian_sympy (n):
 
 def spherical_to_cartesian_torch(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
+    assert arr.shape[1] >= 2
     r = arr[:, -1:]
     angles = arr[:, :-1]
     sin_prods = torch.cumprod(torch.sin(angles), dim=1)
@@ -134,21 +139,6 @@ def gradient_r(inputs, norm, q):
     return grad_r_theta_aug.unsqueeze(-1)
 
 
-# def pseudo_determinant(thetas, norm, q):
-#     r_theta = inflate_radius(thetas, norm, q)
-#     grad_r = gradient_r(thetas, norm, q)
-#
-#     # J_sc should not be computed via autograd, since we just need to evaluate it
-#     J_sc = jacobian(spherical_to_cartesian_torch, r_theta).sum(2)
-#
-#     J_sc_T = torch.transpose(J_sc, 1, 2)
-#     J_sc_r = torch.inverse(J_sc_T) @ grad_r
-#     norm = torch.linalg.matrix_norm(J_sc_r)
-#     det = jacobian_det_spherical_cartesian(r_theta)
-#
-#     return (det ** 2) * (norm ** 2)
-
-
 def jacobian_det_spherical_cartesian(x):
     d = x.shape[1]
     assert d >= 2
@@ -160,44 +150,6 @@ def jacobian_det_spherical_cartesian(x):
     sines_k = torch.pow(sines, sine_powers)
 
     return sign * r_n_1 * sines_k.prod(1)
-
-# def logabs_pseudodet(inputs, theta_r, norm, q):
-#     # spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
-#     # jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
-#     jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
-#     jac_inv = sherman_morrison_inverse(jac.mT)
-#     # jac_inv = torch.inverse(jac.mT)
-#
-#     # print(torch.abs(jacobian_inv-torch.linalg.inv(jacobian.mT)))
-#     # assert torch.allclose(jacobian_inv, torch.linalg.inv(jacobian.mT))
-#
-#     grad_r = gradient_r(inputs, norm, q)
-#     jac_inv_grad = jac_inv @ grad_r
-#     fro_norm = torch.norm(jac_inv_grad.squeeze(), p='fro', dim=1)
-#
-#     logabsdet_fro_norm = torch.log(torch.abs(fro_norm))
-#     logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
-#
-#     logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
-#
-#     # logabsdet = pseudo_determinant(inputs, norm, q)
-#
-#     return logabsdet
-
-# def pseudo_determinant(thetas, radius_func):
-#     r_theta = inflate_radius(thetas, radius_func)
-#     grad_r = gradient_r(thetas, radius_func)
-#
-#     # J_sc should not be computed via autograd, since we just need to evaluate it
-#     J_sc = jacobian(spherical_to_cartesian_torch, r_theta).sum(2)
-#
-#     J_sc_T = torch.transpose(J_sc, 1, 2)
-#     J_sc_r = torch.inverse(J_sc_T) @ grad_r
-#     norm = torch.linalg.matrix_norm(J_sc_r)
-#
-#     det = jacobian_det_spherical_cartesian(r_theta)
-#
-#     return (det ** 2) * (norm ** 2)
 
 
 class FixedNorm(Transform):
@@ -226,7 +178,6 @@ class FixedNorm(Transform):
 
         return outputs
 
-
     def inverse(self, inputs, context=None):
         raise NotImplementedError
 
@@ -237,28 +188,67 @@ class FixedNorm(Transform):
         jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
         # assert torch.allclose(jac, jac_)
         jac_inv = sherman_morrison_inverse(jac.mT)
-        # jac_inv = torch.inverse(jac.mT)
+        #jac_inv = torch.inverse(jac.mT)
 
-        # abs_diff = torch.abs(jac_inv-jac_inv_)
-        # plt.hist(abs_diff.detach().numpy().ravel(), bins=50)
-        # plt.xscale('log')
-        # plt.show()
-        # print(abs_diff.max(), abs_diff.min(), abs_diff.mean())
-        # assert torch.allclose(jacobian_inv, torch.linalg.inv(jacobian.mT))
 
         grad_r = gradient_r(inputs, self.norm, self.q)
+        #grad_r = torch.clamp(grad_r, min=-100, max=100)
+        #grad_r_np = grad_r.detach().numpy().ravel()
+        #theta_r_np = theta_r.detach().numpy().ravel()
+        #plt.hist(grad_r_np, bins=100)
+        #plt.show()
+        #print("-" * 100)
+        #idx = np.argsort(grad_r_np)
+        #print(grad_r_np[idx])
+        #print(theta_r_np[idx])
+        #print(grad_r_np.min(), grad_r_np.max())
         jac_inv_grad = jac_inv @ grad_r
         fro_norm = torch.norm(jac_inv_grad.squeeze(), p='fro', dim=1)
 
         logabsdet_fro_norm = torch.log(torch.abs(fro_norm))
         logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
-        # print(logabsdet_fro_norm)
-        # print(logabsdet_s_to_c)
 
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
-        # logabsdet = pseudo_determinant(inputs, norm, q)
+
+        inputs_np = inputs.detach().numpy().ravel()
+        fro_norm = logabsdet_fro_norm.detach().numpy().ravel()
+        idx = np.argsort(inputs_np)
+        #print(inputs_np[idx])
+        #print(fro_norm[idx])
+        #print("+" * 100)
+        #print(fro_norm.min(), fro_norm.max())
 
         return logabsdet
 
+
+class ConstrainedAngles(Transform):
+    def __init__(self, elemwise_transform: Transform = Sigmoid()):
+        super().__init__()
+        self.elemwise_transform = elemwise_transform
+
+
+    def forward(self, inputs, context=None):
+        mask = torch.zeros_like(inputs)
+        mask[:,-1] = torch.ones_like(inputs[:, -1])
+        transformed_inputs, logabsdet_elemwise = self.elemwise_transform(inputs)
+        outputs = mask * transformed_inputs + transformed_inputs
+        logabsdet_last_elem = inputs.new_ones(inputs.shape[0]) * torch.log(torch.tensor(2.))
+
+        return outputs, logabsdet_elemwise + logabsdet_last_elem
+
+    def inverse(self, inputs, context=None):
+        mask = torch.zeros_like(inputs)
+        mask[:, -1] = torch.ones_like(inputs[:, -1])
+        transformed_inputs, logabsdet_elemwise = self.elemwise_transform.inverse(inputs)
+        outputs = mask * transformed_inputs + transformed_inputs
+        logabsdet_last_elem = inputs.new_ones(inputs.shape[0]) * torch.log(torch.tensor(0.5))
+
+        return outputs, logabsdet_elemwise + logabsdet_last_elem
+
+
+class ConstrainedAnglesSigmoid(ConstrainedAngles):
+    def __init__(self):
+        super().__init__(elemwise_transform=CompositeTransform([Sigmoid(),
+                                                                ScalarScale(scale=np.pi, trainable=False)]))
 
