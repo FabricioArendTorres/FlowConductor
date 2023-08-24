@@ -6,4 +6,4 @@ from enflows.distributions.normal import (
     DiagonalNormal,
     StandardNormal,
 )
-from enflows.distributions.uniform import LotkaVolterraOscillating, MG1Uniform
+from enflows.distributions.uniform import LotkaVolterraOscillating, MG1Uniform, Uniform

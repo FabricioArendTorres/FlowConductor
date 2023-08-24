@@ -2,6 +2,8 @@ from typing import Union
 
 import torch
 from torch import distributions
+from enflows.distributions.base import Distribution
+from enflows.utils import torchutils
 
 
 class BoxUniform(distributions.Independent):
@@ -27,6 +29,41 @@ class BoxUniform(distributions.Independent):
         super().__init__(
             distributions.Uniform(low=low, high=high), reinterpreted_batch_ndims
         )
+
+
+class Uniform(Distribution):
+    """A multivariate Normal with zero mean and unit covariance."""
+
+    def __init__(self, shape, low, high):
+        super().__init__()
+        self._shape = torch.Size(shape)
+        self._low = low
+        self._high = high
+
+    def _log_prob(self, inputs, context):
+        # Note: the context is ignored.
+        if inputs.shape[1:] != self._shape:
+            raise ValueError(
+                "Expected input of shape {}, got {}".format(
+                    self._shape, inputs.shape[1:]
+                )
+            )
+        assert torch.all(inputs.le(self._high)) and torch.all(inputs.ge(self._low))
+
+        log_prob = - torch.log(self._high - self._low) * inputs.shape[-1] # self._shape
+
+        return inputs.new_ones(inputs.shape[:1]) * log_prob
+
+    def _sample(self, num_samples, context):
+        if context is None:
+            samples = torch.rand((num_samples, *self._shape), device=self._low.device)
+            return self._low + samples * (self._high - self._low)
+        else:
+            # The value of the context is ignored, only its size and device are taken into account.
+            context_size = context.shape[0]
+            samples = torch.rand((context_size * num_samples, *self._shape), device=self._low.device)
+            samples = self._low + samples * (self._high - self._low)
+            return torchutils.split_leading_dim(samples, [context_size, num_samples])
 
 
 class MG1Uniform(distributions.Uniform):
