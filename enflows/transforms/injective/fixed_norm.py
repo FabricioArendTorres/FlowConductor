@@ -1,5 +1,9 @@
 import torch
 from torch.autograd.functional import jacobian
+from torch.nn import functional as F
+from torch import nn
+from torch.nn import init
+
 import sympy as sym
 import numpy as np
 import sympytorch
@@ -21,14 +25,17 @@ def r_given_norm(thetas, norm, q):
     else:
         norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
                    range(2, n + 1)]
-        norm_2 = torch.stack(norm_2_, dim=-1).sum(-1)
+        norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
         return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
-    #return thetas.mean(1)
+
 
 def inflate_radius(inputs, norm, q):
     r = r_given_norm(inputs, norm, q)
+    # if context is not None:
+    #     theta_r = torch.cat([inputs, r], dim=1)
+    # else:
+    #     theta_r = torch.cat([inputs, r.unsqueeze(-1)], dim=1)
     theta_r = torch.cat([inputs, r.unsqueeze(-1)], dim=1)
-
     return theta_r
 def sph_to_cart_sympy(spherical):
     # sympy implementation of change of variables from spherical to cartesian
@@ -78,7 +85,7 @@ def logabsdet_sph_to_car(arr):
     r = arr[:, -1]
     angles = arr[:, :-2]
     sin_angles = torch.sin(angles)
-    sin_exp = torch.arange(n - 2, 0, -1)
+    sin_exp = torch.arange(n - 2, 0, -1).to(arr.device)
 
     logabsdet_r = (n - 1) * torch.log(r + eps)
     logabsdet_sin = torch.sum(sin_exp * torch.log(torch.abs(sin_angles) + eps), dim=1)
@@ -114,7 +121,7 @@ def logabsdet_sph_to_car(arr):
 def sherman_morrison_inverse(A):
     # print(A)
     A_triu = A.triu()
-    eye = torch.eye(*A.shape[1:]).repeat(A.shape[0], 1, 1)
+    eye = torch.eye(*A.shape[1:]).repeat(A.shape[0], 1, 1).to(A.device)
     # A_triu_inv = torch.triangular_solve(eye, A_triu)[0]
     A_triu_inv = torch.linalg.solve_triangular(A_triu, eye, upper=True)
     # A_triu_inv = torch.linalg.inv(A_triu)
@@ -153,18 +160,19 @@ def jacobian_det_spherical_cartesian(x):
 
 
 class FixedNorm(Transform):
-    def __init__(self, N, norm, q):
+    def __init__(self, norm, q):
         super().__init__()
-        self.N = N
         self.norm = norm
         self.q = q
-        self.r_given_norm = r_given_norm
 
-        spherical_names, jac = sph_to_cart_jacobian_sympy(self.N)
-        self.spherical_names = spherical_names
-        self.sph_to_cart_jac = sympytorch.SymPyModule(expressions=jac)
+        self.r_given_norm = r_given_norm
+        self.register_buffer("initialized", torch.tensor(False, dtype=torch.bool))
 
     def forward(self, inputs, context=None):
+
+        if self.training and not self.initialized:
+            self._initialize_jacobian(inputs)
+
         theta_r = inflate_radius(inputs, self.norm, self.q)
         outputs = spherical_to_cartesian_torch(theta_r)
 
@@ -172,17 +180,12 @@ class FixedNorm(Transform):
 
         return outputs, logabsdet
 
-    def just_forward(self, inputs, context=None):
-        theta_r = inflate_radius(inputs, self.norm, self.q)
-        outputs = spherical_to_cartesian_torch(theta_r)
-
-        return outputs
 
     def inverse(self, inputs, context=None):
         raise NotImplementedError
 
 
-    def logabs_pseudodet(self, inputs, theta_r):
+    def logabs_pseudodet(self, inputs, theta_r, context=None):
         # spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
         # jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
         jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
@@ -193,15 +196,11 @@ class FixedNorm(Transform):
 
         grad_r = gradient_r(inputs, self.norm, self.q)
         #grad_r = torch.clamp(grad_r, min=-100, max=100)
-        #grad_r_np = grad_r.detach().numpy().ravel()
-        #theta_r_np = theta_r.detach().numpy().ravel()
-        #plt.hist(grad_r_np, bins=100)
-        #plt.show()
-        #print("-" * 100)
-        #idx = np.argsort(grad_r_np)
-        #print(grad_r_np[idx])
-        #print(theta_r_np[idx])
-        #print(grad_r_np.min(), grad_r_np.max())
+        # grad_r_np = grad_r.detach().cpu().numpy().reshape(-1,2)
+        # inputs_np = inputs.detach().cpu().numpy().ravel()
+        # plt.scatter(inputs_np, np.linalg.norm(grad_r_np, axis=1), marker='.')
+        # plt.show()
+
         jac_inv_grad = jac_inv @ grad_r
         fro_norm = torch.norm(jac_inv_grad.squeeze(), p='fro', dim=1)
 
@@ -211,15 +210,157 @@ class FixedNorm(Transform):
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
 
-        inputs_np = inputs.detach().numpy().ravel()
-        fro_norm = logabsdet_fro_norm.detach().numpy().ravel()
-        idx = np.argsort(inputs_np)
-        #print(inputs_np[idx])
-        #print(fro_norm[idx])
-        #print("+" * 100)
-        #print(fro_norm.min(), fro_norm.max())
-
         return logabsdet
+
+    def _initialize_jacobian(self, inputs):
+        spherical_names, jac = sph_to_cart_jacobian_sympy(inputs.shape[1])
+        self.spherical_names = spherical_names
+        self.sph_to_cart_jac = sympytorch.SymPyModule(expressions=jac)
+
+class ConditionalFixedNorm(Transform):
+
+    def __init__(self,q):
+        super().__init__()
+        self.q = q
+
+    def forward(self, inputs, context):
+        # the first element of context is assumed to be the norm value
+        transformer = FixedNorm(norm=context[:, 0], q=self.q)
+
+        output, logabsdet = transformer.forward(inputs, context)
+
+        return output, logabsdet
+
+    def inverse(self, inputs, context):
+        raise NotImplementedError
+# class ConditionalFixedNorm(ConditionalTransform):
+#
+#     def __init__(
+#             self,
+#             features,
+#             hidden_features,
+#             q,
+#             context_features=None,
+#             num_blocks=2,
+#             use_residual_blocks=True,
+#             activation=F.relu,
+#             dropout_probability=0.0,
+#             use_batch_norm=False,
+#     ):
+#         self.q = q
+#         super().__init__(
+#             features=features,
+#             hidden_features=hidden_features,
+#             context_features=context_features,
+#             num_blocks=num_blocks,
+#             use_residual_blocks=use_residual_blocks,
+#             activation=activation,
+#             dropout_probability=dropout_probability,
+#             use_batch_norm=use_batch_norm
+#         )
+#
+#     def _forward_given_params(self, inputs, context):
+#         # the first element of context is assumed to be the norm value
+#         transformer = FixedNorm(norm=context[:,:1], q=self.q)
+#
+#         output, logabsdet = transformer.forward(inputs)
+#
+#     def _inverse_given_params(self, inputs, autoregressive_params):
+#         NotImplementedError
+
+
+class ResidualBlock(nn.Module):
+    """A general-purpose residual block. Works only with 1-dim inputs."""
+
+    def __init__(
+        self,
+        features,
+        context_features,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+        zero_initialization=True,
+    ):
+        super().__init__()
+        self.activation = activation
+
+        self.use_batch_norm = use_batch_norm
+        if use_batch_norm:
+            self.batch_norm_layers = nn.ModuleList(
+                [nn.BatchNorm1d(features, eps=1e-3) for _ in range(2)]
+            )
+        if context_features is not None:
+            self.context_layer = nn.Linear(context_features, features)
+        self.linear_layers = nn.ModuleList(
+            [nn.Linear(features, features) for _ in range(2)]
+        )
+        self.dropout = nn.Dropout(p=dropout_probability)
+        if zero_initialization:
+            init.uniform_(self.linear_layers[-1].weight, -1e-3, 1e-3)
+            init.uniform_(self.linear_layers[-1].bias, -1e-3, 1e-3)
+
+    def forward(self, inputs, context=None):
+        temps = inputs
+        if self.use_batch_norm:
+            temps = self.batch_norm_layers[0](temps)
+        temps = self.activation(temps)
+        temps = self.linear_layers[0](temps)
+        if self.use_batch_norm:
+            temps = self.batch_norm_layers[1](temps)
+        temps = self.activation(temps)
+        temps = self.dropout(temps)
+        temps = self.linear_layers[1](temps)
+        if context is not None:
+            temps = F.glu(torch.cat((temps, self.context_layer(context)), dim=1), dim=1)
+        return inputs + temps
+
+class ResidualNetInput(nn.Module):
+    """A residual network that . Works only with 1-dim inputs."""
+
+    def __init__(
+        self,
+        in_features,
+        out_features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+    ):
+        super().__init__()
+        self.hidden_features = hidden_features
+        self.context_features = context_features
+        if context_features is not None:
+            self.initial_layer = nn.Linear(
+                in_features + context_features, hidden_features
+            )
+        else:
+            self.initial_layer = nn.Linear(in_features, hidden_features)
+        self.blocks = nn.ModuleList(
+            [
+                ResidualBlock(
+                    features=hidden_features,
+                    context_features=context_features,
+                    activation=activation,
+                    dropout_probability=dropout_probability,
+                    use_batch_norm=use_batch_norm,
+                )
+                for _ in range(num_blocks)
+            ]
+        )
+        self.final_layer = nn.Linear(hidden_features, out_features -1)
+
+    def forward(self, inputs, context=None):
+        if context is None:
+            temps = self.initial_layer(inputs)
+        else:
+            temps = self.initial_layer(torch.cat((inputs, context), dim=1))
+        for block in self.blocks:
+            temps = block(temps, context=context)
+        outputs = self.final_layer(temps)
+
+        return torch.cat((inputs[:,:1], outputs), dim=1)
 
 
 class ConstrainedAngles(Transform):
@@ -248,7 +389,8 @@ class ConstrainedAngles(Transform):
 
 
 class ConstrainedAnglesSigmoid(ConstrainedAngles):
-    def __init__(self):
-        super().__init__(elemwise_transform=CompositeTransform([Sigmoid(),
+    def __init__(self,temperature=1, learn_temperature=False):
+        super().__init__(elemwise_transform=CompositeTransform([Sigmoid(temperature=temperature,
+                                                                        learn_temperature=learn_temperature),
                                                                 ScalarScale(scale=np.pi, trainable=False)]))
 
