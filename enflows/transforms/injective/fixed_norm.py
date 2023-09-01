@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 
 
 def r_given_norm(thetas, norm, q):
-    eps = 1e-5
     assert thetas.shape[1] >= 1
     n = thetas.shape[-1]
     sin_thetas = torch.sin(thetas)
@@ -26,6 +25,7 @@ def r_given_norm(thetas, norm, q):
         norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
                    range(2, n + 1)]
         norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
+
         return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
 
 
@@ -80,7 +80,7 @@ def spherical_to_cartesian_torch(arr):
 
 def logabsdet_sph_to_car(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
-    eps = 1e-8
+    eps = 1e-10
     n = arr.shape[1]
     r = arr[:, -1]
     angles = arr[:, :-2]
@@ -132,6 +132,7 @@ def sherman_morrison_inverse(A):
     v = torch.cat((v, torch.zeros_like(v[:, :, :1])), 2)
 
     assert torch.all(A == A_triu + u @ v)
+
 
     num = ((A_triu_inv @ u) @ v) @ A_triu_inv
     den = 1 + (v @ A_triu_inv) @ u
@@ -196,9 +197,18 @@ class FixedNorm(Transform):
 
         grad_r = gradient_r(inputs, self.norm, self.q)
         #grad_r = torch.clamp(grad_r, min=-100, max=100)
-        # grad_r_np = grad_r.detach().cpu().numpy().reshape(-1,2)
-        # inputs_np = inputs.detach().cpu().numpy().ravel()
-        # plt.scatter(inputs_np, np.linalg.norm(grad_r_np, axis=1), marker='.')
+        # grad_r_np = grad_r.detach().cpu().numpy().reshape(-1,inputs.shape[-1]+1)[:,:inputs.shape[-1]]
+        # inputs_np = inputs.detach().cpu().numpy().reshape(-1,inputs.shape[-1])
+        # print("grad_r_np", grad_r_np)
+        # print('contains nans', np.any(np.isnan(grad_r_np)))
+        # grad_r_np[grad_r_np == 0] = 1e-7
+        # log_min = np.log10(np.min(np.abs(grad_r_np.ravel())))
+        # log_max = np.log10(np.max(np.abs(grad_r_np.ravel())))
+        #
+        # print(log_min, log_max)
+        # plt.hist(np.abs(grad_r_np).ravel(), bins=np.logspace(log_min, log_max, 100))
+        # plt.xscale('log')
+        # # plt.scatter(np.linalg.norm(inputs_np, axis=-1), grad_r_np, marker='.')
         # plt.show()
 
         jac_inv_grad = jac_inv @ grad_r
