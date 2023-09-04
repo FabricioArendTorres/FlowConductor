@@ -20,13 +20,16 @@ def r_given_norm(thetas, norm, q):
     norm_1 = torch.abs(cos_thetas[:, 0]) ** q
     norm_3 = torch.abs(torch.prod(sin_thetas, dim=-1)) ** q
     if thetas.shape[1] == 1:
+        r = norm / ((norm_1 + norm_3) ** (1. / q))
+        assert  not torch.any(torch.isnan(r))
         return norm / ((norm_1 + norm_3) ** (1. / q))
     else:
         norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
                    range(2, n + 1)]
         norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
-
-        return norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
+        r = norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
+        assert not torch.any(torch.isnan(r))
+        return r
 
 
 def inflate_radius(inputs, norm, q):
@@ -121,10 +124,15 @@ def logabsdet_sph_to_car(arr):
 def sherman_morrison_inverse(A):
     # print(A)
     A_triu = A.triu()
+    assert not torch.any(torch.isnan(A_triu))
     eye = torch.eye(*A.shape[1:]).repeat(A.shape[0], 1, 1).to(A.device)
     # A_triu_inv = torch.triangular_solve(eye, A_triu)[0]
-    A_triu_inv = torch.linalg.solve_triangular(A_triu, eye, upper=True)
+    eps = 1e-7
+    A_triu_eps = A_triu + eye * eps
+    A_triu_inv = torch.linalg.solve_triangular(A_triu_eps, eye, upper=True)
     # A_triu_inv = torch.linalg.inv(A_triu)
+
+    assert not torch.any(torch.isnan(A_triu_inv))
 
     u = torch.zeros_like(A[:, :, -1:])
     u[:, -1, :] = 1.
@@ -133,9 +141,10 @@ def sherman_morrison_inverse(A):
 
     assert torch.all(A == A_triu + u @ v)
 
-
     num = ((A_triu_inv @ u) @ v) @ A_triu_inv
     den = 1 + (v @ A_triu_inv) @ u
+
+    assert not torch.any(den==0)
 
     return A_triu_inv - num / den
 
@@ -143,6 +152,8 @@ def gradient_r(inputs, norm, q):
     r = r_given_norm(inputs, norm, q)
     grad_r_theta = torch.autograd.grad(r, inputs, grad_outputs=torch.ones_like(r))[0]
     grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
+
+    assert not torch.any(torch.isnan(grad_r_theta))
 
     return grad_r_theta_aug.unsqueeze(-1)
 
@@ -190,10 +201,13 @@ class FixedNorm(Transform):
         # spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
         # jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
         jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
+        assert not torch.any(torch.isnan(jac))
         # assert torch.allclose(jac, jac_)
+
         jac_inv = sherman_morrison_inverse(jac.mT)
         #jac_inv = torch.inverse(jac.mT)
 
+        assert not torch.any(torch.isnan(jac_inv))
 
         grad_r = gradient_r(inputs, self.norm, self.q)
         #grad_r = torch.clamp(grad_r, min=-100, max=100)
@@ -216,6 +230,9 @@ class FixedNorm(Transform):
 
         logabsdet_fro_norm = torch.log(torch.abs(fro_norm))
         logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
+
+        assert not torch.any(torch.isnan(logabsdet_fro_norm))
+        assert not torch.any(torch.isnan(logabsdet_s_to_c))
 
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
@@ -381,7 +398,7 @@ class ConstrainedAngles(Transform):
 
     def forward(self, inputs, context=None):
         mask = torch.zeros_like(inputs)
-        mask[:,-1] = torch.ones_like(inputs[:, -1])
+        mask[...,-1] = torch.ones_like(inputs[..., -1])
         transformed_inputs, logabsdet_elemwise = self.elemwise_transform(inputs)
         outputs = mask * transformed_inputs + transformed_inputs
         logabsdet_last_elem = inputs.new_ones(inputs.shape[0]) * torch.log(torch.tensor(2.))
@@ -390,7 +407,7 @@ class ConstrainedAngles(Transform):
 
     def inverse(self, inputs, context=None):
         mask = torch.zeros_like(inputs)
-        mask[:, -1] = torch.ones_like(inputs[:, -1])
+        mask[..., -1] = torch.ones_like(inputs[..., -1])
         transformed_inputs, logabsdet_elemwise = self.elemwise_transform.inverse(inputs)
         outputs = mask * transformed_inputs + transformed_inputs
         logabsdet_last_elem = inputs.new_ones(inputs.shape[0]) * torch.log(torch.tensor(0.5))
