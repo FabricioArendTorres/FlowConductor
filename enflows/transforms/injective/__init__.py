@@ -1,1 +1,1 @@
-from enflows.transforms.injective.fixed_norm import FixedNorm, ConditionalFixedNorm, ConstrainedAnglesSigmoid, ResidualNetInput
+from enflows.transforms.injective.fixed_norm import FixedNorm, ConditionalFixedNorm, ConstrainedAnglesSigmoid, ResidualNetInput, ClampedAngles

@@ -14,20 +14,26 @@ import matplotlib.pyplot as plt
 
 def r_given_norm(thetas, norm, q):
     assert thetas.shape[1] >= 1
+    eps = 1e-8
     n = thetas.shape[-1]
+    assert not torch.any(torch.isnan(thetas))
     sin_thetas = torch.sin(thetas)
     cos_thetas = torch.cos(thetas)
-    norm_1 = torch.abs(cos_thetas[:, 0]) ** q
-    norm_3 = torch.abs(torch.prod(sin_thetas, dim=-1)) ** q
+
+    norm_1 = (torch.abs(cos_thetas[:, 0]) + eps) ** q
+    assert not torch.any(torch.isnan(norm_1))
+    norm_3 = (torch.abs(torch.prod(sin_thetas, dim=-1)) + eps) ** q
+    assert not torch.any(torch.isnan(norm_3))
     if thetas.shape[1] == 1:
         r = norm / ((norm_1 + norm_3) ** (1. / q))
         assert  not torch.any(torch.isnan(r))
-        return norm / ((norm_1 + norm_3) ** (1. / q))
+        return norm / ((norm_1 + norm_3 + eps) ** (1. / q))
     else:
-        norm_2_ = [torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) ** q for k in
+        norm_2_ = [(torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) + eps) ** q for k in
                    range(2, n + 1)]
         norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
-        r = norm / ((norm_1 + norm_2 + norm_3) ** (1. / q))
+        assert not torch.any(torch.isnan(norm_2))
+        r = norm / ((norm_1 + norm_2 + norm_3 + eps) ** (1. / q))
         assert not torch.any(torch.isnan(r))
         return r
 
@@ -72,8 +78,23 @@ def sph_to_cart_jacobian_sympy (n):
 def spherical_to_cartesian_torch(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
     assert arr.shape[1] >= 2
+    assert not torch.any(torch.isnan(arr))
+    eps = 1e-5
     r = arr[:, -1:]
     angles = arr[:, :-1]
+
+    # print(angles[:,:-1][angles[:, :-1] >= np.pi -eps])
+    # print(angles[:,:-1][angles[:, :-1] <= eps])
+    # print(angles[:, -1][angles[:, -1] >= 2 * np.pi - eps])
+    # print(angles[:, -1][angles[:, -1] <= eps])
+
+    _0_pi = torch.clamp(angles[:,:-1], min=eps, max=np.pi-eps)
+    _0_2pi = torch.clamp(angles[:,-1:], min=eps, max=2*np.pi-eps)
+    angles_clamped = torch.cat((_0_pi, _0_2pi), dim=1)
+    assert torch.all(angles_clamped[:, :-1] > 0)
+    assert torch.all(angles_clamped[:, :-1] < np.pi)
+    assert torch.all(angles_clamped[:, -1] > 0)
+    assert torch.all(angles_clamped[:, -1] < 2 * np.pi)
     sin_prods = torch.cumprod(torch.sin(angles), dim=1)
     x1 = r * torch.cos(angles[:, :1])
     xs = r * sin_prods[:, :-1] * torch.cos(angles[:, 1:])
@@ -198,8 +219,8 @@ class FixedNorm(Transform):
 
 
     def logabs_pseudodet(self, inputs, theta_r, context=None):
-        # spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
-        # jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
+        #spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
+        #jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
         jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
         assert not torch.any(torch.isnan(jac))
         # assert torch.allclose(jac, jac_)
@@ -421,3 +442,47 @@ class ConstrainedAnglesSigmoid(ConstrainedAngles):
                                                                         learn_temperature=learn_temperature),
                                                                 ScalarScale(scale=np.pi, trainable=False)]))
 
+class ClampedAngles(Transform):
+    _05PI = 0.5 * np.pi
+    _10PI = 1.0 * np.pi
+    _15PI = 1.5 * np.pi
+    _20PI = 2.0 * np.pi
+
+    def __init__(self, eps):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, inputs, context):
+        self.dtype = inputs.dtype
+        thetas = inputs[...,:-1]
+        last_theta = inputs[...,-1:]
+        _0pi_05pi_mask, _0pi_05pi_clamp = self.compute_mask(arr=thetas, vmin=0., vmax=self._05PI)
+        _05pi_10pi_mask, _05pi_10pi_clamp = self.compute_mask(arr=thetas, vmin=self._05PI, vmax=self._10PI, right_included=True)
+        clamped_thetas = _0pi_05pi_mask * _0pi_05pi_clamp + _05pi_10pi_mask * _05pi_10pi_clamp
+
+        _0pi_05pi_mask, _0pi_05pi_clamp = self.compute_mask(arr=last_theta, vmin=0., vmax=self._05PI)
+        _05pi_10pi_mask, _05pi_10pi_clamp = self.compute_mask(arr=last_theta, vmin=self._05PI, vmax=self._10PI)
+        _10pi_15pi_mask, _10pi_15pi_clamp = self.compute_mask(arr=last_theta, vmin=self._10PI, vmax=self._15PI)
+        _15pi_20pi_mask, _15pi_20pi_clamp = self.compute_mask(arr=last_theta, vmin=self._15PI, vmax=self._20PI, right_included=True)
+        clamped_last_theta = _0pi_05pi_mask * _0pi_05pi_clamp + _05pi_10pi_mask * _05pi_10pi_clamp + \
+                         _10pi_15pi_mask * _10pi_15pi_clamp + _15pi_20pi_mask * _15pi_20pi_clamp
+
+        output = torch.cat((clamped_thetas, clamped_last_theta), dim = -1)
+        logabsdet = output.new_zeros(inputs.shape[:-1])
+
+        return output, logabsdet
+
+    def compute_mask(self, arr, vmin, vmax, right_included=False):
+        if right_included:
+            condition = (arr >= vmin) * (arr < vmax)
+        else:
+            condition = (arr >= vmin) * (arr <= vmax)
+
+        mask = condition.to(self.dtype)
+        arr_clamped = torch.clamp(arr, min=vmin + self.eps, max=vmax - self.eps)
+
+        return mask, arr_clamped
+
+
+    def inverse(self, inputs, context):
+        raise NotImplementedError

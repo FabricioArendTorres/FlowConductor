@@ -178,3 +178,50 @@ class DiagonalNormal(Distribution):
 
     def _mean(self, context):
         return self.mean
+
+import torch.distributions as D
+
+class MOG(Distribution):
+    """A mixture of Gaussians with given mean and covariance."""
+
+    def __init__(self, means, stds):
+        super().__init__()
+        assert means.shape == stds.shape
+        self._shape = torch.Size([means.shape[1]])
+        self.n_components = means.shape[0]
+        self.means = means
+        self.stds = stds
+
+        equal_components = torch.ones(self.n_components, ).to(means.device)
+        mix = D.Categorical(equal_components)
+        comp = D.Normal(self.means, self.stds)
+        comp = D.Independent(D.Normal(self.means, self.stds), 1)
+        self.gmm = D.MixtureSameFamily(mix, comp)
+
+    def _log_prob(self, inputs, context):
+        # Note: the context is ignored.
+        if inputs.shape[1:] != self._shape:
+            raise ValueError(
+                "Expected input of shape {}, got {}".format(
+                    self._shape, inputs.shape[1:]
+                )
+            )
+
+        return self.gmm.log_prob(inputs)
+
+    def _sample(self, num_samples, context):
+        if context is None:
+            return self.gmm.sample(torch.Size([num_samples]))
+        else:
+            # The value of the context is ignored, only its size and device are taken into account.
+            context_size = context.shape[0]
+            samples = self.gmm.sample(torch.Size([context_size * num_samples]))
+            return torchutils.split_leading_dim(samples, [context_size, num_samples])
+
+    def _mean(self, context):
+        NotImplementedError
+        # if context is None:
+        #     return self._log_z.new_zeros(self._shape)
+        # else:
+        #     # The value of the context is ignored, only its size is taken into account.
+        #     return context.new_zeros(context.shape[0], *self._shape)
