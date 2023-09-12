@@ -3,6 +3,8 @@ from torch.autograd.functional import jacobian
 from torch.nn import functional as F
 from torch import nn
 from torch.nn import init
+import time
+from datetime import timedelta
 
 import sympy as sym
 import numpy as np
@@ -16,25 +18,28 @@ def r_given_norm(thetas, norm, q):
     assert thetas.shape[1] >= 1
     eps = 1e-8
     n = thetas.shape[-1]
-    assert not torch.any(torch.isnan(thetas))
+
+    check_tensor(thetas)
+
     sin_thetas = torch.sin(thetas)
     cos_thetas = torch.cos(thetas)
 
     norm_1 = (torch.abs(cos_thetas[:, 0]) + eps) ** q
-    assert not torch.any(torch.isnan(norm_1))
+    check_tensor(norm_1)
     norm_3 = (torch.abs(torch.prod(sin_thetas, dim=-1)) + eps) ** q
-    assert not torch.any(torch.isnan(norm_3))
+    check_tensor(norm_3)
     if thetas.shape[1] == 1:
         r = norm / ((norm_1 + norm_3) ** (1. / q))
-        assert  not torch.any(torch.isnan(r))
+        check_tensor(r)
         return norm / ((norm_1 + norm_3 + eps) ** (1. / q))
     else:
         norm_2_ = [(torch.abs(torch.prod(sin_thetas[..., :k - 1], dim=-1) * cos_thetas[..., k - 1]) + eps) ** q for k in
                    range(2, n + 1)]
         norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
-        assert not torch.any(torch.isnan(norm_2))
+        check_tensor(norm_2)
+
         r = norm / ((norm_1 + norm_2 + norm_3 + eps) ** (1. / q))
-        assert not torch.any(torch.isnan(r))
+        check_tensor(r)
         return r
 
 
@@ -78,7 +83,7 @@ def sph_to_cart_jacobian_sympy (n):
 def spherical_to_cartesian_torch(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
     assert arr.shape[1] >= 2
-    assert not torch.any(torch.isnan(arr))
+    check_tensor(arr)
     eps = 1e-5
     r = arr[:, -1:]
     angles = arr[:, :-1]
@@ -88,13 +93,13 @@ def spherical_to_cartesian_torch(arr):
     # print(angles[:, -1][angles[:, -1] >= 2 * np.pi - eps])
     # print(angles[:, -1][angles[:, -1] <= eps])
 
-    _0_pi = torch.clamp(angles[:,:-1], min=eps, max=np.pi-eps)
-    _0_2pi = torch.clamp(angles[:,-1:], min=eps, max=2*np.pi-eps)
-    angles_clamped = torch.cat((_0_pi, _0_2pi), dim=1)
-    assert torch.all(angles_clamped[:, :-1] > 0)
-    assert torch.all(angles_clamped[:, :-1] < np.pi)
-    assert torch.all(angles_clamped[:, -1] > 0)
-    assert torch.all(angles_clamped[:, -1] < 2 * np.pi)
+    # _0_pi = torch.clamp(angles[:,:-1], min=eps, max=np.pi-eps)
+    # _0_2pi = torch.clamp(angles[:,-1:], min=eps, max=2*np.pi-eps)
+    # angles_clamped = torch.cat((_0_pi, _0_2pi), dim=1)
+    # assert torch.all(angles_clamped[:, :-1] > 0)
+    # assert torch.all(angles_clamped[:, :-1] < np.pi)
+    # assert torch.all(angles_clamped[:, -1] > 0)
+    # assert torch.all(angles_clamped[:, -1] < 2 * np.pi)
     sin_prods = torch.cumprod(torch.sin(angles), dim=1)
     x1 = r * torch.cos(angles[:, :1])
     xs = r * sin_prods[:, :-1] * torch.cos(angles[:, 1:])
@@ -104,7 +109,7 @@ def spherical_to_cartesian_torch(arr):
 
 def logabsdet_sph_to_car(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
-    eps = 1e-10
+    eps = 1e-8
     n = arr.shape[1]
     r = arr[:, -1]
     angles = arr[:, :-2]
@@ -145,15 +150,14 @@ def logabsdet_sph_to_car(arr):
 def sherman_morrison_inverse(A):
     # print(A)
     A_triu = A.triu()
-    assert not torch.any(torch.isnan(A_triu))
+    check_tensor(A_triu)
     eye = torch.eye(*A.shape[1:]).repeat(A.shape[0], 1, 1).to(A.device)
     # A_triu_inv = torch.triangular_solve(eye, A_triu)[0]
-    eps = 1e-7
+    eps = 1e-3
     A_triu_eps = A_triu + eye * eps
     A_triu_inv = torch.linalg.solve_triangular(A_triu_eps, eye, upper=True)
     # A_triu_inv = torch.linalg.inv(A_triu)
-
-    assert not torch.any(torch.isnan(A_triu_inv))
+    check_tensor(A_triu_inv)
 
     u = torch.zeros_like(A[:, :, -1:])
     u[:, -1, :] = 1.
@@ -169,12 +173,13 @@ def sherman_morrison_inverse(A):
 
     return A_triu_inv - num / den
 
+
 def gradient_r(inputs, norm, q):
     r = r_given_norm(inputs, norm, q)
     grad_r_theta = torch.autograd.grad(r, inputs, grad_outputs=torch.ones_like(r))[0]
     grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
 
-    assert not torch.any(torch.isnan(grad_r_theta))
+    check_tensor(grad_r_theta)
 
     return grad_r_theta_aug.unsqueeze(-1)
 
@@ -219,18 +224,21 @@ class FixedNorm(Transform):
 
 
     def logabs_pseudodet(self, inputs, theta_r, context=None):
-        #spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
-        #jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, self.N, self.N)
-        jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
-        assert not torch.any(torch.isnan(jac))
+        eps = 1e-8
+        spherical_dict = {name: theta_r[:, i].cpu() for i, name in enumerate(self.spherical_names)}
+        jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, theta_r.shape[-1], theta_r.shape[-1]).to(inputs.device)
+        # jac = jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
+        check_tensor(jac)
+
         # assert torch.allclose(jac, jac_)
 
         jac_inv = sherman_morrison_inverse(jac.mT)
         #jac_inv = torch.inverse(jac.mT)
+        check_tensor(jac_inv)
 
-        assert not torch.any(torch.isnan(jac_inv))
 
         grad_r = gradient_r(inputs, self.norm, self.q)
+        check_tensor(grad_r)
         #grad_r = torch.clamp(grad_r, min=-100, max=100)
         # grad_r_np = grad_r.detach().cpu().numpy().reshape(-1,inputs.shape[-1]+1)[:,:inputs.shape[-1]]
         # inputs_np = inputs.detach().cpu().numpy().reshape(-1,inputs.shape[-1])
@@ -247,13 +255,19 @@ class FixedNorm(Transform):
         # plt.show()
 
         jac_inv_grad = jac_inv @ grad_r
+        check_tensor(jac_inv_grad)
+        # print(f"jac inv max: {jac_inv.squeeze().max().item():.3e}, "
+        #       f"min: {jac_inv.squeeze().min().item():.3e} ")
+        # print(f"grad inv max: {grad_r.squeeze().max().item():.3e}, "
+        #       f"min: {grad_r.squeeze().min().item():.3e} ")
         fro_norm = torch.norm(jac_inv_grad.squeeze(), p='fro', dim=1)
 
-        logabsdet_fro_norm = torch.log(torch.abs(fro_norm))
+        check_tensor(fro_norm)
+        logabsdet_fro_norm = torch.log(torch.abs(fro_norm) + eps)
         logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
 
-        assert not torch.any(torch.isnan(logabsdet_fro_norm))
-        assert not torch.any(torch.isnan(logabsdet_s_to_c))
+        check_tensor(logabsdet_fro_norm)
+        check_tensor(logabsdet_s_to_c)
 
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
@@ -261,9 +275,9 @@ class FixedNorm(Transform):
         return logabsdet
 
     def _initialize_jacobian(self, inputs):
-        spherical_names, jac = sph_to_cart_jacobian_sympy(inputs.shape[1])
+        spherical_names, jac = sph_to_cart_jacobian_sympy(inputs.shape[1]+1)
         self.spherical_names = spherical_names
-        self.sph_to_cart_jac = sympytorch.SymPyModule(expressions=jac)
+        self.sph_to_cart_jac = sympytorch.SymPyModule(expressions=jac).to(inputs.device)
 
 class ConditionalFixedNorm(Transform):
 
@@ -486,3 +500,8 @@ class ClampedAngles(Transform):
 
     def inverse(self, inputs, context):
         raise NotImplementedError
+
+
+def check_tensor(tensor):
+    assert not torch.any(torch.isnan(tensor))
+    assert not torch.any(torch.isinf(tensor))
