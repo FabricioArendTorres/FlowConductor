@@ -2,7 +2,7 @@ import copy
 import numpy as np
 import torch
 import torch.nn as nn
-from nflows.transforms import ActNorm
+from enflows.transforms import ActNorm
 
 from . import diffeq_layers
 from .squeeze import squeeze, unsqueeze
