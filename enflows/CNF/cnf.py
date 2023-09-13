@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torchdiffeq import odeint_adjoint as odeint
 
-from nflows.CNF.neural_odes.wrappers.cnf_regularization import RegularizedODEfunc
+from enflows.CNF.neural_odes.wrappers.cnf_regularization import RegularizedODEfunc
 
 __all__ = ["CNF"]
 
