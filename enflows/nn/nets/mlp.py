@@ -78,13 +78,22 @@ class FCBlock(torch.nn.Module):
     """
 
     def __init__(self,
-                 in_features,
-                 out_features,
-                 hidden_features,
-                 num_blocks,
-                 outermost_activation: Callable = torch.nn.Identity,
-                 activation: str = "tanh", **kwargs):
+                 in_shape,
+                 out_shape,
+                 hidden_sizes,
+                 activation="tanh",
+                 activate_output=False,
+                 **kwargs):
         super().__init__()
+
+        self._in_shape = torch.Size(in_shape)
+        self._out_shape = torch.Size(out_shape)
+        self._hidden_sizes = hidden_sizes
+        self._activation = activation
+        self._activate_output = activate_output
+
+        if len(hidden_sizes) == 0:
+            raise ValueError("List of hidden sizes can't be empty.")
 
         nls_and_inits = {'sine': (Sine(kwargs.get("sine_frequency", 7)),
                                   gen_sine_init(kwargs.get("sine_frequency", 7)),
@@ -98,27 +107,24 @@ class FCBlock(torch.nn.Module):
 
         nl, self.weight_init, first_layer_init = nls_and_inits[activation]
 
-        self.net = []
-        self.net.append(torch.nn.Sequential(
-            torch.nn.Linear(in_features, hidden_features), nl
-        ))
+        net = self.build_net(hidden_sizes, in_shape, nl, out_shape)
+        self.net = torch.nn.Sequential(*net)
 
-        for i in range(num_blocks):
-            self.net.append(torch.nn.Sequential(
-                torch.nn.Linear(hidden_features, hidden_features), nl  # , nn.BatchNorm1d(hidden_features)
-            ))
+        self.initialize_weights(first_layer_init)
 
-        if outermost_activation:
-            self.net.append(torch.nn.Sequential(
-                torch.nn.Linear(hidden_features, out_features), outermost_activation()
-            ))
-        else:
-            self.net.append(torch.nn.Sequential(
-                torch.nn.Linear(hidden_features, out_features)
-            ))
+    def build_net(self, hidden_sizes, in_shape, nl, out_shape):
+        net = []
+        net.append(nn.Linear(np.prod(in_shape), hidden_sizes[0]))
+        for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
+            net.append(nl)
+            net.append(nn.Linear(in_size, out_size))
+        net.append(nl)
+        net.append(nn.Linear(hidden_sizes[-1], np.prod(out_shape)))
+        if self._activate_output:
+            net.append(nl)
+        return net
 
-        self.net = torch.nn.Sequential(*self.net)
-
+    def initialize_weights(self, first_layer_init):
         self.net.apply(self.weight_init)
         if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
             self.net[0].apply(first_layer_init)
