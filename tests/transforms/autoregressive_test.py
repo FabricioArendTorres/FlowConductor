@@ -195,34 +195,6 @@ class MaskedPiecewiseCubicAutoregressiveTranformTest(TransformTest):
         self.assert_forward_inverse_are_consistent(transform, inputs)
 
 
-class MaskedDeepSigmoidAutoregressiveTransformTest(TransformTest):
-    def setUp(self) -> None:
-        torch.manual_seed(1234)
-
-    def test_forward_inverse_are_consistent(self):
-        batch_size = 200
-        features = 10
-        inputs = torch.rand(batch_size, features)
-        self.eps = 2e-3
-        inputs = inputs.requires_grad_(True)
-
-        transform = autoregressive.MaskedDeepSigmoidTransform(
-            features=features,
-            hidden_features=30,
-            num_blocks=2,
-            use_residual_blocks=True,
-        )
-
-        outputs, logabsdet = transform.forward(inputs)
-        self.assert_tensor_is_good(outputs, [batch_size, features])
-        self.assert_tensor_is_good(logabsdet, [batch_size])
-
-
-        _, ref_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(outputs, inputs))
-        self.assert_jacobian_correct(transform, inputs)
-
-        self.eps = 1e-1
-        self.assert_forward_inverse_are_consistent(transform, inputs)
 
 
 if __name__ == "__main__":

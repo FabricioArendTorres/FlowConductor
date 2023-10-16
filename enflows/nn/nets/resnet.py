@@ -13,7 +13,7 @@ class ResidualBlock(nn.Module):
         self,
         features,
         context_features,
-        activation=F.relu,
+        activation=torch.nn.ReLU(),
         dropout_probability=0.0,
         use_batch_norm=False,
         zero_initialization=True,
@@ -62,7 +62,7 @@ class ResidualNet(nn.Module):
         hidden_features,
         context_features=None,
         num_blocks=2,
-        activation=F.relu,
+        activation=torch.nn.ReLU(),
         dropout_probability=0.0,
         use_batch_norm=False,
     ):

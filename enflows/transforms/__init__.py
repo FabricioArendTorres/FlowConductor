@@ -66,6 +66,7 @@ from enflows.transforms.standard import (
     PointwiseAffineTransform,
 )
 from enflows.transforms.adaptive_sigmoids import (SumOfSigmoids, DeepSigmoid)
+from enflows.transforms.adaptive_sigmoids import (SumOfSigmoids, DeepSigmoid)
 from enflows.transforms.svd import SVDLinear
 from enflows.transforms.conditional import (
     ConditionalTransform,
@@ -79,9 +80,9 @@ from enflows.transforms.conditional import (
     ConditionalRotationTransform,
     ConditionalSumOfSigmoidsTransform,
     ConditionalShiftTransform,
-    ConditionalScaleTransform
+    ConditionalScaleTransform,
 )
 from enflows.transforms.unitvector import UnitVector
 from enflows.transforms.matrix import (TransformDiagonal, TransformDiagonalSoftplus, TransformDiagonalExponential,
                                        CholeskyOuterProduct)
-from enflows.transforms.lipschitz import (iResBlock, LipschitzDenseNetBuilder, LipschitzFCNNBuilder, MonotoneiResBlock)
+from enflows.transforms.lipschitz import (iResBlock, LipschitzDenseNetBuilder, LipschitzFCNNBuilder)
