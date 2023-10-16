@@ -129,5 +129,5 @@ class FCBlock(torch.nn.Module):
         if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
             self.net[0].apply(first_layer_init)
 
-    def forward(self, coords):
-        return self.net(coords)
+    def forward(self, inputs):
+        return self.net(inputs.reshape(-1, np.prod(self._in_shape))).reshape(-1, *self._out_shape)
