@@ -12,3 +12,4 @@ pyyaml
 torchtestcase
 umnn
 parameterized
+scipy
