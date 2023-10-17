@@ -4,13 +4,14 @@ import unittest
 from parameterized import parameterized_class
 import numpy as np
 
-from enflows.nn.nets import mlp, lipschitz, activations, lipschitz_dense
+from enflows.nn.nets import mlp, spectral_norm, activations, lipschitz_dense
+from enflows.nn.nets.spectral_norm import scaled_spectral_norm
 from torch.nn.utils.parametrize import is_parametrized
 from types import SimpleNamespace
 from enflows.utils.torchutils import tensor_to_np, batch_jacobian, logabsdet
 
 
-def spectral_norm(model):
+def _spectral_norm(model):
     list_singular_vals = []
     for m in model.modules():
         if isinstance(m, torch.nn.Linear) or is_parametrized(m):
@@ -31,21 +32,21 @@ class TestLipschitzLayer(torchtestcase.TorchTestCase):
         self.eps = 1e-3
 
     def test_spectral_norms(self):
-        for spectral_norm_param in (lipschitz.scaled_spectral_norm_powerits,
-                                    lipschitz.scaled_spectral_norm_induced
-                                    ):
+        for spectral_norm_param in (scaled_spectral_norm,):
             wrapper = lambda net: spectral_norm_param(net,
                                                       coeff=self.coef,
-                                                      n_power_iterations=1)
+                                                      n_power_iterations=1,
+                                                      domain=2,
+                                                      codomain=2)
             self._test_single_layer(wrapper)
 
     def _test_single_layer(self, wrapper):
         net = torch.nn.Linear(self.input_dim, self.output_dim)
         net.weight.data.fill_(10)
-        self.assertGreater(spectral_norm(net).mean, 1)
+        self.assertGreater(_spectral_norm(net).mean, 1)
 
         wrapped_net = wrapper(net)
-        self.assertAlmostEqual(spectral_norm(wrapped_net).mean, self.coef, delta=1e-4)
+        self.assertAlmostEqual(_spectral_norm(wrapped_net).mean, self.coef, delta=1e-4)
 
 if __name__ == "__main__":
     unittest.main()

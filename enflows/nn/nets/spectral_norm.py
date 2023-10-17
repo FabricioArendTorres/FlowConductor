@@ -4,6 +4,35 @@ from typing import Optional
 from torch.nn.utils.parametrize import register_parametrization
 
 
+def scaled_spectral_norm(module: torch.nn.modules.Module,
+                         domain,
+                         codomain,
+                         coeff=0.97,
+                         name: str = 'weight',
+                         n_power_iterations: int = 1,
+                         eps: float = 1e-12,
+                         dim: Optional[int] = None) -> torch.nn.modules.Module:
+    r"""Applies spectral normalization to a parameter in the given module.
+    Calls custom normalization modules instead of default pytorch ones.
+    """
+    weight = getattr(module, name, None)
+    if not isinstance(weight, torch.Tensor):
+        raise ValueError(
+            "Module '{}' has no parameter or buffer with name '{}'".format(module, name)
+        )
+
+    if dim is None:
+        if isinstance(module, (torch.nn.ConvTranspose1d,
+                               torch.nn.ConvTranspose2d,
+                               torch.nn.ConvTranspose3d)):
+            dim = 1
+        else:
+            dim = 0
+    register_parametrization(module, name,
+                             _InducedSpectralNorm(weight, domain, codomain, n_power_iterations, dim, eps, coeff=coeff))
+    return module
+
+
 # noinspection PyProtectedMember
 class _ScaledSpectralNorm(torch.nn.utils.parametrizations._SpectralNorm):
     def __init__(self,
@@ -54,6 +83,9 @@ class _ScaledSpectralNorm(torch.nn.utils.parametrizations._SpectralNorm):
 
 
 class _InducedSpectralNorm(_ScaledSpectralNorm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     @torch.autograd.no_grad()
     def _power_method(self, weight_mat: torch.Tensor, n_power_iterations: int) -> None:
 
@@ -97,60 +129,6 @@ class _InducedSpectralNorm(_ScaledSpectralNorm):
             else:
                 u = uph * uabs / vector_norm(uabs, codomain / (codomain - 1))
         return u
-
-
-def _scaled_spectral_norm(module: torch.nn.modules.Module,
-                          domain,
-                          codomain,
-                          SpectralNormClass=_ScaledSpectralNorm,
-                          coeff=0.97,
-                          name: str = 'weight',
-                          n_power_iterations: int = 1,
-                          eps: float = 1e-12,
-                          dim: Optional[int] = None) -> torch.nn.modules.Module:
-    r"""Applies spectral normalization to a parameter in the given module.
-    Calls custom normalization modules instead of default pytorch ones.
-    """
-    weight = getattr(module, name, None)
-    if not isinstance(weight, torch.Tensor):
-        raise ValueError(
-            "Module '{}' has no parameter or buffer with name '{}'".format(module, name)
-        )
-
-    if dim is None:
-        if isinstance(module, (torch.nn.ConvTranspose1d,
-                               torch.nn.ConvTranspose2d,
-                               torch.nn.ConvTranspose3d)):
-            dim = 1
-        else:
-            dim = 0
-    register_parametrization(module, name,
-                             SpectralNormClass(weight, domain, codomain, n_power_iterations, dim, eps, coeff=coeff))
-    return module
-
-
-def scaled_spectral_norm_powerits(module: torch.nn.modules.Module,
-                                  domain=2,
-                                  codomain=2,
-                                  coeff=0.97,
-                                  name: str = 'weight',
-                                  n_power_iterations: int = 1,
-                                  eps: float = 1e-12,
-                                  dim: Optional[int] = None):
-    return _scaled_spectral_norm(module, domain, codomain, _ScaledSpectralNorm,
-                                 coeff, name, n_power_iterations, eps, dim)
-
-
-def scaled_spectral_norm_induced(module: torch.nn.modules.Module,
-                                 domain=2,
-                                 codomain=2,
-                                 coeff=0.97,
-                                 name: str = 'weight',
-                                 n_power_iterations: int = 1,
-                                 eps: float = 1e-12,
-                                 dim: Optional[int] = None):
-    return _scaled_spectral_norm(module, domain, codomain, _InducedSpectralNorm,
-                                 coeff, name, n_power_iterations, eps, dim)
 
 
 # Utility stuff

@@ -4,7 +4,7 @@ import unittest
 from parameterized import parameterized_class
 import numpy as np
 
-from enflows.nn.nets import mlp, lipschitz, activations, lipschitz_dense
+from enflows.nn.nets import mlp, spectral_norm, activations, lipschitz_dense
 from enflows.transforms.lipschitz.builders import LipschitzDenseNetBuilder
 from enflows.transforms.lipschitz.iresblock import iResBlock
 from tests.transforms.transform_test import TransformTest

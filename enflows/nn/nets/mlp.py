@@ -31,6 +31,7 @@ class MLP(nn.Module):
         """
         super().__init__()
         self._in_shape = torch.Size(in_shape)
+        self._in_prod = self._in_shape.numel()
         self._out_shape = torch.Size(out_shape)
         self._hidden_sizes = hidden_sizes
         self._activation = activation
@@ -46,12 +47,12 @@ class MLP(nn.Module):
 
     def build_net(self, hidden_sizes, in_shape, nl, out_shape):
         net = []
-        net.append(nn.Linear(np.prod(in_shape), hidden_sizes[0]))
+        net.append(nn.Linear(self._in_shape.numel(), hidden_sizes[0]))
         for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
             net.append(nl)
             net.append(nn.Linear(in_size, out_size))
         net.append(nl)
-        net.append(nn.Linear(hidden_sizes[-1], np.prod(out_shape)))
+        net.append(nn.Linear(hidden_sizes[-1], self._out_shape.numel()))
         if self._activate_output:
             net.append(nl)
         return net
@@ -62,41 +63,8 @@ class MLP(nn.Module):
             self.net[0].apply(first_layer_init)
 
     def forward(self, inputs):
-        return self.net(inputs.reshape(-1, np.prod(self._in_shape))).reshape(-1, *self._out_shape)
+        return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)
 
-    #
-    #     self._input_layer = nn.Linear(np.prod(in_shape), hidden_sizes[0])
-    #     self._hidden_layers = nn.ModuleList(
-    #         [
-    #             nn.Linear(in_size, out_size)
-    #             for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:])
-    #         ]
-    #     )
-    #     self._output_layer = nn.Linear(hidden_sizes[-1], np.prod(out_shape))
-    #
-    #
-    # def forward(self, inputs):
-    #     if inputs.shape[1:] != self._in_shape:
-    #         raise ValueError(
-    #             "Expected inputs of shape {}, got {}.".format(
-    #                 self._in_shape, inputs.shape[1:]
-    #             )
-    #         )
-    #
-    #     inputs = inputs.reshape(-1, np.prod(self._in_shape))
-    #     outputs = self._input_layer(inputs)
-    #     outputs = self._activation(outputs)
-    #
-    #     for hidden_layer in self._hidden_layers:
-    #         outputs = hidden_layer(outputs)
-    #         outputs = self._activation(outputs)
-    #
-    #     outputs = self._output_layer(outputs)
-    #     if self._activate_output:
-    #         outputs = self._activation(outputs)
-    #     outputs = outputs.reshape(-1, *self._out_shape)
-    #
-    #     return outputs
 
 
 class FCBlock(torch.nn.Module):
@@ -114,7 +82,9 @@ class FCBlock(torch.nn.Module):
         super().__init__()
 
         self._in_shape = torch.Size(in_shape)
+        self._in_prod = self._in_shape.numel()
         self._out_shape = torch.Size(out_shape)
+        self._out_prod = self._out_shape.numel()
         self._hidden_sizes = hidden_sizes
         self._activation = activation
         self._activate_output = activate_output
@@ -136,18 +106,16 @@ class FCBlock(torch.nn.Module):
 
         net = self.build_net(hidden_sizes, in_shape, nl, out_shape)
         self.net = torch.nn.Sequential(*net)
-
         self.initialize_weights(first_layer_init)
-        # self.net = torch.jit.script(self.net)
 
     def build_net(self, hidden_sizes, in_shape, nl, out_shape):
         net = []
-        net.append(nn.Linear(np.prod(in_shape), hidden_sizes[0]))
+        net.append(nn.Linear(self._in_prod, hidden_sizes[0]))
         for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
             net.append(nl)
             net.append(nn.Linear(in_size, out_size))
         net.append(nl)
-        net.append(nn.Linear(hidden_sizes[-1], np.prod(out_shape)))
+        net.append(nn.Linear(hidden_sizes[-1], self._out_prod))
         if self._activate_output:
             net.append(nl)
         return net
@@ -158,4 +126,4 @@ class FCBlock(torch.nn.Module):
             self.net[0].apply(first_layer_init)
 
     def forward(self, inputs):
-        return self.net(inputs.reshape(-1, np.prod(self._in_shape))).reshape(-1, *self._out_shape)
+        return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)

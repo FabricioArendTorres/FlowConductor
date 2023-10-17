@@ -4,7 +4,7 @@ import torch
 
 from enflows.nn.nets import activations
 from enflows.nn.nets.extended_basic_nets import ExtendedSequential, ExtendedLinear
-from enflows.nn.nets.lipschitz import scaled_spectral_norm_induced
+from enflows.nn.nets.spectral_norm import scaled_spectral_norm
 from enflows.nn.nets.lipschitz_dense import LipschitzDenseLayer
 
 coeff = 0.9
@@ -87,9 +87,9 @@ class LipschitzDenseNetBuilder:
         self.n_lipschitz_iters = n_lipschitz_iters
 
         self.context_features = context_features if context_features is not None else 0
-        self.wrapper = lambda network: scaled_spectral_norm_induced(network,
-                                                                    n_power_iterations=self.n_lipschitz_iters,
-                                                                    domain=2, codomain=2)
+        self.wrapper = lambda network: scaled_spectral_norm(network,
+                                                            n_power_iterations=self.n_lipschitz_iters,
+                                                            domain=2, codomain=2)
 
         self.set_activation(self.act_fun)
 
@@ -143,10 +143,10 @@ class LipschitzFCNNBuilder:
         self.lip_coeff = lip_coeff
         self.n_lipschitz_iters = n_lipschitz_iters
 
-        self.wrapper = lambda network: scaled_spectral_norm_induced(network,
-                                                                    n_power_iterations=self.n_lipschitz_iters,
-                                                                    coeff=self.lip_coeff,
-                                                                    domain=2, codomain=2)
+        self.wrapper = lambda network: scaled_spectral_norm(network,
+                                                            n_power_iterations=self.n_lipschitz_iters,
+                                                            coeff=self.lip_coeff,
+                                                            domain=2, codomain=2)
 
     @property
     def activation(self):
