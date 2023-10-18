@@ -4,7 +4,7 @@ Link: https://github.com/thu-ml/implicit-normalizing-flows/blob/master/lib/layer
 '''
 
 import torch
-from torch import nn
+from torch import nn, nn as nn
 import torch.nn.functional as functional
 from torch.autograd import Function
 import numpy as np
@@ -12,7 +12,9 @@ import math
 import pickle
 import sys
 import os
+from typing import *
 from scipy.optimize import root
+from scipy.special import expit
 import time
 
 import logging
@@ -112,76 +114,104 @@ def find_fixed_point(f, x0, threshold=1000, eps=1e-5):
             return Xn.view(x0.shape)
 
 
-class RootFind(torch.autograd.Function):
-    @staticmethod
-    def banach_find_root(Gnet, x, *args):
-        eps = args[-2]
-        threshold = args[-1]  # Can also set this to be different, based on training/inference
-        g = lambda y: x - Gnet(y)
-        y_est = find_fixed_point(g, x, threshold=threshold, eps=eps)
-        return y_est.clone().detach()
+
+
+class ParameterGenerator(torch.nn.Module):
+    def sample_parameters(self, training=True) -> Tuple[Callable, int]:
+        pass
+
+
+
+class Sampler():
+    def rcdf_fn(self, k, offset):
+        pass
+
+    def sample_fn(self, m):
+        pass
+
+    @classmethod
+    def build_sampler(cls, n_dist, **kwargs):
+        if n_dist == 'geometric':
+            return GeometricSampler(kwargs.get("geom_p"))
+        elif n_dist == 'poisson':
+            return GeometricSampler(kwargs.get("lamb"))
+        else:
+            raise NotImplementedError(f"Unknown sampler '{n_dist}'.")
+
+
+class GeometricSampler(Sampler):
+    def __init__(self, geom_p):
+        self.geom_p = expit(geom_p)
+
+    def sample_fn(self, m):
+        return self.geometric_sample(self.geom_p, m)
+
+    def rcdf_fn(self, k, offset):
+        return self.geometric_1mcdf(self.geom_p, k, offset)
 
     @staticmethod
-    def forward(ctx, Gnet, x, method, *args):
-        ctx.args_len = len(args)
-        with torch.no_grad():
-            y_est = RootFind.banach_find_root(Gnet, x, *args)
-
-            # If one would like to analyze the convergence process (e.g., failures, stability), should
-            # insert here or in broyden_find_root.
-            return y_est
+    def geometric_sample(p, n_samples):
+        return np.random.geometric(p, n_samples)
 
     @staticmethod
-    def backward(ctx, grad_y):
-        assert 0, 'Cannot backward to this function.'
-        grad_args = [None for _ in range(ctx.args_len)]
-        return (None, None, grad_y, None, *grad_args)
+    def geometric_1mcdf(p, k, offset):
+        if k <= offset:
+            return 1.
+        else:
+            k = k - offset
+        """P(n >= k)"""
+        return (1 - p) ** max(k - 1, 0)
 
 
-'''
-Provides backward propagation for the implicit mapping F^-1(x).
-'''
+class UnbiasedParameterGenerator(ParameterGenerator):
+    geom_p = 0.5
+    geom_p = np.log(geom_p) - np.log(1. - geom_p)
+
+    def __init__(self, n_exact_terms, n_samples):
+        super().__init__()
+        self.sampler = GeometricSampler(self.geom_p)
+        self.n_exact_terms = n_exact_terms
+        self.n_samples = n_samples
+
+        # store the samples of n.
+        # self.register_buffer('last_n_samples', torch.zeros(self.n_samples))
+
+    def sample_parameters(self, training=True):
+        n_samples = self.sampler.sample_fn(m=self.n_samples)
+        # n_samples = sample_fn(self.n_samples)
+        n_power_series = max(n_samples) + self.n_exact_terms
+
+        if not training:
+            n_power_series += 20
+
+        def coeff_fn(k):
+            rcdf_term = self.sampler.rcdf_fn(k, self.n_exact_terms)
+            return 1 / rcdf_term * sum(n_samples >= k - self.n_exact_terms) / len(n_samples)
+
+        return coeff_fn, n_power_series
 
 
-class MonotoneBlockBackward(torch.autograd.Function):
-    """
-    A 'dummy' function that does nothing in the forward pass and perform implicit differentiation
-    in the backward pass. Essentially a wrapper that provides backprop for the `MonotoneBlock` class.
-    You should use this class in MonotoneBlock's forward() function by calling:
+class BiasedParameterGenerator(ParameterGenerator):
+    def __init__(self, n_power_series):
+        super().__init__()
 
-        MonotoneBlockBackward.apply(self.func, ...)
+        self.n_power_series = n_power_series
 
-    """
+    def sample_parameters(self, training=True):
+        def coeff_fn(k):
+            return 1
 
-    @staticmethod
-    def forward(ctx, Gnet, y, x, *args):
-        ctx.save_for_backward(y, x)
-        ctx.Gnet = Gnet
-        ctx.args = args
-        return y
+        return coeff_fn, self.n_power_series
 
-    @staticmethod
-    def backward(ctx, grad):
-        grad = grad.clone()
-        y, x = ctx.saved_tensors
-        args = ctx.args
-        method, eps, threshold = args[-3:]
 
-        Gnet = ctx.Gnet
-        y = y.clone().detach().requires_grad_()
+class Sine(nn.Module):
+    def __init__(self, w0=1.):
+        super().__init__()
+        self.w0 = w0
 
-        with torch.enable_grad():
-            Gy = Gnet(y)
+    def forward(self, x):
+        return torch.sin(self.w0 * x) / self.w0
 
-        def h(x_):
-            y.grad = None
-            Gy.backward(x_, retain_graph=True)
-            xJ = y.grad.clone().detach()
-            y.grad = None
-            return xJ
 
-        dl_dh = RootFind.apply(h, grad, method, eps, threshold)
-        dl_dx = dl_dh
-
-        grad_args = [None for _ in range(len(args))]
-        return (None, dl_dh, dl_dx, *grad_args)
+def exists(val):
+    return val is not None

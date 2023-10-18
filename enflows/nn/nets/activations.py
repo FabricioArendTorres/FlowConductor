@@ -135,6 +135,14 @@ class CLipSwish(nn.Module):
     def forward(self, x):
         x = torch.cat((x, -x), 1)
         return self.swish(x).div_(1.004)
+class LipSwish(nn.Module):
+
+    def __init__(self):
+        super(LipSwish, self).__init__()
+        self.swish = Swish()
+
+    def forward(self, x):
+        return self.swish(x).div_(1.004)
 
 
 '''

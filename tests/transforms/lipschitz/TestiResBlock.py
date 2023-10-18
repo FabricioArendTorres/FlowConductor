@@ -1,11 +1,9 @@
 import torch
-import torchtestcase
 import unittest
 from parameterized import parameterized_class
-import numpy as np
 
-from enflows.nn.nets import mlp, spectral_norm, activations, lipschitz_dense
-from enflows.transforms.lipschitz.builders import LipschitzDenseNetBuilder
+from enflows.nn.nets import activations
+from enflows.nn.nets.invertible_densenet import DenseNet
 from enflows.transforms.lipschitz.iresblock import iResBlock
 from tests.transforms.transform_test import TransformTest
 
@@ -31,11 +29,10 @@ class TestLipschitzLayer(TransformTest):
 
         self.inputs = torch.randn(self.batch_size, self.features)
 
-        densenet_builder = LipschitzDenseNetBuilder(input_channels=self.features,
-                                                    densenet_depth=3,
-                                                    activation_function=activations.Sin(),
-                                                    lip_coeff=self.coef,
-                                                    )
+        densenet_builder = DenseNet.factory(dimension=self.features,
+                                            densenet_depth=3,
+                                            activation_function=activations.Sin(),
+                                            lip_coeff=self.coef, )
         self.transform = iResBlock(densenet_builder.build_network(),
                                    brute_force=True,
                                    exact_trace=True,
@@ -55,7 +52,6 @@ class TestLipschitzLayer(TransformTest):
 
     def test_forward_inverse_are_consistent(self):
         self.assert_forward_inverse_are_consistent(self.transform, self.inputs)
-
 
 
 if __name__ == '__main__':

@@ -85,4 +85,4 @@ from enflows.transforms.conditional import (
 from enflows.transforms.unitvector import UnitVector
 from enflows.transforms.matrix import (TransformDiagonal, TransformDiagonalSoftplus, TransformDiagonalExponential,
                                        CholeskyOuterProduct)
-from enflows.transforms.lipschitz import (iResBlock, LipschitzDenseNetBuilder, LipschitzFCNNBuilder)
+from enflows.transforms.lipschitz import (iResBlock)

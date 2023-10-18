@@ -16,14 +16,21 @@ from sklearn.utils import shuffle as util_shuffle
 
 
 class PlaneDataset(Dataset):
-    def __init__(self, num_points, flip_axes=False):
+    def __init__(self, num_points, flip_axes=False, return_label=False):
         self.num_points = num_points
         self.flip_axes = flip_axes
         self.data = None
+        self.label = None
+        self.min_label = None
+        self.max_label = None
+        self.return_label = return_label
         self.reset()
 
     def __getitem__(self, item):
-        return self.data[item]
+        if self.return_label:
+            return self.data[item], self.label[item]
+        else:
+            return self.data[item]
 
     def __len__(self):
         return self.num_points
@@ -45,6 +52,7 @@ class GaussianDataset(PlaneDataset):
         x2 = 0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x1, x2)).t()
 
+
 class EightGaussianDataset(PlaneDataset):
     def _create_data(self):
         scale = 4.
@@ -54,13 +62,16 @@ class EightGaussianDataset(PlaneDataset):
         centers = np.array([(scale * x, scale * y) for x, y in centers])
 
         dataset = []
-        points = np.random.randn(self.num_points* 2).reshape(-1, 2) * 0.5
-        idx = np.random.randint(8, size=(self.num_points, ))
+        points = np.random.randn(self.num_points * 2).reshape(-1, 2) * 0.5
+        idx = np.random.randint(8, size=(self.num_points,))
         center = centers[idx]
         points[..., 0] = points[..., 0] + center[..., 0]
         points[..., 1] = points[..., 1] + center[..., 1]
         dataset = points / 1.414
         self.data = torch.tensor(dataset, dtype=torch.float32)
+        self.label = torch.tensor(idx, dtype=torch.float32)
+        self.min_label = 0.
+        self.max_label = 7.
 
 
 class CrescentDataset(PlaneDataset):
@@ -71,20 +82,28 @@ class CrescentDataset(PlaneDataset):
         x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x2, x1)).t()
 
+
 class TwoMoonsDataset(PlaneDataset):
     def _create_data(self):
-        data = sklearn.datasets.make_moons(n_samples=self.num_points, noise=0.1)[0]
+        data, label = sklearn.datasets.make_moons(n_samples=self.num_points, noise=0.1)
         data = data.astype("float32")
         data = data * 2 + np.array([-1, -0.2])
         self.data = torch.tensor(data, dtype=torch.float32)
+        self.label = torch.tensor(label, dtype=torch.float32)
+        self.min_label = 0.
+        self.max_label = 1.
 
 
 class SwissRollDataset(PlaneDataset):
     def _create_data(self):
-        data = sklearn.datasets.make_swiss_roll(n_samples=self.num_points, noise=1.0)[0]
+        data, label = sklearn.datasets.make_swiss_roll(n_samples=self.num_points, noise=1.0)
         data = data.astype("float32")[:, [0, 2]]
         data /= 5
         self.data = torch.tensor(data, dtype=torch.float32)
+        self.label = torch.tensor(label, dtype=torch.float32)
+        self.min_label = 0.
+        self.max_label = 15.
+
 
 class PinWheelDataset(PlaneDataset):
     def _create_data(self):
@@ -95,8 +114,8 @@ class PinWheelDataset(PlaneDataset):
         rate = 0.25
         rads = np.linspace(0, 2 * np.pi, num_classes, endpoint=False)
 
-        features = np.random.randn(num_classes*num_per_class, 2) \
-            * np.array([radial_std, tangential_std])
+        features = np.random.randn(num_classes * num_per_class, 2) \
+                   * np.array([radial_std, tangential_std])
         features[:, 0] += 1.
         labels = np.repeat(np.arange(num_classes), num_per_class)
 
@@ -108,8 +127,12 @@ class PinWheelDataset(PlaneDataset):
         idx_permuted = np.random.permutation(np.arange(x.shape[0]))
         x_permuted = x[idx_permuted]
         label_permuted = labels[idx_permuted]
-        label_permuted = label_permuted/ label_permuted.max()
-        self.data = torch.tensor(x_permuted, dtype=torch.float32)#, label_permuted
+        label_permuted = label_permuted / label_permuted.max()
+        self.data = torch.tensor(x_permuted, dtype=torch.float32)  # , label_permuted
+        self.label = torch.tensor(label_permuted, dtype=torch.float32)  # , label_permuted
+        self.min_label = 0.
+        self.max_label = 1.
+
 
 class CrescentCubedDataset(PlaneDataset):
     def _create_data(self):
@@ -146,12 +169,17 @@ class SignDataset(PlaneDataset):
         x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x1, x2)).t()
 
+
 class TwoCircles(PlaneDataset):
     def _create_data(self):
-        data = sklearn.datasets.make_circles(n_samples=self.num_points, factor=.5, noise=0.08)[0]
+        data, label = sklearn.datasets.make_circles(n_samples=self.num_points, factor=.5, noise=0.08)
         data = data.astype("float32")
         data *= 3
         self.data = torch.tensor(data, dtype=torch.float32)
+        self.label = torch.tensor(label, dtype=torch.float32)
+
+        self.min_label = 0.
+        self.max_label = 1.
 
 
 class FourCircles(PlaneDataset):
@@ -279,7 +307,6 @@ class ConcentricRingsDataset(PlaneDataset):
         # Add noise
         X = X + np.random.normal(scale=0.08, size=X.shape)
         self.data = X.astype("float32")
-
 
 
 class TestGridDataset(PlaneDataset):

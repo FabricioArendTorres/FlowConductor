@@ -30,7 +30,7 @@ def load_dataset(name, split, frac=None):
         raise ValueError('Frac must be between 0 and 1.')
 
 
-def load_plane_dataset(name, num_points, flip_axes=False):
+def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
     """Loads and returns a plane dataset.
 
     Args:
@@ -63,7 +63,7 @@ def load_plane_dataset(name, num_points, flip_axes=False):
             'pinwheel': PinWheelDataset,
             'swissroll': SwissRollDataset,
             'rings' : ConcentricRingsDataset
-        }[name](num_points=num_points, flip_axes=flip_axes)
+        }[name](num_points=num_points, flip_axes=flip_axes, return_label=return_label)
 
     except KeyError:
         raise ValueError('Unknown dataset: {}'.format(name))
