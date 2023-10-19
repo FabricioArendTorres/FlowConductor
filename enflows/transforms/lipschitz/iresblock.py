@@ -31,6 +31,8 @@ from enflows.transforms import Transform
 from enflows.utils.torchutils import batch_jacobian, logabsdet
 from enflows.transforms.lipschitz.util import BiasedParameterGenerator, UnbiasedParameterGenerator, ParameterGenerator
 from enflows.nn.nets.invertible_densenet import *
+from enflows.nn.nets.invertible_densenet import _DenseNet
+
 import logging
 from typing import *
 
@@ -42,7 +44,7 @@ __all__ = ['iResBlock']
 class iResBlock(Transform):
     def __init__(
             self,
-            nnet,
+            nnet:_DenseNet,
             brute_force=False,
             unbiased_estimator=True,
             **options
@@ -136,7 +138,7 @@ class iResBlock(Transform):
 
 
 class DeterminantEstimator(torch.nn.Module):
-    def __init__(self, network: torch.nn.Module, parameter_generator: ParameterGenerator):
+    def __init__(self, network:_DenseNet, parameter_generator: ParameterGenerator):
         super().__init__()
         self.nnet = network
         self.parameter_generator = parameter_generator
@@ -173,7 +175,7 @@ class BruteForceDeterminantEstimator(DeterminantEstimator):
         Brute-force compute Jacobian determinant
     """
 
-    def __init__(self, network):
+    def __init__(self, network:_DenseNet):
         super().__init__(network=network, parameter_generator=None)
 
     def logabsdet_and_g(self, x, context=None, training=False, **kwargs):
