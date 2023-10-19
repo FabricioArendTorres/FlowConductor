@@ -75,6 +75,7 @@ Main changes compared to the nflows repository include:
 
 - Sum-of-Sigmoid Layers
 - [DeepSigmoid Layers / Neural Autoregressive Flows] (https://proceedings.mlr.press/v80/huang18d.html)
+- [Lipschitz Constrained DenseNets] (https://arxiv.org/abs/2010.02125)
 - Transformations for which the inverse is only known to exist, but not available: 
   - [Planar Flow](https://arxiv.org/abs/1912.02762) 
   - [Sylvester Flow](https://arxiv.org/abs/1803.05649)
