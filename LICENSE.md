@@ -1,6 +1,7 @@
 MIT License
 
 Copyright (c) 2020 Conor Durkan, Artur Bekasov, Iain Murray, George Papamakarios
+Copyright (c) 2023 Fabricio Arend Torres, Marcello Massimo Negri, Jonathan Aellen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
