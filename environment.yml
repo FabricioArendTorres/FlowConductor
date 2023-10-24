@@ -32,4 +32,6 @@ dependencies:
   - pyyaml
   - tensorboard
   - tqdm
+  - pandas=1.*
+  - h5py
  
