@@ -1,6 +1,9 @@
 # nflows-extended: An extension of nflows
 
 <a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
+<a href="https://codecov.io/gh/FabricioArendTorres/enflows" >
+<img src="https://codecov.io/gh/FabricioArendTorres/enflows/graph/badge.svg?token=UPQ2ZNQ6G4"/>
+</a>
 
 The original `nflows` package is a comprehensive collection of [normalizing flows](https://arxiv.org/abs/1912.02762) using [PyTorch](https://pytorch.org).
 Our `nflows-extended`, or `enflows`, is as the name suggests an extension. 
@@ -60,11 +63,12 @@ samples = flow.sample(num_samples)
 
 Additional examples of the workflow are provided in [examples folder](examples/).
 # Changes and added features compared to nflows
-
 The core logic of the code for LFlows (i.e. the `nflows/` directory) is based on the [nflows package](https://github.com/bayesiains/nflows).
+Aside from added features, our extension provides tests for the calculation of the Jacobian log-determinant, which is at the heart of Normalizing Flow.
+
 Added Layers / Flwos:
 
-- (Conditional)[Sum-of-Sigmoid Layers](https://arxiv.org/abs/2306.07255)
+- [(Conditional) Sum-of-Sigmoid Layers](https://arxiv.org/abs/2306.07255)
 - [Cholesky Outer Product for flows on symmetric positive definite matrices](https://arxiv.org/abs/2306.07255)
 - [Lipschitz Constrained invertible DenseNets](https://arxiv.org/abs/2010.02125)
   In particular, we provide three ways to condition these of these transformations without affecting the invertibility.
