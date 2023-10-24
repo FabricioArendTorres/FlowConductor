@@ -4,11 +4,8 @@ Various 2-dim datasets.
 """
 
 import numpy as np
-import os
 import torch
 
-from skimage import color, io, transform
-from torch import distributions
 from torch.utils.data import Dataset
 import sklearn.datasets
 import enflows.utils as utils
@@ -332,41 +329,6 @@ class CheckerboardDataset(PlaneDataset):
         x2_ = torch.rand(self.num_points) - torch.randint(0, 2, [self.num_points]).float() * 2
         x2 = x2_ + torch.floor(x1) % 2
         self.data = torch.stack([x1, x2]).t() * 2
-
-
-class FaceDataset(PlaneDataset):
-    def __init__(self, num_points, name='einstein', flip_axes=False):
-        self.name = name
-        self.image = None
-        super().__init__(num_points, flip_axes)
-
-    def _create_data(self):
-        root = utils.get_data_root()
-        path = os.path.join(root, 'faces', self.name + '.jpg')
-        try:
-            image = io.imread(path)
-        except FileNotFoundError:
-            raise RuntimeError('Unknown face name: {}'.format(self.name))
-        image = color.rgb2gray(image)
-        self.image = transform.resize(image, [512, 512])
-
-        grid = np.array([
-            (x, y) for x in range(self.image.shape[0]) for y in range(self.image.shape[1])
-        ])
-
-        rotation_matrix = np.array([
-            [0, -1],
-            [1, 0]
-        ])
-        p = self.image.reshape(-1) / sum(self.image.reshape(-1))
-        ix = np.random.choice(range(len(grid)), size=self.num_points, replace=True, p=p)
-        points = grid[ix].astype(np.float32)
-        points += np.random.rand(self.num_points, 2)  # dequantize
-        points /= (self.image.shape[0])  # scale to [0, 1]
-        # assert 0 <= min(points) <= max(points) <= 1
-
-        self.data = torch.tensor(points @ rotation_matrix).float()
-        self.data[:, 1] += 1
 
 
 def _test():

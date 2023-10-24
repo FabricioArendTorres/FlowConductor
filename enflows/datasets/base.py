@@ -1,34 +1,10 @@
 """
-Based on https://github.com/bayesiains/nsf/blob/master/data/base.py
+Based on https://github.com/bayesiains/nsf
 """
-
 
 from .plane import *
 
 from torch.utils import data
-
-def load_dataset(name, split, frac=None):
-    """Loads and returns a requested dataset.
-
-    Args:
-        name: string, the name of the dataset.
-        split: one of 'train', 'val' or 'test', the dataset split.
-        frac: float between 0 and 1 or None, the fraction of the dataset to be returned.
-            If None, defaults to the whole dataset.
-
-    Returns:
-        A Dataset object, the requested dataset.
-
-    Raises:
-         ValueError: If any of the arguments has an invalid value.
-    """
-
-    if split not in ['train', 'val', 'test']:
-        raise ValueError('Split must be one of \'train\', \'val\' or \'test\'.')
-
-    if frac is not None and (frac < 0 or frac > 1):
-        raise ValueError('Frac must be between 0 and 1.')
-
 
 def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
     """Loads and returns a plane dataset.
@@ -37,6 +13,24 @@ def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
         name: string, the name of the dataset.
         num_points: int, the number of points the dataset should have,
         flip_axes: bool, flip x and y axes if True.
+
+    Possible Names:
+        'gaussian'
+        'crescent'
+        'crescent_cubed'
+        'sine_wave'
+        'abs'
+        'sign'
+        'four_circles'
+        'diamond'
+        'two_spirals'
+        'checkerboard'
+        "eight_gaussians"
+        'two_circles'
+        'two_moons'
+        'pinwheel'
+        'swissroll'
+        'rings'
 
     Returns:
         A Dataset object, the requested dataset.
@@ -62,7 +56,7 @@ def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
             'two_moons': TwoMoonsDataset,
             'pinwheel': PinWheelDataset,
             'swissroll': SwissRollDataset,
-            'rings' : ConcentricRingsDataset
+            'rings': ConcentricRingsDataset
         }[name](num_points=num_points, flip_axes=flip_axes, return_label=return_label)
 
     except KeyError:

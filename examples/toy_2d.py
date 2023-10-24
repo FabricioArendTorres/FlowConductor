@@ -2,19 +2,16 @@ import matplotlib.pyplot as plt
 import os
 
 import torch
-from torch import nn
 from torch import optim
 
-from enflows.flows.base import Flow
-from enflows.distributions.normal import StandardNormal
-from datasets.base import load_plane_dataset, InfiniteLoader
+from enflows.flows import Flow
+from enflows.distributions import StandardNormal
+from enflows.datasets import load_plane_dataset, InfiniteLoader
 from enflows.transforms import *
 from enflows.nn.nets import *
 
 device = "cuda"
 
-LOAD_MODEL = False
-SAVE_MODEL = True
 CONTINUE_TRAINING = False
 
 os.makedirs("figures", exist_ok=True)
@@ -22,7 +19,7 @@ os.makedirs("models", exist_ok=True)
 
 base_dist = StandardNormal(shape=[2])
 MB_SIZE = 500
-selected_data = "rings"
+selected_data = "two_spirals"
 num_layers = 10
 
 num_iter = {"eight_gaussians": 3_000,
@@ -54,33 +51,29 @@ def main():
 
     flow = build_flow()
 
-    if not LOAD_MODEL or CONTINUE_TRAINING:
-        optimizer = optim.Adam(flow.parameters(), lr=1e-3)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, eta_min=1e-7, T_max=num_iter)
-        try:
-            for i in range(num_iter):
-                x = next(train_loader).to(device)
-                optimizer.zero_grad()
-                loss = -flow.log_prob(inputs=x).mean()
-                if (i % 50) == 0:
-                    print(f"{i:04}: {loss=:.3f}")
-                loss.backward()
-                optimizer.step()
-                scheduler.step()
-                if (i + 1) % 250 == 0:
-                    with torch.no_grad():
-                        flow.eval()
+    optimizer = optim.Adam(flow.parameters(), lr=1e-3, weight_decay=1e-5)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9995)
+    try:
+        for i in range(num_iter):
+            x = next(train_loader).to(device)
+            optimizer.zero_grad()
+            loss = -flow.log_prob(inputs=x).mean()
+            if (i % 50) == 0:
+                print(f"{i:04}: {loss=:.3f}")
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+            if (i + 1) % 250 == 0:
+                with torch.no_grad():
+                    flow.eval()
+                    x = next(test_loader).to(device)
+                    test_loss = -flow.log_prob(inputs=x).mean()
+                    print(f"{i:04}: {test_loss=:.3f}")
+                    plot_model(flow)
+                    flow.train()
 
-                        x = next(test_loader).to(device)
-                        test_loss = -flow.log_prob(inputs=x).mean()
-                        print(f"{i:04}: {test_loss=:.3f}")
-                        plot_model(flow)
-                        flow.train()
-
-        except KeyboardInterrupt:
-            pass
-    if SAVE_MODEL:
-        torch.save(flow, f"models/{selected_data}.pt")
+    except KeyboardInterrupt:
+        pass
     plot_model(flow)
 
 
@@ -90,18 +83,15 @@ def build_flow():
                         .set_logabsdet_estimator(brute_force=True)
                         .set_densenet(dimension=2,
                                       densenet_depth=3,
-                                      densenet_growth=32,
-                                      activation_function=CSin(w0=30))
+                                      densenet_growth=16,
+                                      activation_function=CSin(10))
                         )
     for _ in range(num_layers):
         transforms.append(ActNorm(features=2))
         transforms.append(densenet_factory.build())
 
     transform = CompositeTransform(transforms)
-    if LOAD_MODEL:
-        flow = torch.load(f"models/{selected_data}.pt")
-    else:
-        flow = Flow(transform, base_dist).to(device)
+    flow = Flow(transform, base_dist).to(device)
     return flow
 
 
@@ -129,7 +119,7 @@ def plot_model(flow):
     # flow.train()
     # flow.eval()
     with torch.no_grad():
-        zgrid = flow.log_prob(xyinput).reshape(nsamples, nsamples)
+        zgrid = flow.log_prob(xyinput).reshape(nsamples, nsamples).exp()
 
         samples = flow.sample(num_samples=5_000)
     # plt.contourf(xgrid.detach().cpu().numpy(), ygrid.detach().cpu().numpy(), zgrid.detach().cpu().numpy())
@@ -143,7 +133,8 @@ def plot_model(flow):
     plt.tight_layout()
     # plt.title('iteration {}'.format(i + 1))
     plt.savefig(f"figures/{selected_data}.png")
-
+    plt.close()
+    print("Saved plot to figures/{}.png".format(selected_data))
 
 if __name__ == "__main__":
     main()

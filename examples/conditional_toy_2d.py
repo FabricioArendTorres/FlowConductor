@@ -13,7 +13,7 @@ from enflows.transforms import (ActNorm,
                                 )
 from enflows.nn.nets import *
 from enflows.utils.torchutils import *
-from datasets.base import load_plane_dataset, InfiniteLoader, PlaneDataset
+from enflows.datasets.base import load_plane_dataset, InfiniteLoader, PlaneDataset
 import logging
 
 logging.basicConfig(
@@ -22,10 +22,10 @@ logging.basicConfig(
     datefmt='%H:%M:%S')
 
 logger = logging.getLogger()
-device = "cuda"
+device = "cpu"  # "cuda"
 
 ###########################################
-selected_data = "swissroll"
+selected_data = "pinwheel"
 MB_SIZE = 1024
 num_iter = 1000
 
@@ -67,7 +67,7 @@ def main():
             plot_model(flow, train_dataset)
 
 
-def build_flow(num_layers=10,
+def build_flow(num_layers=5,
                num_shared_embedding=50):
     base_dist = DiagonalNormal(shape=[2])
 
@@ -75,9 +75,9 @@ def build_flow(num_layers=10,
     # First set on how to estimate the logabsdet of the lipschitz constrained neural network.
     # Use brute_force for low dimensions (i.e. directly via autograd).
     # Else, use stochastic estimator.
-    densenet_factory.set_logabsdet_estimator(brute_force=False,  # set this to false for high dimensions (>3)
-                                             unbiased_estimator=True,  # default;
-                                             trace_estimator="neumann"  # either "neumann" or "basic";
+    densenet_factory.set_logabsdet_estimator(brute_force=True,  # set this to false for high dimensions (>3)
+                                             # unbiased_estimator=True,  # default;
+                                             # trace_estimator="neumann"  # either "neumann" or "basic";
                                              )
 
     # Then select on how to condition the lipschitz constrained neural network
@@ -91,7 +91,7 @@ def build_flow(num_layers=10,
                                   densenet_growth=32,
                                   c_embed_hidden_sizes=(128, 128, 10),
                                   m_embed_hidden_sizes=(128, 128),
-                                  activation_function=CSin(10),
+                                  activation_function=Sin(10),
                                   lip_coeff=.97,
                                   context_features=num_shared_embedding)
 
