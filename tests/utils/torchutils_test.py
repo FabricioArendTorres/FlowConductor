@@ -155,6 +155,21 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
                 n_params = torchutils.get_num_parameters(tmp)
                 assert n_params == tmp.n_params, f"n_params={n_params}, tmp.n_params={tmp.n_params}"
 
+    def test_safe_detach(self):
+        for condition in [True, False]:
+            x = torch.randn(2, 3, 4, 5).requires_grad_(condition)
+            y = torchutils.safe_detach(x)
+            self.assertEqual(y, x)
+            self.assertEqual(y.requires_grad, condition)
+            self.assertEqual(x.requires_grad, condition)
+
+
+    def test_sample_rademacher_like(self):
+        x = torch.randn(2, 3, 4, 5)
+        y = torchutils.sample_rademacher_like(x)
+        self.assertEqual(y.shape, x.shape)
+        self.assertEqual(y.dtype, x.dtype)
+        self.assertEqual(y.device, x.device)
 
 if __name__ == "__main__":
     unittest.main()
