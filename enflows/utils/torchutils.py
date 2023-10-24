@@ -5,7 +5,6 @@ import torch
 from numpy.typing import ArrayLike
 import random
 
-
 def set_seeds(SEED):
     np.random.seed(SEED)
     torch.random.manual_seed(SEED)
@@ -60,7 +59,7 @@ def repeat_rows(x, num_reps):
 
 
 def tensor2numpy(x):
-    return x.detach().cpu().numpy()
+    return tensor_to_np(x)
 
 
 def logabsdet(x):
@@ -192,7 +191,6 @@ def gradient(y, x, grad_outputs=None):
     return grad
 
 
-
 def batchwise_dot_prod(bvector1, bvector2):
     return (bvector1 * bvector2).sum(-1)
 
@@ -216,11 +214,13 @@ def np_to_tensor(input: ArrayLike, dtype=None, device="cpu") -> torch.Tensor:
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if not torch.is_tensor(input):
+    if isinstance(input, np.ndarray):
         return torch.tensor(input, dtype=dtype, device=device)
-    else:
+    elif isinstance(input, torch.Tensor):
         input: torch.Tensor
         return input.to(dtype).to(device)
+    else:
+        raise ValueError("Unknown Type: " + str(type(input)))
 
 
 def tensor_to_np(tensor: torch.Tensor) -> ArrayLike:
@@ -230,7 +230,6 @@ def tensor_to_np(tensor: torch.Tensor) -> ArrayLike:
         return tensor
     else:
         raise ValueError("Unknown Type: " + str(type(tensor)))
-
 
 
 def sample_rademacher_like(y):

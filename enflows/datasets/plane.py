@@ -338,7 +338,7 @@ def _test():
 
     from enflows.utils import torchutils
     from matplotlib import pyplot as plt
-    data = torchutils.tensor2numpy(dataset.data)
+    data = torchutils.tensor_to_np(dataset.data)
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     # ax.scatter(data[:, 0], data[:, 1], s=2, alpha=0.5)
     bound = 4

@@ -114,17 +114,28 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         with self.assertRaises(TypeError):
             torchutils.sum_except_batch(x, num_batch_dims=-1)
 
-    def test_tensor2numpy(self):
+    def test_tensor_to_np(self):
         self.eps = 1e-6
         shape = 2, 3, 4, 5
         x = torch.randn(shape)
-        y = torchutils.tensor2numpy(x)
+        y = torchutils.tensor_to_np(x)
         x_ = torchutils.np_to_tensor(y)
-        y_ = torchutils.tensor2numpy(x_)
+        y_ = torchutils.tensor_to_np(x_)
         self.assertIsInstance(y, np.ndarray)
         self.assertIsInstance(x_, torch.Tensor)
 
         self.assertEqual(x, x_)
+
+        with self.assertRaises(ValueError):
+            torchutils.tensor_to_np(2)
+
+        with self.assertRaises(ValueError):
+            torchutils.np_to_tensor(2)
+
+        assert np.all(torchutils.tensor_to_np(y) == y)
+
+        self.assert_tensor_equal(torchutils.np_to_tensor(x), x)
+
         assert np.allclose(y, y_)
 
     def test_get_num_parameters(self):

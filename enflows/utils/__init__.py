@@ -13,7 +13,8 @@ from enflows.utils.torchutils import (
     searchsorted,
     split_leading_dim,
     sum_except_batch,
-    tensor2numpy,
+    tensor_to_np,
+    np_to_tensor,
     tile,
 )
 from enflows.utils.typechecks import (
