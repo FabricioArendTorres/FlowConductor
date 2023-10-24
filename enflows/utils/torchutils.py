@@ -192,13 +192,6 @@ def gradient(y, x, grad_outputs=None):
     return grad
 
 
-def divergence(y, x, x_offset=1):
-    div = 0.
-    for i in range(y.shape[-1]):
-        tmp_grad = torch.autograd.grad(y[..., i], x, torch.ones_like(y[..., i]), create_graph=True)[0]
-        div += tmp_grad[..., [i + x_offset]]
-    return div
-
 
 def batchwise_dot_prod(bvector1, bvector2):
     return (bvector1 * bvector2).sum(-1)
