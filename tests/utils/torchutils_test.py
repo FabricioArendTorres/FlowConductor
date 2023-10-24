@@ -128,9 +128,6 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         assert np.allclose(y, y_)
 
     def test_get_num_parameters(self):
-        feature_size = 10
-        num_layers = 1
-
         class Dummy(torch.nn.Module):
             def __init__(self, feature_size, num_layers):
                 super().__init__()
