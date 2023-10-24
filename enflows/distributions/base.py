@@ -131,18 +131,23 @@ class Distribution(nn.Module):
         """calls sample_maps and returns the maximizing x and associated log prob for each context.
 
         In general it is recommended to use simulated annealing to recover the global maximum.
-        returns (context_size x 1 x dim) and (context_size x 1) if context is not None
-                else (dim) and ()
+        returns max_x, max_logprob
+        The shapes are [context_size, 1, dim] and [context_size, 1] if context is not None
+                else [dim] and []
         """
         xs, log_ps = self.sample_maxima(num_samples, context, its, opt, *args)
         if context is not None:
             index = torch.argmax(log_ps, dim=-1, keepdim=True)
             # the following unsqueezing over multiple dimensions is to accommodate the variable shape of the space of x
-            return (torch.take_along_dim(xs,index[...,*[None]*(xs.ndim-2)], dim=1),
-                    torch.take_along_dim(log_ps, index, dim=1))
+            n_extra_dims = (xs.ndim - 2)
+            index_unsqueezed = index.view(tuple(index.shape) + (1,) * n_extra_dims)
+            max_x = torch.take_along_dim(xs, index_unsqueezed, dim=1)
+
+            max_logprob = torch.take_along_dim(log_ps, index, dim=1)
         else:
             index = torch.argmax(log_ps)
-            return xs[index], log_ps[index]
+            max_x, max_logprob = xs[index], log_ps[index]
+        return max_x, max_logprob
 
     def sample_maxima(self, num_samples, context=None, its=1, opt="LBFGS", *args):
         """Takes a number of samples and maximizes their log prob.
@@ -171,6 +176,7 @@ class Distribution(nn.Module):
             neg_log_prob = -self.log_prob(initial_sample, context).mean()
             neg_log_prob.backward()
             return neg_log_prob
+
         for _ in range(its):
             optimizer.step(closure)
 
