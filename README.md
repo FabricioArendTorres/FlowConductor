@@ -1,4 +1,4 @@
-# nflows-extended: An extension of nflows focused on Conditional Normalizing Flows
+# nflows-extended: An extension of nflows
 
 <a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
 
@@ -64,9 +64,9 @@ Additional examples of the workflow are provided in [examples folder](examples/)
 The core logic of the code for LFlows (i.e. the `nflows/` directory) is based on the [nflows package](https://github.com/bayesiains/nflows).
 Added Layers / Flwos:
 
-- (Conditional) [Sum-of-Sigmoid Layers](https://arxiv.org/abs/2306.07255)
-- [Cholesky Outer Product for flows on symmetric positive definite matrices] (https://arxiv.org/abs/2306.07255)
-- [Lipschitz Constrained invertible DenseNets] (https://arxiv.org/abs/2010.02125)
+- (Conditional)[Sum-of-Sigmoid Layers](https://arxiv.org/abs/2306.07255)
+- [Cholesky Outer Product for flows on symmetric positive definite matrices](https://arxiv.org/abs/2306.07255)
+- [Lipschitz Constrained invertible DenseNets](https://arxiv.org/abs/2010.02125)
   In particular, we provide three ways to condition these of these transformations without affecting the invertibility.
 - Transformations for which the inverse is only known to exist, but not available: 
   - [(Conditional) Planar Flow](https://arxiv.org/abs/1912.02762) 
