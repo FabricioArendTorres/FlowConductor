@@ -108,7 +108,7 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         self.eps = 1e-6
         x = torch.randn(2, 3, 4, 5)
         y = torchutils.sum_except_batch(x, num_batch_dims=1)
-        self.assertEqual(y.shape, torch.Size([2,]))
+        self.assertEqual(y.shape, torch.Size([2, ]))
         self.assertEqual(y, x.sum(-1).sum(-1).sum(-1))
 
         with self.assertRaises(TypeError):
@@ -126,6 +126,26 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
 
         self.assertEqual(x, x_)
         assert np.allclose(y, y_)
+
+    def test_get_num_parameters(self):
+        feature_size = 10
+        num_layers = 1
+
+        class Dummy(torch.nn.Module):
+            def __init__(self, feature_size, num_layers):
+                super().__init__()
+                self.layers = torch.nn.Sequential(
+                    *[torch.nn.Linear(feature_size, feature_size) for _ in range(num_layers)])
+                self.random = torch.nn.Parameter(torch.randn(1), requires_grad=True)
+                self.random2 = torch.nn.Parameter(torch.randn(1), requires_grad=False)
+
+                self.n_params = (feature_size * feature_size + feature_size) * num_layers + 1
+
+        for features in [10, 20, 30]:
+            for num_layers in [1, 2, 3]:
+                tmp = Dummy(features, num_layers)
+                n_params = torchutils.get_num_parameters(tmp)
+                assert n_params == tmp.n_params, f"n_params={n_params}, tmp.n_params={tmp.n_params}"
 
 
 if __name__ == "__main__":

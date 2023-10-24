@@ -95,7 +95,8 @@ def get_num_parameters(model):
     """
     num_parameters = 0
     for parameter in model.parameters():
-        num_parameters += torch.numel(parameter)
+        if parameter.requires_grad:
+            num_parameters += torch.numel(parameter)
     return num_parameters
 
 
