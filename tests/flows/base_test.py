@@ -116,11 +116,11 @@ class FlowTest(torchtestcase.TorchTestCase):
                 [None, context],
                 [1e-4 * torch.ones(batch_size, *shape), 1e-4 * torch.ones(context_size, batch_size, *shape)]):
             with self.subTest(context=context, fdesc="multiple: sample_maps"):
-                xs, logps = distribution.sample_maxima(batch_size, context)
+                xs, logps = distribution.sample_maxima(batch_size, context, its=2)
                 self.assertIsInstance(xs, torch.Tensor)
                 self.assert_tensor_less(torch.abs(xs), should_be_less)
             with self.subTest(context=context, fdesc="singular: sample_map"):
-                x, logp = distribution.sample_maximum(batch_size, context)
+                x, logp = distribution.sample_maximum(batch_size, context, its=2)
                 self.assertIsInstance(x, torch.Tensor)
                 self.assert_tensor_less(torch.abs(x), should_be_less[0] if context is None else should_be_less[:, 0:1])
 

@@ -127,14 +127,14 @@ class Distribution(nn.Module):
     def _mean(self, context):
         raise NoMeanException()
 
-    def sample_maximum(self, num_samples, context=None, opt="LBFGS", *args):
+    def sample_maximum(self, num_samples, context=None, its=1, opt="LBFGS", *args):
         """calls sample_maps and returns the maximizing x and associated log prob for each context.
 
         In general it is recommended to use simulated annealing to recover the global maximum.
         returns (context_size x 1 x dim) and (context_size x 1) if context is not None
                 else (dim) and ()
         """
-        xs, log_ps = self.sample_maxima(num_samples, context, opt, *args)
+        xs, log_ps = self.sample_maxima(num_samples, context, its, opt, *args)
         if context is not None:
             index = torch.argmax(log_ps, dim=-1, keepdim=True)
             # the following unsqueezing over multiple dimensions is to accommodate the variable shape of the space of x
@@ -144,7 +144,7 @@ class Distribution(nn.Module):
             index = torch.argmax(log_ps)
             return xs[index], log_ps[index]
 
-    def sample_maxima(self, num_samples, context=None, opt="LBFGS", *args):
+    def sample_maxima(self, num_samples, context=None, its=1, opt="LBFGS", *args):
         """Takes a number of samples and maximizes their log prob.
         this can be used to approximately sample the maxima of a multimodal distribution.
 
@@ -152,6 +152,7 @@ class Distribution(nn.Module):
             num_samples: The number of samples per context.
             context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
                 with the data.
+            its: The number of optimization steps
             opt: The optimizer to use in the torch.optim package in str format.
             args: The arguments for the optimizer
 
@@ -170,7 +171,8 @@ class Distribution(nn.Module):
             neg_log_prob = -self.log_prob(initial_sample, context).mean()
             neg_log_prob.backward()
             return neg_log_prob
-        optimizer.step(closure)
+        for _ in range(its):
+            optimizer.step(closure)
 
         if context is not None:
             return (torchutils.split_leading_dim(initial_sample.data, shape=[-1, num_samples]),
