@@ -104,5 +104,16 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         self.assertEqual(torch.cuda.initial_seed(), 123)
         self.assertEqual(torch.cuda.random.initial_seed(), 123)
 
+    def test_sum_except_batch(self):
+        self.eps = 1e-6
+        x = torch.randn(2, 3, 4, 5)
+        y = torchutils.sum_except_batch(x, num_batch_dims=1)
+        self.assertEqual(y.shape, torch.Size([2,]))
+        self.assertEqual(y, x.sum(-1).sum(-1).sum(-1))
+
+        with self.assertRaises(TypeError):
+            torchutils.sum_except_batch(x, num_batch_dims=-1)
+
+
 if __name__ == "__main__":
     unittest.main()
