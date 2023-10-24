@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 
 def load_uci_dataset(name, split, frac=None):
