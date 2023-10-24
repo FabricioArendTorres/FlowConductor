@@ -1,31 +1,25 @@
-# nflows
+# nflows-extended: An extension of nflows focused on Conditional Normalizing Flows
 
 <a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
 
-`nflows` is a comprehensive collection of [normalizing flows](https://arxiv.org/abs/1912.02762) using [PyTorch](https://pytorch.org).
-nflows-extended, or `enflows`, is as the name suggests an extension of this package. 
+The original `nflows` package is a comprehensive collection of [normalizing flows](https://arxiv.org/abs/1912.02762) using [PyTorch](https://pytorch.org).
+Our `nflows-extended`, or `enflows`, is as the name suggests an extension. 
 The main focus lies in implementing more flow layers from the literature in one consistent framework.
+In particular, we support conditional transformations based on hypernetworks.
+In the original package, conditional networks were restricted to using a conditional base distribution. In `enflows`, nearly every layer can be conditional :).
+
+The bijective layers we additionally provide includes but are not limited to Planar Flows, invertible ResNets/DenseNets, a variant of neural autoregressive flows, and a basic support of continuous normalizing flows (and FFJORD) based `torchdiffeq` package.
 
 
 ## Setting up the Environment.
-The environment set-up was tested with [mamba](https://github.com/mamba-org/mamba).
-We assume cuda is available, and did not explicitely test a CPU setup.
-In principle, it should also work with [conda](https://docs.conda.io/en/latest/) (just a lot slower), but we did not explicitely test that.
-For using conda, exchange `mamba` with `conda` in the following commands.
-
 The `.yml` file for the environment is given in `env/conda_env.yml`, and can be created from the base directory via:
 
 ```
-(base) $  mamba env create --file env/conda_env.yml
-(base) $  conda activate lflows_neurips
+(base) $  conda env create --file env/conda_env.yml
+(base) $  conda activate environment.yml
 # This code should then work:
-(enflows) $  python examples/lflows_conditional_moons.py
+(enflows) $  python examples/conditional_toy_2d.py
 ```
-
-If you do not create it from the base directory, the pip install of the local package will not work.
-In that case, you can try fixing it by running afterwards:
-
-`(enflows) /lagrangian_flow_net$ pip install -e .`
 
 Ideally, after a successfull install you should  be able to run and pass the unit tests with:
 
@@ -35,7 +29,7 @@ Ideally, after a successfull install you should  be able to run and pass the uni
 
 ## Usage
 
-To define a flow:
+As the core is based on `nflows`, its usage is similar. To define a flow:
 
 ```python
 from enflows import transforms, distributions, flows
@@ -68,19 +62,16 @@ Additional examples of the workflow are provided in [examples folder](examples/)
 # Changes and added features compared to nflows
 
 The core logic of the code for LFlows (i.e. the `nflows/` directory) is based on the [nflows package](https://github.com/bayesiains/nflows).
+Added Layers / Flwos:
 
-Main changes compared to the nflows repository include:
-
-1. The addition of a few transformations.
-
-- Sum-of-Sigmoid Layers
-- [DeepSigmoid Layers / Neural Autoregressive Flows] (https://proceedings.mlr.press/v80/huang18d.html)
-- [Lipschitz Constrained DenseNets] (https://arxiv.org/abs/2010.02125)
+- (Conditional) [Sum-of-Sigmoid Layers](https://arxiv.org/abs/2306.07255)
+- [Cholesky Outer Product for flows on symmetric positive definite matrices] (https://arxiv.org/abs/2306.07255)
+- [Lipschitz Constrained invertible DenseNets] (https://arxiv.org/abs/2010.02125)
+  In particular, we provide three ways to condition these of these transformations without affecting the invertibility.
 - Transformations for which the inverse is only known to exist, but not available: 
-  - [Planar Flow](https://arxiv.org/abs/1912.02762) 
-  - [Sylvester Flow](https://arxiv.org/abs/1803.05649)
+  - [(Conditional) Planar Flow](https://arxiv.org/abs/1912.02762) 
+  - [(Conditional) Sylvester Flow](https://arxiv.org/abs/1803.05649)
 - Conditional Versions of existing non-conditional transformations from nflows. Can be found for imports at `nflows.transforms.conditional.*`:
-    - Planar Flow, Sylvester Flow
     - LU Transform
     - Orthogonal Transforms based on parameterized Householder projections
     - SVD based on the Orthogonal transforms
@@ -88,5 +79,3 @@ Main changes compared to the nflows repository include:
 - Conditional Versions of existing auto-regressive Variations, i.e. getting rid of the autoregressive parts.
     - [ConditionalPiecewiseRationalQuadraticTransform](https://proceedings.neurips.cc/paper/2019/hash/7ac71d433f282034e088473244df8c02-Abstract.html)
     - [ConditionalUMNNTransform](https://arxiv.org/abs/1908.05164)
-
-2. Some extensions and fixes of the unit tests provided in `tests`.
