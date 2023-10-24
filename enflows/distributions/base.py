@@ -1,7 +1,7 @@
 """Basic definitions for the distributions module."""
 
 import torch
-from torch import nn
+from torch import nn, optim
 
 from enflows.utils import torchutils
 import enflows.utils.typechecks as check
@@ -126,3 +126,54 @@ class Distribution(nn.Module):
 
     def _mean(self, context):
         raise NoMeanException()
+
+    def sample_maximum(self, num_samples, context=None, opt="LBFGS", *args):
+        """calls sample_maps and returns the maximizing x and associated log prob for each context.
+
+        In general it is recommended to use simulated annealing to recover the global maximum.
+        returns (context_size x 1 x dim) and (context_size x 1) if context is not None
+                else (dim) and ()
+        """
+        xs, log_ps = self.sample_maxima(num_samples, context, opt, *args)
+        if context is not None:
+            index = torch.argmax(log_ps, dim=-1, keepdim=True)
+            # the following unsqueezing over multiple dimensions is to accommodate the variable shape of the space of x
+            return (torch.take_along_dim(xs,index[...,*[None]*(xs.ndim-2)], dim=1),
+                    torch.take_along_dim(log_ps, index, dim=1))
+        else:
+            index = torch.argmax(log_ps)
+            return xs[index], log_ps[index]
+
+    def sample_maxima(self, num_samples, context=None, opt="LBFGS", *args):
+        """Takes a number of samples and maximizes their log prob.
+        this can be used to approximately sample the maxima of a multimodal distribution.
+
+        Args:
+            num_samples: The number of samples per context.
+            context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
+                with the data.
+            opt: The optimizer to use in the torch.optim package in str format.
+            args: The arguments for the optimizer
+
+        Returns:
+            A `Tensor` of shape [batch_size, ...] representing samples xs, the associated log_prob.
+        """
+        initial_sample = self._sample(num_samples, context)
+        if context is not None:
+            initial_sample = torchutils.merge_leading_dims(initial_sample, num_dims=2)
+            context = torchutils.repeat_rows(context, num_reps=num_samples)
+        initial_sample = torch.nn.parameter.Parameter(initial_sample, requires_grad=True)
+        optimizer = getattr(optim, opt)([initial_sample], *args)
+
+        def closure():
+            optimizer.zero_grad()
+            neg_log_prob = -self.log_prob(initial_sample, context).mean()
+            neg_log_prob.backward()
+            return neg_log_prob
+        optimizer.step(closure)
+
+        if context is not None:
+            return (torchutils.split_leading_dim(initial_sample.data, shape=[-1, num_samples]),
+                    torchutils.split_leading_dim(self.log_prob(initial_sample.data, context), shape=[-1, num_samples]))
+        else:
+            return initial_sample.data, self.log_prob(initial_sample.data, context)

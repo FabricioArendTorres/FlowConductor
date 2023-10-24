@@ -103,6 +103,27 @@ class FlowTest(torchtestcase.TorchTestCase):
                 self.assertIsInstance(noise, torch.Tensor)
                 self.assertEqual(noise.shape, torch.Size([batch_size] + shape))
 
+    def test_sample_maps(self):
+        batch_size = 10
+        context_size = 20
+        shape = [2, 3, 4]
+        context_shape = [5, 6]
+        # zero mean with variance shape
+        distribution = StandardNormal(shape)
+        # testing no context
+        context = torch.randn(context_size, *context_shape)
+        for context, should_be_less in zip(
+                [None, context],
+                [1e-4 * torch.ones(batch_size, *shape), 1e-4 * torch.ones(context_size, batch_size, *shape)]):
+            with self.subTest(context=context, fdesc="multiple: sample_maps"):
+                xs, logps = distribution.sample_maxima(batch_size, context)
+                self.assertIsInstance(xs, torch.Tensor)
+                self.assert_tensor_less(torch.abs(xs), should_be_less)
+            with self.subTest(context=context, fdesc="singular: sample_map"):
+                x, logp = distribution.sample_maximum(batch_size, context)
+                self.assertIsInstance(x, torch.Tensor)
+                self.assert_tensor_less(torch.abs(x), should_be_less[0] if context is None else should_be_less[:, 0:1])
+
 
 if __name__ == "__main__":
     unittest.main()
