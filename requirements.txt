@@ -8,6 +8,7 @@ black
 flake8
 isort
 pytest
+coverage
 pyyaml
 torchtestcase
 umnn
@@ -15,3 +16,4 @@ parameterized
 scipy
 pandas<2.0.0
 h5py
+scikit-learn
