@@ -3,10 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.cpp_extension as cpp_extension
 import copy
-
-pila_cpp = cpp_extension.load(name='pila_cpp', sources=['lib/layers/base/pila.cpp', 'lib/layers/base/pila.cu'],
-    extra_cuda_cflags=['-allow-unsupported-compiler'], verbose=True)
-
+from pathlib import Path
+# pila_cpp = cpp_extension.load(name='pila_cpp', sources=['lib/layers/base/pila.cpp', 'lib/layers/base/pila.cu'],
+#     extra_cuda_cflags=['-allow-unsupported-compiler'], verbose=True)
+dir_path = Path(__file__).resolve().parent
+pila_cpp = cpp_extension.load(name='pila_cpp', sources=[dir_path / 'pila.cpp', dir_path / 'pila.cu'],
+                              extra_cuda_cflags=['-allow-unsupported-compiler'], verbose=True)
 
 '''
 By default, forward() and backward() of torch.autograd.Function

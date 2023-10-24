@@ -97,7 +97,7 @@ class _DenseNet(torch.nn.Module):
     @staticmethod
     def calc_output_channels(activation, densenet_growth):
         # Change growth size for CLipSwish:
-        if isinstance(activation, activations.CLipSwish) or isinstance(activation, activations.CSin):
+        if hasattr(activation, "_does_concat") and activation._does_concat: #isinstance(activation, activations.CLipSwish) or isinstance(activation, activations.CSin):
             assert densenet_growth % 2 == 0, "Select an even densenet growth size for CLipSwish!"
             output_channels = densenet_growth // 2
         else:

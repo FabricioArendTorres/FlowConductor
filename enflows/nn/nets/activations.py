@@ -105,10 +105,11 @@ class CSin(nn.Module):
     def __init__(self, w0=1):
         super(CSin, self).__init__()
         self.w0 = w0
+        self._does_concat = True
 
     def forward(self, x):
         x = torch.cat((x, -x), 1)
-        return torch.sin(x * self.w0) / self.w0
+        return torch.sin(x * self.w0) / (self.w0)
 
     def build_clone(self):
         return copy.deepcopy(self)
@@ -131,10 +132,13 @@ class CLipSwish(nn.Module):
     def __init__(self):
         super(CLipSwish, self).__init__()
         self.swish = Swish()
+        self._does_concat = True
 
     def forward(self, x):
         x = torch.cat((x, -x), 1)
         return self.swish(x).div_(1.004)
+
+
 class LipSwish(nn.Module):
 
     def __init__(self):
@@ -151,67 +155,65 @@ By default, forward() and backward() of torch.autograd.Function
    Hence, no need to worry about that inefficiency.
 '''
 
-#
-# pila_cpp = cpp_extension.load(name='pila_cpp', sources=[dir_path / 'pila.cpp', dir_path / 'pila.cu'],
-#                               extra_cuda_cflags=['-allow-unsupported-compiler'], verbose=True)
-# class PilaFunction(torch.autograd.Function):
-#     @staticmethod
-#     def forward(ctx, x, kabcdmn):
-#         y = pila_cpp.forward(x, kabcdmn)
-#         ctx.save_for_backward(x, kabcdmn)
-#         return y
-#
-#     @staticmethod
-#     def backward(ctx, grad_output):
-#         x, kabcdmn = ctx.saved_tensors
-#         k, a, b, c, d, m, n = kabcdmn
-#         kabcdmn_new = torch.stack([k, k * a, k * b + 3 * a, k * c + 2 * b, k * d + c, 0 * k, m])
-#         return grad_output * PilaFunction.apply(x, kabcdmn_new), None
-#
-#
-# class Pila(nn.Module):
-#     def __init__(self, k=5, device=None):
-#         super(Pila, self).__init__()
-#         assert k > 0
-#         self.k = k
-#
-#     def forward(self, x):
-#         k = self.k
-#         kabcdmn = torch.tensor((k, k ** 2 / 2, -k, 1, 0, 1, 0), dtype=x.dtype, device=x.device)
-#         return PilaFunction.apply(x, kabcdmn)
-#
-#
-# class CPila(nn.Module):
-#     def __init__(self, k=5, device=None):
-#         super(CPila, self).__init__()
-#         assert k > 0
-#         self.k = k
-#         self.pila = Pila(k=k, device=device)
-#
-#     def forward(self, x):
-#         x = torch.cat((x - 0.2, -x - 0.2), 1)
-#         return self.pila(x) / 1.06
-#
-#     def build_clone(self):
-#         return copy.deepcopy(self)
-#
-#     def build_jvp_net(self, x):
-#         class CPilaJVP(nn.Module):
-#             def __init__(self, grad):
-#                 super(CPilaJVP, self).__init__()
-#                 self.register_buffer('grad', grad)
-#
-#             def forward(self, x):
-#                 return torch.cat((x, x), dim=1) * self.grad
-#
-#         with torch.no_grad():
-#             y = self.forward(x)
-#
-#             k = self.k
-#             a, b, c, d, m, n = k ** 2 / 2, -k, 1, 0, 1, 0
-#             kabcdmn = torch.tensor((k, k * a, k * b + 3 * a, k * c + 2 * b, k * d + c, 0 * k, m), dtype=x.dtype,
-#                                    device=x.device)
-#             grad = torch.cat((pila_cpp.forward(x - 0.2, kabcdmn), -pila_cpp.forward(-x - 0.2, kabcdmn)), dim=1)
-#             grad.div_(1.06)
-#
-#             return CPilaJVP(grad), y
+
+class Pila(nn.Module):
+
+    def __init__(self, k=5, device=None):
+        super(Pila, self).__init__()
+        assert k > 0
+
+        from enflows.nn.nets.pila import PilaFunction
+        self.PilaFunction = PilaFunction
+        self.k = k
+
+    def forward(self, x):
+        k = self.k
+        kabcdmn = torch.tensor((k, k ** 2 / 2, -k, 1, 0, 1, 0), dtype=x.dtype, device=x.device)
+        return self.PilaFunction.apply(x, kabcdmn)
+
+
+
+class CPila(nn.Module):
+    def __init__(self, k=5, device=None):
+        super(CPila, self).__init__()
+        from enflows.nn.nets.pila import PilaFunction, pila_cpp
+        self.PilaFunction = PilaFunction
+        self.pila_cpp = pila_cpp
+
+        assert k > 0
+        self.k = k
+        self.pila = Pila(k=k, device=device)
+
+        self._does_concat = True
+
+
+
+    def forward(self, x):
+        x = torch.cat((x - 0.2, -x - 0.2), 1)
+        return self.pila(x) / 1.06
+
+    def build_clone(self):
+        return copy.deepcopy(self)
+
+    def build_jvp_net(self, x):
+        class CPilaJVP(nn.Module):
+            def __init__(self, grad):
+                super(CPilaJVP, self).__init__()
+                self.register_buffer('grad', grad)
+
+            def forward(self, x):
+                return torch.cat((x, x), dim=1) * self.grad
+
+        with torch.no_grad():
+            y = self.forward(x)
+
+            k = self.k
+            a, b, c, d, m, n = k ** 2 / 2, -k, 1, 0, 1, 0
+            kabcdmn = torch.tensor((k, k * a, k * b + 3 * a, k * c + 2 * b, k * d + c, 0 * k, m), dtype=x.dtype,
+                                   device=x.device)
+            grad = torch.cat(
+                (self.pila_cpp.forward(x - 0.2, kabcdmn), -self.pila_cpp.forward(-x - 0.2, kabcdmn)),
+                dim=1)
+            grad.div_(1.06)
+
+            return CPilaJVP(grad), y
