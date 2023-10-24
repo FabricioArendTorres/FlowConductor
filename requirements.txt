@@ -13,3 +13,5 @@ torchtestcase
 umnn
 parameterized
 scipy
+pandas<2.0.0
+h5py

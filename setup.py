@@ -12,18 +12,31 @@ setup(
     description="Normalizing flows in PyTorch. An extension of nflows.",
     long_description=long_description,
     long_description_content_type='text/markdown',
-    # url="https://github.com/bayesiains/nflows",
+    # url="https://github.com/FabricioArendTorres/enflows",
     # download_url = 'https://github.com/bayesiains/nflows/archive/v0.14.tar.gz',
-    author="Conor Durkan, Artur Bekasov, George Papamakarios, Iain Murray",
+    author="Fabricio Arend Torres, Marcello Massima Negri, Jonathan Aellen",
     packages=find_packages(exclude=["tests"]),
     license="MIT",
+    # setup_requires=['pbr'],
     install_requires=[
         "matplotlib",
         "numpy",
         "tensorboard",
         "torch",
+        "torchdiffeq",
         "tqdm",
-        "umnn"
+        "umnn",
+        "ninja",
+        "scikit-learn",
+        "pandas<2.0",
+        "h5py"
     ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Development Status :: 2 - Pre-Alpha "
+    ],
+    # python_requires='>3.9',
     dependency_links=[],
 )
