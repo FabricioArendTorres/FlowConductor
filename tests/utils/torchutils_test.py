@@ -6,7 +6,7 @@ import torch
 
 from enflows.utils import torchutils
 import torchtestcase
-
+import numpy as np
 
 
 class TorchUtilsTest(torchtestcase.TorchTestCase):
@@ -113,6 +113,19 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
 
         with self.assertRaises(TypeError):
             torchutils.sum_except_batch(x, num_batch_dims=-1)
+
+    def test_tensor2numpy(self):
+        self.eps = 1e-6
+        shape = 2, 3, 4, 5
+        x = torch.randn(shape)
+        y = torchutils.tensor2numpy(x)
+        x_ = torchutils.np_to_tensor(y)
+        y_ = torchutils.tensor2numpy(x_)
+        self.assertIsInstance(y, np.ndarray)
+        self.assertIsInstance(x_, torch.Tensor)
+
+        self.assertEqual(x, x_)
+        assert np.allclose(y, y_)
 
 
 if __name__ == "__main__":
