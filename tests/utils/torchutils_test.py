@@ -8,6 +8,7 @@ from enflows.utils import torchutils
 import torchtestcase
 
 
+
 class TorchUtilsTest(torchtestcase.TorchTestCase):
     def test_split_leading_dim(self):
         x = torch.randn(24, 5)
@@ -96,6 +97,12 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         idx = torchutils.searchsorted(bin_locations, inputs)
         self.assertEqual(idx.shape, inputs.shape)
 
+    def test_set_seeds(self):
+        torchutils.set_seeds(123)
+        self.assertEqual(torch.initial_seed(), 123)
+        self.assertEqual(torch.random.initial_seed(), 123)
+        self.assertEqual(torch.cuda.initial_seed(), 123)
+        self.assertEqual(torch.cuda.random.initial_seed(), 123)
 
 if __name__ == "__main__":
     unittest.main()
