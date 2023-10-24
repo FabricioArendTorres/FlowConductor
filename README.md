@@ -1,6 +1,9 @@
 # nflows-extended: An extension of nflows
 
 <a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
+<a href="https://codecov.io/gh/FabricioArendTorres/enflows" >
+<img src="https://codecov.io/gh/FabricioArendTorres/enflows/graph/badge.svg?token=UPQ2ZNQ6G4"/>
+</a>
 
 The original `nflows` package is a comprehensive collection of [normalizing flows](https://arxiv.org/abs/1912.02762) using [PyTorch](https://pytorch.org).
 Our `nflows-extended`, or `enflows`, is as the name suggests an extension. 
