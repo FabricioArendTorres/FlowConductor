@@ -1,4 +1,4 @@
-# nflows-extended: An extension of nflows
+# nflows-extended: Normalizing Flows and (Conditional) bijective Layers in Pytorch
 
 <a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
 <a href="https://codecov.io/gh/FabricioArendTorres/enflows" >
