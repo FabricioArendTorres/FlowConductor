@@ -14,19 +14,29 @@ In the original package, conditional networks were restricted to using a conditi
 The bijective layers we additionally provide includes but are not limited to Planar Flows, invertible ResNets/DenseNets, a variant of neural autoregressive flows, and a basic support of continuous normalizing flows (and FFJORD) based `torchdiffeq` package.
 
 
-## Setting up the Environment.
-The `.yml` file for the environment is given in `env/conda_env.yml`, and can be created from the base directory via:
+## Install.
+Our releases are available on `pip`.
+We recommend using a virtual environment.
+Make sure to set up your pytorch version beforehand.
 
 ```
-(base) $  conda env create --file env/conda_env.yml
+(base) $  pip install enflows
+```
+
+## Using the current version from Github.
+If you want to use the current version, or contribute, you can directly clone this github repository.
+The requirements.txt is provided if you use pip.
+The `.yml` file for the environment is given in `env/conda_env.yml`, and can be created with conda from the base directory via:
+
+```
+(base) $  conda env create --file environment.yml
 (base) $  conda activate environment.yml
+
 # This code should then work:
 (enflows) $  python examples/conditional_toy_2d.py
 ```
 
-Ideally, after a successfull install you should  be able to run and pass the unit tests with:
-
-` 
+Ideally, after a successfull install you should also  be able to run and pass the unit tests with:` 
 (enflows) /lagrangian_flow_net$  pytest
 `
 
