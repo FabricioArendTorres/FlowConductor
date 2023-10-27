@@ -2,6 +2,7 @@ from os import path
 from setuptools import find_packages, setup
 from enflows.version import VERSION
 
+
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -37,6 +38,6 @@ setup(
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha "
     ],
-    # python_requires='>3.9',
+    python_requires='<3.11',
     dependency_links=[],
 )

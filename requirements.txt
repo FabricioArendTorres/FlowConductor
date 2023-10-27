@@ -8,7 +8,6 @@ black
 flake8
 isort
 pytest
-coverage
 pyyaml
 torchtestcase
 umnn
