@@ -35,6 +35,8 @@ import torch.nn.functional as F
 import torch.utils.cpp_extension as cpp_extension
 import copy
 import os
+import math
+
 from pathlib import Path
 
 dir_path = Path(__file__).resolve().parent
@@ -100,7 +102,6 @@ class Sin(nn.Module):
     def build_clone(self):
         return copy.deepcopy(self)
 
-
 class CSin(nn.Module):
     def __init__(self, w0=1):
         super(CSin, self).__init__()
@@ -109,7 +110,7 @@ class CSin(nn.Module):
 
     def forward(self, x):
         x = torch.cat((x, -x), 1)
-        return torch.sin(x * self.w0) / (self.w0)
+        return torch.sin(x * self.w0) / (self.w0 * math.sqrt(2))
 
     def build_clone(self):
         return copy.deepcopy(self)
