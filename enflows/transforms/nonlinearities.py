@@ -13,6 +13,7 @@ from enflows.transforms.base import (
     Transform,
 )
 from enflows.utils import torchutils
+from enflows.utils.torchutils import _share_across_batch
 
 
 class Exp(Transform):
@@ -243,10 +244,6 @@ class CompositeCDFTransform(CompositeTransform):
         )
 
 
-def _share_across_batch(params, batch_size):
-    return params[None, ...].expand(batch_size, *params.shape)
-
-
 class PiecewiseLinearCDF(Transform):
     def __init__(self, shape, num_bins=10, tails=None, tail_bound=1.0):
         super().__init__()
@@ -424,6 +421,10 @@ class PiecewiseRationalQuadraticCDF(Transform):
         self.tail_bound = tail_bound
         self.tails = tails
 
+        num_derivatives = {"linear": num_bins - 1,
+                           "quadratic": num_bins + 1,
+                           "circular": num_bins}[tails]
+
         if isinstance(shape, int):
             shape = (shape,)
         if identity_init:
@@ -431,9 +432,6 @@ class PiecewiseRationalQuadraticCDF(Transform):
             self.unnormalized_heights = nn.Parameter(torch.zeros(*shape, num_bins))
 
             constant = np.log(np.exp(1 - min_derivative) - 1)
-            num_derivatives = (
-                (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
-            )
             self.unnormalized_derivatives = nn.Parameter(
                 constant * torch.ones(*shape, num_derivatives)
             )
@@ -441,9 +439,6 @@ class PiecewiseRationalQuadraticCDF(Transform):
             self.unnormalized_widths = nn.Parameter(torch.rand(*shape, num_bins))
             self.unnormalized_heights = nn.Parameter(torch.rand(*shape, num_bins))
 
-            num_derivatives = (
-                (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
-            )
             self.unnormalized_derivatives = nn.Parameter(
                 torch.rand(*shape, num_derivatives)
             )
@@ -458,7 +453,6 @@ class PiecewiseRationalQuadraticCDF(Transform):
         unnormalized_derivatives = _share_across_batch(
             self.unnormalized_derivatives, batch_size
         )
-
         if self.tails is None:
             spline_fn = splines.rational_quadratic_spline
             spline_kwargs = {}
@@ -485,6 +479,80 @@ class PiecewiseRationalQuadraticCDF(Transform):
 
     def inverse(self, inputs, context=None):
         return self._spline(inputs, inverse=True)
+
+
+class PeriodicRationalQuadraticCDF(PiecewiseRationalQuadraticCDF):
+    def __init__(
+            self,
+            shape,
+            left=0.,
+            right=1.,
+            num_bins=10,
+            identity_init=False,
+            min_bin_width=splines.rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+            min_bin_height=splines.rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+            min_derivative=splines.rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+    ):
+        self.right = right
+        self.left = left
+        self.tail_bound = right - left
+
+        self.shift = 0  # -self.tail_bound / 2
+        self.middle = (self.right-self.left)/2
+        super().__init__(shape,
+                         num_bins=num_bins,
+                         tails="circular",
+                         tail_bound=self.middle,
+                         identity_init=identity_init,
+                         min_bin_width=min_bin_width,
+                         min_bin_height=min_bin_height,
+                         min_derivative=min_derivative
+                         )
+
+    def forward(self, inputs, context=None):
+        # logabsdet = 0 of this operation
+        inputs_modulo = inputs.clone()
+        inputs_modulo = torch.remainder(inputs_modulo + self.left, self.right) - self.left
+
+        output, logabsdet = super().forward(inputs_modulo - self.middle, context)
+        return output, logabsdet
+
+    def inverse(self, inputs, context=None):
+        # logabsdet = 0 of this operation
+        inputs_modulo = self.shift_and_modulo(inputs, -self.shift, self.tail_bound)
+        return super().inverse(inputs_modulo, context)
+
+    def shift_and_modulo(self, inputs, shift, bound):
+        """
+        Shift and modulo.
+        """
+        inputs_modulo = inputs.clone()
+        inputs_modulo = (
+                torch.remainder(inputs_modulo + shift + bound / 2, 2 * bound) - bound / 2
+        )
+        return inputs_modulo
+
+
+class CircularRationalQuadraticCDF(PiecewiseRationalQuadraticCDF):
+    def __init__(
+            self,
+            shape,
+            num_bins=10,
+            tail_bound=1.,
+            identity_init=False,
+            min_bin_width=splines.rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+            min_bin_height=splines.rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+            min_derivative=splines.rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+    ):
+        super().__init__(shape,
+                         num_bins=num_bins,
+                         tails="circular",
+                         tail_bound=tail_bound,
+                         identity_init=identity_init,
+                         min_bin_width=min_bin_width,
+                         min_bin_height=min_bin_height,
+                         min_derivative=min_derivative
+                         )
 
 
 class ExtendedSoftplus(torch.nn.Module):

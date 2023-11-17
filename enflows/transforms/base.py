@@ -60,6 +60,7 @@ class CompositeTransform(Transform):
         return self._cascade(inputs, funcs, context)
 
 
+
 class MultiscaleCompositeTransform(Transform):
     """A multiscale composite transform as described in the RealNVP paper.
 

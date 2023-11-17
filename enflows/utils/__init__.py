@@ -16,6 +16,8 @@ from enflows.utils.torchutils import (
     tensor_to_np,
     np_to_tensor,
     tile,
+    batch_jacobian,
+    _share_across_batch
 )
 from enflows.utils.typechecks import (
     is_bool,

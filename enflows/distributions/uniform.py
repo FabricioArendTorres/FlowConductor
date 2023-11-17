@@ -1,19 +1,25 @@
 from typing import Union
 
+from enflows.distributions.base import Distribution
+from enflows.utils import torchutils
 import torch
 from torch import distributions
+from torch.distributions.utils import broadcast_all
+from numbers import Number
 
 
 class BoxUniform(distributions.Independent):
     def __init__(
-        self,
-        low: Union[torch.Tensor, float],
-        high: Union[torch.Tensor, float],
-        reinterpreted_batch_ndims: int = 1,
+            self,
+            low: Union[torch.Tensor, float],
+            high: Union[torch.Tensor, float],
+            reinterpreted_batch_ndims: int = 1,
     ):
         """Multidimensionqal uniform distribution defined on a box.
         
-        A `Uniform` distribution initialized with e.g. a parameter vector low or high of length 3 will result in a /batch/ dimension of length 3. A log_prob evaluation will then output three numbers, one for each of the independent Uniforms in the batch. Instead, a `BoxUniform` initialized in the same way has three /event/ dimensions, and returns a scalar log_prob corresponding to whether the evaluated point is in the box defined by low and high or outside. 
+        A `Uniform` distribution initialized with e.g. a parameter vector low or high of length 3 will result in a /batch/ dimension of length 3.
+        A log_prob evaluation will then output three numbers, one for each of the independent Uniforms in the batch.
+        Instead, a `BoxUniform` initialized in the same way has three /event/ dimensions, and returns a scalar log_prob corresponding to whether the evaluated point is in the box defined by low and high or outside.
     
         Refer to torch.distributions.Uniform and torch.distributions.Independent for further documentation.
     
@@ -43,6 +49,41 @@ class MG1Uniform(distributions.Uniform):
     def _to_noise(self, parameters):
         A = torch.tensor([[1.0, -1, 0], [0, 1, 0], [0, 0, 1]])
         return parameters @ A
+
+
+class Uniform(Distribution):
+    def __init__(self,
+                 low: Union[torch.Tensor, float] = 0.,
+                 high: Union[torch.Tensor, float] = 1.,
+                 reinterpreted_batch_ndims=1):
+        super().__init__()
+
+        if isinstance(low, Number) and isinstance(high, Number):
+            self.low, self.high = broadcast_all(torch.tensor([low]), torch.tensor([high]))
+        else:
+            self.low, self.high = broadcast_all(low, high)
+        shape = self.low.size()
+        self._shape = shape
+        # self.register_buffer("_shape", shape)
+
+        self.dist = distributions.Independent(
+            distributions.Uniform(low=low, high=high), reinterpreted_batch_ndims=reinterpreted_batch_ndims
+        )
+
+    def _log_prob(self, value, context):
+        return self.dist.log_prob(value)
+
+    def _sample(self, num_samples, context=None, batch_size=None):
+
+        if context is None:
+            samples = self.dist.sample((num_samples, *self._shape))
+        else:
+            # The value of the context is ignored, only its size and device are taken into account.
+            context_size = context.shape[0]
+            samples = self.dist.sample((context_size * num_samples, *self._shape))
+            samples = torchutils.split_leading_dim(samples, [context_size, num_samples])
+
+        return samples
 
 
 class LotkaVolterraOscillating:

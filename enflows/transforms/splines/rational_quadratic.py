@@ -11,17 +11,17 @@ DEFAULT_MIN_DERIVATIVE = 1e-3
 
 
 def unconstrained_rational_quadratic_spline(
-    inputs,
-    unnormalized_widths,
-    unnormalized_heights,
-    unnormalized_derivatives,
-    inverse=False,
-    tails="linear",
-    tail_bound=1.0,
-    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
-    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
-    min_derivative=DEFAULT_MIN_DERIVATIVE,
-    enable_identity_init=False,
+        inputs,
+        unnormalized_widths,
+        unnormalized_heights,
+        unnormalized_derivatives,
+        inverse=False,
+        tails="linear",
+        tail_bound=1.0,
+        min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative=DEFAULT_MIN_DERIVATIVE,
+        enable_identity_init=False,
 ):
     inside_interval_mask = (inputs >= -tail_bound) & (inputs <= tail_bound)
     outside_interval_mask = ~inside_interval_mask
@@ -37,6 +37,12 @@ def unconstrained_rational_quadratic_spline(
 
         outputs[outside_interval_mask] = inputs[outside_interval_mask]
         logabsdet[outside_interval_mask] = 0
+    elif tails == "circular":
+        unnormalized_derivatives = F.pad(unnormalized_derivatives, pad=(0, 1))
+        unnormalized_derivatives[..., -1] = unnormalized_derivatives[..., 0]
+        outputs[outside_interval_mask] = inputs[outside_interval_mask]
+        logabsdet[outside_interval_mask] = 0
+
     else:
         raise RuntimeError("{} tails are not implemented.".format(tails))
 
@@ -64,19 +70,19 @@ def unconstrained_rational_quadratic_spline(
 
 
 def rational_quadratic_spline(
-    inputs,
-    unnormalized_widths,
-    unnormalized_heights,
-    unnormalized_derivatives,
-    inverse=False,
-    left=0.0,
-    right=1.0,
-    bottom=0.0,
-    top=1.0,
-    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
-    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
-    min_derivative=DEFAULT_MIN_DERIVATIVE,
-    enable_identity_init=False,
+        inputs,
+        unnormalized_widths,
+        unnormalized_heights,
+        unnormalized_derivatives,
+        inverse=False,
+        left=0.0,
+        right=1.0,
+        bottom=0.0,
+        top=1.0,
+        min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative=DEFAULT_MIN_DERIVATIVE,
+        enable_identity_init=False,
 ):
     if torch.min(inputs) < left or torch.max(inputs) > right:
         raise InputOutsideDomain()
@@ -95,16 +101,17 @@ def rational_quadratic_spline(
     cumwidths = (right - left) * cumwidths + left
     cumwidths[..., 0] = left
     cumwidths[..., -1] = right
-    widths = cumwidths[..., 1:] - cumwidths[..., :-1]
 
-    if enable_identity_init: #flow is the identity if initialized with parameters equal to zero
+    widths = cumwidths[..., 1:] - cumwidths[..., :-1]
+    if enable_identity_init:  # flow is the identity if initialized with parameters equal to zero
         beta = np.log(2) / (1 - min_derivative)
-    else: #backward compatibility
+    else:  # backward compatibility
         beta = 1
     derivatives = min_derivative + F.softplus(unnormalized_derivatives, beta=beta)
 
     heights = F.softmax(unnormalized_heights, dim=-1)
     heights = min_bin_height + (1 - min_bin_height * num_bins) * heights
+
     cumheights = torch.cumsum(heights, dim=-1)
     cumheights = F.pad(cumheights, pad=(1, 0), mode="constant", value=0.0)
     cumheights = (top - bottom) * cumheights + bottom
@@ -131,10 +138,10 @@ def rational_quadratic_spline(
 
     if inverse:
         a = (inputs - input_cumheights) * (
-            input_derivatives + input_derivatives_plus_one - 2 * input_delta
+                input_derivatives + input_derivatives_plus_one - 2 * input_delta
         ) + input_heights * (input_delta - input_derivatives)
         b = input_heights * input_derivatives - (inputs - input_cumheights) * (
-            input_derivatives + input_derivatives_plus_one - 2 * input_delta
+                input_derivatives + input_derivatives_plus_one - 2 * input_delta
         )
         c = -input_delta * (inputs - input_cumheights)
 
@@ -147,13 +154,13 @@ def rational_quadratic_spline(
 
         theta_one_minus_theta = root * (1 - root)
         denominator = input_delta + (
-            (input_derivatives + input_derivatives_plus_one - 2 * input_delta)
-            * theta_one_minus_theta
+                (input_derivatives + input_derivatives_plus_one - 2 * input_delta)
+                * theta_one_minus_theta
         )
         derivative_numerator = input_delta.pow(2) * (
-            input_derivatives_plus_one * root.pow(2)
-            + 2 * input_delta * theta_one_minus_theta
-            + input_derivatives * (1 - root).pow(2)
+                input_derivatives_plus_one * root.pow(2)
+                + 2 * input_delta * theta_one_minus_theta
+                + input_derivatives * (1 - root).pow(2)
         )
         logabsdet = torch.log(derivative_numerator) - 2 * torch.log(denominator)
 
@@ -163,19 +170,19 @@ def rational_quadratic_spline(
         theta_one_minus_theta = theta * (1 - theta)
 
         numerator = input_heights * (
-            input_delta * theta.pow(2) + input_derivatives * theta_one_minus_theta
+                input_delta * theta.pow(2) + input_derivatives * theta_one_minus_theta
         )
         denominator = input_delta + (
-            (input_derivatives + input_derivatives_plus_one - 2 * input_delta)
-            * theta_one_minus_theta
+                (input_derivatives + input_derivatives_plus_one - 2 * input_delta)
+                * theta_one_minus_theta
         )
         outputs = input_cumheights + numerator / denominator
 
         derivative_numerator = input_delta.pow(2) * (
-            input_derivatives_plus_one * theta.pow(2)
-            + 2 * input_delta * theta_one_minus_theta
-            + input_derivatives * (1 - theta).pow(2)
+                input_derivatives_plus_one * theta.pow(2)
+                + 2 * input_delta * theta_one_minus_theta
+                + input_derivatives * (1 - theta).pow(2)
         )
         logabsdet = torch.log(derivative_numerator) - 2 * torch.log(denominator)
-
         return outputs, logabsdet
+

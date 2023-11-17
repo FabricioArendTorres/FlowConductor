@@ -1,7 +1,7 @@
 matplotlib
 numpy
-tensorboard
 torch
+tensorboard
 tqdm
 autoflake
 black
