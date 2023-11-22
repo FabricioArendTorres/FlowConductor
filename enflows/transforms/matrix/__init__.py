@@ -1,2 +1,2 @@
 from enflows.transforms.matrix.diagonal import TransformDiagonal, TransformDiagonalSoftplus, TransformDiagonalExponential
-from enflows.transforms.matrix.cholesky import CholeskyOuterProduct
+from enflows.transforms.matrix.cholesky import CholeskyOuterProduct, PositiveDefiniteAndUnconstrained
