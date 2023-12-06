@@ -7,8 +7,8 @@ import numpy as np
 import sympytorch
 from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarScale, CompositeTransform, ScalarShift
 
-from utils import sph_to_cart_jacobian_sympy, spherical_to_cartesian_torch, cartesian_to_spherical_torch, logabsdet_sph_to_car
-from utils import check_tensor, sherman_morrison_inverse
+from enflows.transforms.injective.utils import sph_to_cart_jacobian_sympy, spherical_to_cartesian_torch, cartesian_to_spherical_torch, logabsdet_sph_to_car
+from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN
 
 
 class ManifoldFlow(Transform):
@@ -27,7 +27,6 @@ class ManifoldFlow(Transform):
             self._initialize_jacobian(theta)
 
         r = self.r_given_theta(theta, context=context)
-        print(r.shape, theta.shape)
         theta_r = torch.cat([theta, r], dim=1)
         outputs = spherical_to_cartesian_torch(theta_r)
 
@@ -98,6 +97,28 @@ class LearnableManifoldFlow(ManifoldFlow):
 
         return grad_r_theta_aug.unsqueeze(-1)
 
+
+class SphereFlow(ManifoldFlow):
+    def __init__(self, n, r=1.):
+        super().__init__()
+        self.radius = r
+        # self.network = SimpleNN(n, hidden_size=50, output_size=1, max_radius=max_radius)
+
+    def r_given_theta(self, theta, context=None):
+        r = theta.new_ones(theta.shape[0], 1)
+        # r = self.network(theta)
+
+        return r
+
+    def gradient_r_given_theta(self, theta, context=None):
+        # r = self.r_given_theta(theta, context=context)
+        # grad_r_theta = torch.autograd.grad(r,theta, grad_outputs=torch.ones_like(r))[0]
+        grad_r_theta = torch.zeros_like(theta)
+        grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
+
+        check_tensor(grad_r_theta)
+
+        return grad_r_theta_aug.unsqueeze(-1)
 
 class LpManifoldFlow(ManifoldFlow):
     def __init__(self, norm, p):
