@@ -96,14 +96,15 @@ def cartesian_to_spherical_torch(arr):
 def logabsdet_sph_to_car(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
     eps = 1e-8
-    n = arr.shape[1]
-    r = arr[:, -1]
-    angles = arr[:, :-2]
+    n = arr.shape[-1]
+    r = arr[..., -1]
+    angles = arr[..., :-2]
     sin_angles = torch.sin(angles)
     sin_exp = torch.arange(n - 2, 0, -1).to(arr.device)
 
     logabsdet_r = (n - 1) * torch.log(r + eps)
-    logabsdet_sin = torch.sum(sin_exp * torch.log(torch.abs(sin_angles) + eps), dim=1)
+
+    logabsdet_sin = torch.sum(sin_exp * torch.log(torch.abs(sin_angles) + eps), dim=-1)
 
     return logabsdet_r + logabsdet_sin
 

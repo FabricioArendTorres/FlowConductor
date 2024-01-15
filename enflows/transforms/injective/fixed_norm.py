@@ -10,7 +10,6 @@ from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarS
 from enflows.transforms.injective.utils import sph_to_cart_jacobian_sympy, spherical_to_cartesian_torch, cartesian_to_spherical_torch, logabsdet_sph_to_car
 from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN
 
-
 class ManifoldFlow(Transform):
     def __init__(self):
         super().__init__()
@@ -23,7 +22,7 @@ class ManifoldFlow(Transform):
         raise NotImplementedError()
 
     def forward(self, theta, context=None):
-        if self.training and not self.initialized:
+        if not self.initialized:
             self._initialize_jacobian(theta)
 
         r = self.r_given_theta(theta, context=context)
@@ -166,6 +165,52 @@ class LpManifoldFlow(ManifoldFlow):
         check_tensor(grad_r_theta)
         print("gradient_shape", grad_r_theta.shape, grad_r_theta_aug.unsqueeze(-1).shape)
         return grad_r_theta_aug.unsqueeze(-1)
+
+class PeriodicElementwiseTransform(Transform):
+    def __init__(self, elemwise_transform=torch.sin, elemwise_inv_transform=torch.asin, scale=0.5*np.pi):
+        super().__init__()
+        self.elemwise_transform = elemwise_transform
+        self.scale = scale
+        self.elemwise_inv_transform = elemwise_inv_transform
+        self.eps = 1e-8
+
+    def forward(self, inputs, context=None):
+        outputs = (self.elemwise_transform(inputs) + 1) * self.scale
+        logabsdet_cos = torch.log(torch.cos(inputs) + self.eps).sum(-1)
+        logabsdet_scale = inputs.shape[-1] * np.log(self.scale)
+
+        return outputs, logabsdet_cos + logabsdet_scale
+
+    def inverse(self, inputs, context=None):
+        outputs = self.elemwise_inv_transform(inputs / self.scale - 1)
+        logabsdet_cos = torch.log(torch.cos(outputs) + self.eps).sum(-1)
+        logabsdet_scale = inputs.shape[-1] * np.log(self.scale)
+
+        return outputs, -logabsdet_cos - logabsdet_scale
+
+
+class ScaleLastDim(Transform):
+    def __init__(self, scale=2.):
+        super().__init__()
+        self.scale = scale
+
+    def forward(self, inputs, context=None):
+        mask = torch.zeros_like(inputs)
+        mask[...,-1] = torch.ones_like(inputs[..., -1])
+        outputs = (1 - mask) * inputs + mask * inputs * self.scale
+        logabsdet = inputs.new_ones(inputs.shape[0]) * np.log(self.scale)
+
+        return outputs, logabsdet
+
+    def inverse(self, inputs, context=None):
+        mask = torch.zeros_like(inputs)
+        mask[..., -1] = torch.ones_like(inputs[..., -1])
+        outputs = (1 - mask) * inputs + mask * inputs / self.scale
+        logabsdet = -inputs.new_ones(inputs.shape[0]) * np.log(self.scale)
+
+        return outputs, logabsdet
+
+
 
 
 class ConstrainedAngles(Transform):
