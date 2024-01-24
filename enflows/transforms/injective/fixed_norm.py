@@ -3,6 +3,8 @@ import torch
 from torch.nn import functional as F
 from torch import nn
 from torch.nn import init
+from functools import partial
+
 import numpy as np
 import sympytorch
 from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarScale, CompositeTransform, ScalarShift
@@ -11,9 +13,10 @@ from enflows.transforms.injective.utils import sph_to_cart_jacobian_sympy, spher
 from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN
 
 class ManifoldFlow(Transform):
-    def __init__(self):
+    def __init__(self, bruteforce=False):
         super().__init__()
         self.register_buffer("initialized", torch.tensor(False, dtype=torch.bool))
+        self.bruteforce = bruteforce
 
     def r_given_theta(self, theta, context=None):
         raise NotImplementedError()
@@ -29,7 +32,10 @@ class ManifoldFlow(Transform):
         theta_r = torch.cat([theta, r], dim=1)
         outputs = spherical_to_cartesian_torch(theta_r)
 
-        logabsdet = self.logabs_pseudodet(theta, theta_r)
+        if self.bruteforce:
+            logabsdet = self.logabs_pseudodet_bruteforce(theta, theta_r)
+        else:
+            logabsdet = self.logabs_pseudodet(theta, theta_r)
 
         return outputs, logabsdet
 
@@ -69,6 +75,35 @@ class ManifoldFlow(Transform):
 
         return logabsdet
 
+    def logabs_pseudodet_bruteforce(self, theta, theta_r, context=None):
+        eps = 1e-8
+        spherical_dict = {name: theta_r[:, i].cpu() for i, name in enumerate(self.spherical_names)}
+        jac_sph_cart = self.sph_to_cart_jac(**spherical_dict).reshape(-1, theta_r.shape[-1], theta_r.shape[-1]).to(theta.device)
+        check_tensor(jac_sph_cart)
+
+        eye = torch.eye(theta.shape[-1]).repeat(theta.shape[0],1,1).to(theta.device)
+        r_given_theta = partial(self.r_given_theta, context=context)
+        grad_r = torch.autograd.functional.jacobian(r_given_theta, theta).sum(-2)
+        jac_r_theta = torch.cat((eye, grad_r), dim=1)
+        check_tensor(jac_r_theta)
+
+        jac_forward = jac_sph_cart @ jac_r_theta
+
+        # we need to compute 0.5 * sqrt(ac_forward.T @ jac_forward)
+        # naively we could compute it as
+        # logabsdet2 = 0.5 * torch.logdet(jac_full)
+        # instead, we use cholesky decomposition to compute the determinant in O(d^3)
+        jac_full = jac_forward.mT @ jac_forward
+        jac_full_lower = torch.linalg.cholesky(jac_full)
+        jac_full_lower_diag = torch.diagonal(jac_full_lower, dim1=1, dim2=2)
+        logabsdet = torch.log(jac_full_lower_diag).sum(1) # should be 2* but there is also a 0.5 factor
+
+        # logabsdet_ = self.logabs_pseudodet(theta, theta_r, context=context)
+        # max_diff = torch.square(logabsdet-logabsdet_).max().item()
+        # print("max diff: ", max_diff)
+
+        return logabsdet
+
     def _initialize_jacobian(self, inputs):
         spherical_names, jac = sph_to_cart_jacobian_sympy(inputs.shape[1] + 1)
         self.spherical_names = spherical_names
@@ -77,8 +112,8 @@ class ManifoldFlow(Transform):
 
 
 class LearnableManifoldFlow(ManifoldFlow):
-    def __init__(self, n, max_radius=2.):
-        super().__init__()
+    def __init__(self, n, max_radius=2., bruteforce=False):
+        super().__init__(bruteforce=bruteforce)
 
         self.network = SimpleNN(n, hidden_size=50, output_size=1, max_radius=max_radius)
 
@@ -98,8 +133,8 @@ class LearnableManifoldFlow(ManifoldFlow):
 
 
 class SphereFlow(ManifoldFlow):
-    def __init__(self, n, r=1.):
-        super().__init__()
+    def __init__(self, n, r=1., bruteforce=False):
+        super().__init__(bruteforce=bruteforce)
         self.radius = r
         # self.network = SimpleNN(n, hidden_size=50, output_size=1, max_radius=max_radius)
 
@@ -120,8 +155,8 @@ class SphereFlow(ManifoldFlow):
         return grad_r_theta_aug.unsqueeze(-1)
 
 class LpManifoldFlow(ManifoldFlow):
-    def __init__(self, norm, p):
-        super().__init__()
+    def __init__(self, norm, p, bruteforce=False):
+        super().__init__(bruteforce=bruteforce)
         self.norm = norm
         self.p = p
         self.r_given_norm = r_given_norm
@@ -226,6 +261,15 @@ class ConstrainedAngles(Transform):
         outputs = mask * transformed_inputs + transformed_inputs
         logabsdet_last_elem = inputs.new_ones(inputs.shape[0]) * torch.log(torch.tensor(2.))
 
+        # import matplotlib.pyplot as plt
+        # fig = plt.figure()
+        # plt.hist(inputs[:,0].detach().cpu().numpy(), bins=100, alpha=0.5)
+        # plt.hist(inputs[:,1].detach().cpu().numpy(), bins=100, alpha=0.5)
+        # plt.show()
+        # fig = plt.figure()
+        # plt.hist(outputs[:, 0].detach().cpu().numpy(), bins=100, alpha=0.5)
+        # plt.hist(outputs[:, 1].detach().cpu().numpy(), bins=100, alpha=0.5)
+        # plt.show()
         return outputs, logabsdet_elemwise + logabsdet_last_elem
 
     def inverse(self, inputs, context=None):
@@ -287,8 +331,42 @@ class ClampedAngles(Transform):
 
 
     def inverse(self, inputs, context):
-        raise NotImplementedError
+        return inputs, torch.zeros_like(inputs[...,0])
 
+class ClampedTheta(Transform):
+    def __init__(self, eps):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, inputs, context):
+        self.dtype = inputs.dtype
+        thetas = inputs[...,:-1]
+        last_theta = inputs[...,-1:]
+        _0_pi_mask, _0_pi_clamp = self.compute_mask(arr=thetas, vmin=0., vmax=np.pi, right_included=True)
+        clamped_thetas = _0_pi_mask * _0_pi_clamp
+
+        # _0_2pi_mask, _0_2pi_clamp = self.compute_mask(arr=last_theta, vmin=0., vmax=2*np.pi, right_included=True)
+        # clamped_last_theta = _0_2pi_mask * _0_2pi_clamp
+
+        output = torch.cat((clamped_thetas, last_theta), dim = -1)
+        logabsdet = output.new_zeros(inputs.shape[:-1])
+
+        return output, logabsdet
+
+    def compute_mask(self, arr, vmin, vmax, right_included=False):
+        if right_included:
+            condition = (arr >= vmin) * (arr < vmax)
+        else:
+            condition = (arr >= vmin) * (arr <= vmax)
+
+        mask = condition.to(self.dtype)
+        arr_clamped = torch.clamp(arr, min=vmin + self.eps, max=vmax - self.eps)
+
+        return mask, arr_clamped
+
+
+    def inverse(self, inputs, context):
+        return inputs, torch.zeros_like(inputs[...,0])
 
 ###################################################CONDITIONAL LAYERS###################################################
 
