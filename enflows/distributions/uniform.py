@@ -65,6 +65,64 @@ class Uniform(Distribution):
             samples = self._low + samples * (self._high - self._low)
             return torchutils.split_leading_dim(samples, [context_size, num_samples])
 
+import numpy as np
+import scipy as sp
+from enflows.transforms.injective.utils import logabsdet_sph_to_car, cartesian_to_spherical_torch
+class UniformSphere(Distribution):
+    """Uniform distribution on a (d+1)-sphere. Probabilities are defined over d angles"""
+
+    def __init__(self, shape):
+        super().__init__()
+        self._shape = torch.Size(shape)
+        self.radius = 1.
+        self.compute_log_surface()
+        self.register_buffer("_log_z", torch.tensor(self.log_surface_area, dtype=torch.float64), persistent=False)
+
+    def _log_prob(self, inputs, context):
+        # Note: the context is ignored.
+        if inputs.shape[1:] != self._shape:
+            raise ValueError(
+                "Expected input of shape {}, got {}".format(
+                    self._shape, inputs.shape[1:]
+                )
+            )
+        radius = torch.ones_like(inputs[:,:1]) * self.radius
+        jacobian = logabsdet_sph_to_car(torch.cat((inputs, radius), dim=-1))
+        return jacobian - self._log_z
+
+    def _sample(self, num_samples, context):
+        if context is None:
+            samples = torch.randn(num_samples, *self._shape, device=self._log_z.device)
+            add_dim = torch.randn(num_samples, 1, device=self._log_z.device)
+            samples = torch.cat((samples, add_dim), dim=-1)
+            samples /= torch.norm(samples, dim=-1).reshape(-1, 1)
+            samples *= self.radius
+            samples = cartesian_to_spherical_torch(samples)[:,:-1]
+            assert len(samples.shape) == 2
+
+            return samples
+        else:
+            # The value of the context is ignored, only its size and device are taken into account.
+            context_size = context.shape[0]
+            samples = torch.randn(context_size * num_samples, *self._shape, device=context.device)
+            add_dim = torch.randn(context_size * num_samples, *self._shape, device=context.device)
+            samples = torch.cat((samples, add_dim), dim=-1)
+            samples /= torch.norm(samples, dim=-1).reshape(-1, 1)
+            samples *= self.radius
+
+            samples = cartesian_to_spherical_torch(samples)[:, :-1]
+            assert len(samples.shape) == 2
+
+            return torchutils.split_leading_dim(samples, [context_size, num_samples])
+
+    def compute_log_surface(self):
+        dim = self._shape[-1]
+        log_const_1 = np.log(2) + 0.5 * dim * np.log(np.pi)
+        log_const_2 = (dim - 1) * np.log(self.radius)
+        log_const_3 = - sp.special.loggamma(0.5 * dim)
+
+        self.log_surface_area = log_const_1 + log_const_2 + log_const_3
+
 
 class MG1Uniform(distributions.Uniform):
     def log_prob(self, value):
