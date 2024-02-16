@@ -65,6 +65,43 @@ class Uniform(Distribution):
             samples = self._low + samples * (self._high - self._low)
             return torchutils.split_leading_dim(samples, [context_size, num_samples])
 
+class MultimodalUniform(Distribution):
+    """A multivariate Normal with zero mean and unit covariance."""
+
+    def __init__(self, shape, low, high, n_modes):
+        super().__init__()
+        self._shape = torch.Size(shape)
+        self._low = low
+        self._high = high
+        self._n_modes = n_modes
+        self._means = torch.range(0,n_modes)
+
+    def _log_prob(self, inputs, context):
+        # Note: the context is ignored.
+        if inputs.shape[1:] != self._shape:
+            raise ValueError(
+                "Expected input of shape {}, got {}".format(
+                    self._shape, inputs.shape[1:]
+                )
+            )
+        assert torch.all(inputs.le(self._high)) and torch.all(inputs.ge(self._low))
+
+        log_prob = - torch.log(self._high - self._low) * inputs.shape[-1] # self._shape
+
+        return inputs.new_ones(inputs.shape[:1]) * log_prob
+
+    def _sample(self, num_samples, context):
+        if context is None:
+            samples = torch.rand((num_samples, *self._shape), device=self._low.device)
+            return self._low + samples * (self._high - self._low)
+        else:
+            # The value of the context is ignored, only its size and device are taken into account.
+            context_size = context.shape[0]
+            samples = torch.rand((context_size * num_samples, *self._shape), device=self._low.device)
+            samples = self._low + samples * (self._high - self._low)
+            return torchutils.split_leading_dim(samples, [context_size, num_samples])
+
+
 import numpy as np
 import scipy as sp
 from enflows.transforms.injective.utils import logabsdet_sph_to_car, cartesian_to_spherical_torch

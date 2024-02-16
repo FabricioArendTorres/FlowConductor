@@ -55,9 +55,7 @@ class ManifoldFlow(Transform):
         return outputs, logabsdet
 
     def forward(self, inputs, context=None):
-
         # print("forward")
-
         outputs = cartesian_to_spherical_torch(inputs)
         if self.logabs_jacobian == "analytical":
             logabsdet = self.logabs_jacobian_analytical(outputs[:,:-1], outputs)
@@ -134,6 +132,9 @@ class ManifoldFlow(Transform):
 
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
+        # print(logabsdet[:50])
+        # print(logabsdet_fro_norm[:50])
+        # print(logabsdet_s_to_c[:50])
         # breakpoint()
 
         # torch.cuda.synchronize()
@@ -227,7 +228,7 @@ class SphereFlow(ManifoldFlow):
         # self.network = SimpleNN(n, hidden_size=50, output_size=1, max_radius=max_radius)
 
     def r_given_theta(self, theta, context=None):
-        r = theta.new_ones(theta.shape[0], 1)
+        r = theta.new_ones(theta.shape[0], 1) * self.radius
         # r = self.network(theta)
 
         return r
@@ -277,7 +278,6 @@ class LpManifoldFlow(ManifoldFlow):
 
             r = self.norm / ((norm_1 + norm_2 + norm_3 + eps) ** (1. / self.p))
             check_tensor(r)
-            # breakpoint()
 
             return r.unsqueeze(-1)
 
