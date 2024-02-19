@@ -74,7 +74,13 @@ class MultimodalUniform(Distribution):
         self._low = low
         self._high = high
         self._n_modes = n_modes
-        self._means = torch.range(0,n_modes)
+        self.build_means()
+
+    def build_means(self):
+        self.means = torch.linspace(self._low, self._high, self._n_modes * 2)[::2]
+        assert self.means.shape[0] == self._n_modes
+        self.scale = (self._high - self._low) / (self._n_modes * 2 - 1)
+
 
     def _log_prob(self, inputs, context):
         # Note: the context is ignored.
@@ -86,20 +92,28 @@ class MultimodalUniform(Distribution):
             )
         assert torch.all(inputs.le(self._high)) and torch.all(inputs.ge(self._low))
 
-        log_prob = - torch.log(self._high - self._low) * inputs.shape[-1] # self._shape
+        log_prob = inputs.new_ones(inputs.shape[:1]) * -12
+        # first we create a mask to checks if in each dimension the samples are within the range specified by self.means
+        mask = torch.any( (inputs.unsqueeze(-1) > self.means) * (inputs.unsqueeze(-1) < self.means+self.scale), dim=-1)
+        # then the mask checks if all dimensions are within that range
+        mask = torch.all(mask, dim=-1)
+        log_prob[mask] = - torch.log(self.scale * self._n_modes)
 
-        return inputs.new_ones(inputs.shape[:1]) * log_prob
+        return log_prob
 
     def _sample(self, num_samples, context):
+        assert num_samples % self._n_modes == 0
+        import matplotlib.pyplot as plt
         if context is None:
             samples = torch.rand((num_samples, *self._shape), device=self._low.device)
-            return self._low + samples * (self._high - self._low)
+            samples = samples.reshape(self._n_modes, num_samples//self._n_modes, *self._shape) * self.scale + self.means.reshape(-1,1,1)
+            return samples.reshape(num_samples, *self._shape)
         else:
             # The value of the context is ignored, only its size and device are taken into account.
             context_size = context.shape[0]
             samples = torch.rand((context_size * num_samples, *self._shape), device=self._low.device)
-            samples = self._low + samples * (self._high - self._low)
-            return torchutils.split_leading_dim(samples, [context_size, num_samples])
+            samples = samples.reshape(context_size, self._n_modes, num_samples//self._n_modes, *self._shape) * self.scale + self.means.reshape(1,-1,1,1)
+            return samples.reshape(context_size, num_samples, *self._shape)
 
 
 import numpy as np
