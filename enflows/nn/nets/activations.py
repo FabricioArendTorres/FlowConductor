@@ -1,7 +1,5 @@
 """
 Base, including ClipSwish https://github.com/yperugachidiaz/invertible_densenets/blob/master/lib/layers/base/activations.py
-CPila: https://github.com/mlvlab/MonotoneFlows
-
 
 MIT License
 
@@ -9,6 +7,7 @@ Copyright (c) 2019 Ricky Tian Qi Chen
 Copyright (c) 2020 Cheng Lu
 Copyright (c) 2021 Yura Perugachi-Diaz
 Copyright (c) 2022 Byeongkeun Ahn
+Copyright (c) 2023 Fabricio Arend Torres
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +31,6 @@ SOFTWARE.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.cpp_extension as cpp_extension
 import copy
 import os
 import math
@@ -156,7 +154,6 @@ By default, forward() and backward() of torch.autograd.Function
    Hence, no need to worry about that inefficiency.
 '''
 
-
 class Pila(nn.Module):
 
     def __init__(self, k=5, device=None):
@@ -173,48 +170,3 @@ class Pila(nn.Module):
         return self.PilaFunction.apply(x, kabcdmn)
 
 
-
-class CPila(nn.Module):
-    def __init__(self, k=5, device=None):
-        super(CPila, self).__init__()
-        from enflows.nn.nets.pila import PilaFunction, pila_cpp
-        self.PilaFunction = PilaFunction
-        self.pila_cpp = pila_cpp
-
-        assert k > 0
-        self.k = k
-        self.pila = Pila(k=k, device=device)
-
-        self._does_concat = True
-
-
-
-    def forward(self, x):
-        x = torch.cat((x - 0.2, -x - 0.2), 1)
-        return self.pila(x) / 1.06
-
-    def build_clone(self):
-        return copy.deepcopy(self)
-
-    def build_jvp_net(self, x):
-        class CPilaJVP(nn.Module):
-            def __init__(self, grad):
-                super(CPilaJVP, self).__init__()
-                self.register_buffer('grad', grad)
-
-            def forward(self, x):
-                return torch.cat((x, x), dim=1) * self.grad
-
-        with torch.no_grad():
-            y = self.forward(x)
-
-            k = self.k
-            a, b, c, d, m, n = k ** 2 / 2, -k, 1, 0, 1, 0
-            kabcdmn = torch.tensor((k, k * a, k * b + 3 * a, k * c + 2 * b, k * d + c, 0 * k, m), dtype=x.dtype,
-                                   device=x.device)
-            grad = torch.cat(
-                (self.pila_cpp.forward(x - 0.2, kabcdmn), -self.pila_cpp.forward(-x - 0.2, kabcdmn)),
-                dim=1)
-            grad.div_(1.06)
-
-            return CPilaJVP(grad), y
