@@ -1,6 +1,5 @@
 matplotlib
 numpy
-tensorboard
 torch
 tqdm
 autoflake
@@ -13,6 +12,6 @@ torchtestcase
 umnn
 parameterized
 scipy
-pandas<2.0.0
+pandas
 h5py
 scikit-learn

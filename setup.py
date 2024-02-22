@@ -22,14 +22,13 @@ setup(
     install_requires=[
         "matplotlib",
         "numpy",
-        "tensorboard",
         "torch",
         "torchdiffeq",
         "tqdm",
         "umnn",
         "ninja",
         "scikit-learn",
-        "pandas<2.0",
+        "pandas",
         "h5py"
     ],
     classifiers=[
@@ -38,6 +37,6 @@ setup(
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha "
     ],
-    python_requires='<3.11',
+    # python_requires='<3.11',
     dependency_links=[],
 )
