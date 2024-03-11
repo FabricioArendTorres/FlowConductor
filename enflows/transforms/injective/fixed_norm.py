@@ -12,7 +12,7 @@ from gpytorch.utils import linear_cg
 
 from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarScale, CompositeTransform, ScalarShift
 from enflows.transforms.injective.utils import sph_to_cart_jacobian_sympy, spherical_to_cartesian_torch, cartesian_to_spherical_torch, logabsdet_sph_to_car
-from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN, jacobian_sph_to_car
+from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN, jacobian_sph_to_car, solve_triangular_system
 
 import time
 from datetime import timedelta
@@ -22,7 +22,7 @@ class ManifoldFlow(Transform):
     def __init__(self, logabs_jacobian):
         super().__init__()
         self.register_buffer("initialized", torch.tensor(False, dtype=torch.bool))
-        assert logabs_jacobian in ["cholesky", "analytical"]
+        assert logabs_jacobian in ["cholesky", "analytical_sm", "analytical_lu"]
         self.logabs_jacobian = logabs_jacobian
 
     def r_given_theta(self, theta, context=None):
@@ -37,32 +37,28 @@ class ManifoldFlow(Transform):
 
         outputs = spherical_to_cartesian_torch(theta_r)
 
-        # torch.cuda.synchronize()
-        # start_time = time.monotonic()
-        if self.logabs_jacobian == "analytical":
-            logabsdet = self.logabs_jacobian_analytical(theta, theta_r)
+        if self.logabs_jacobian == "analytical_sm":
+            logabsdet = self.logabs_jacobian_analytical_sm(theta, theta_r, context=context)
+        elif self.logabs_jacobian == "analytical_lu":
+            logabsdet = self.logabs_jacobian_analytical_lu(theta, theta_r, context=context)
         elif self.logabs_jacobian == "cholesky":
-            logabsdet = self.logabs_jacobian_cholesky(theta, theta_r)
+            logabsdet = self.logabs_jacobian_cholesky(theta, theta_r, context=context)
         else:
-            raise ValueError(f"logdet_jacobian {self.logdet_jacobian} is not a valid choice")
-        # torch.cuda.synchronize()
-        # end_time = time.monotonic()
-        # total_time = end_time - start_time
-        # print("Total time: ", total_time)
-
-        # print("inverse")
+            raise ValueError(f"logabs_jacobian {self.logabs_jacobian} is not a valid choice")
 
         return outputs, logabsdet
 
     def forward(self, inputs, context=None):
         # print("forward")
         outputs = cartesian_to_spherical_torch(inputs)
-        if self.logabs_jacobian == "analytical":
-            logabsdet = self.logabs_jacobian_analytical(outputs[:,:-1], outputs)
+        if self.logabs_jacobian == "analytical_sm":
+            logabsdet = self.logabs_jacobian_analytical_sm(outputs[:,:-1], outputs, context=context)
+        elif self.logabs_jacobian == "analytical_lu":
+            logabsdet = self.logabs_jacobian_analytical_lu(outputs[:,:-1], outputs, context=context)
         elif self.logabs_jacobian == "cholesky":
-            logabsdet = self.logabs_jacobian_cholesky(outputs[:,:-1], outputs)
+            logabsdet = self.logabs_jacobian_cholesky(outputs[:,:-1], outputs, context=context)
         else:
-            raise ValueError(f"logdet_jacobian {self.logdet_jacobian} is not a valid choice")
+            raise ValueError(f"logabs_jacobian {self.logabs_jacobian} is not a valid choice")
 
         return outputs[..., :-1], -logabsdet
 
@@ -79,102 +75,80 @@ class ManifoldFlow(Transform):
         jac = torch.cat(jac, 1)
         return jac
 
-    def logabs_jacobian_analytical(self, theta, theta_r, context=None):
+    def logabs_jacobian_analytical_sm(self, theta, theta_r, context=None):
         eps = 1e-8
-        # spherical_dict = {name: theta_r[:, i] for i, name in enumerate(self.spherical_names)}
-        # jac = self.sph_to_cart_jac(**spherical_dict).reshape(-1, theta_r.shape[-1], theta_r.shape[-1])#.to(theta.device)
         # jac = torch.autograd.functional.jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
         # jac = jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2)
         # jac = jacfwd(spherical_to_cartesian_torch)(theta_r).sum(-2)
-        # torch.cuda.synchronize()
-        start_time = time.monotonic()
         # cartesian = spherical_to_cartesian_torch(theta_r)
         # jac = self.compute_jacobian_row(cartesian, theta_r)
         # jac = jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2)
         cartesian = spherical_to_cartesian_torch(theta_r)
         jac = jacobian_sph_to_car(theta_r, cartesian)
-        # print(jac.element_size() * jac.nelement())
-        # breakpoint()
-        # jac = vmap(functorch.jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2))
-        # torch.cuda.synchronize()
-        end_time = time.monotonic()
-        total_time = end_time - start_time
-        # print("Jacobian: ", total_time)
 
-        # torch.cuda.synchronize()
-        start_time = time.monotonic()
         jac_inv = sherman_morrison_inverse(jac.mT)
-        # torch.cuda.synchronize()
-        # end_time = time.monotonic()
-        # total_time = end_time - start_time
-        # print("Sherman morrison inv: ", total_time)
-        # jac_inv = torch.inverse(jac.mT + eps)
-        # check_tensor(jac_inv)
-
-        # torch.cuda.synchronize()
-        # start_time = time.monotonic()
 
         grad_r = self.gradient_r_given_theta(theta, context=context)
-        # check_tensor(grad_r)
-
-        # check_tensor(jac_inv)
         jac_inv_grad = jac_inv @ grad_r
-        # check_tensor(jac_inv_grad)
 
-        # fro_norm = torch.norm(jac_inv_grad.squeeze(-1), p='fro', dim=1)
         fro_norm = torch.norm(jac_inv_grad.squeeze(-1), p='fro', dim=1)
-        # check_tensor(fro_norm)
 
         logabsdet_fro_norm = torch.log(fro_norm + eps)
         logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
-        # check_tensor(logabsdet_fro_norm)
-        # check_tensor(logabsdet_s_to_c)
-
         logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
-        # print(logabsdet[:50])
-        # print(logabsdet_fro_norm[:50])
-        # print(logabsdet_s_to_c[:50])
-        # breakpoint()
+        return logabsdet
 
-        # torch.cuda.synchronize()
-        end_time = time.monotonic()
-        total_time = end_time - start_time
-        # f = open(f"results_analytical_manifold.csv", "a")
-        # f.write(f"{total_time}\n")
-        # f.close()
-        # print("All the rest: ", total_time)
+    def logabs_jacobian_analytical_lu(self, theta, theta_r, context=None):
+        eps = 1e-8
+        # jac = torch.autograd.functional.jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
+        # jac = jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2)
+        # jac = jacfwd(spherical_to_cartesian_torch)(theta_r).sum(-2)
+        # cartesian = spherical_to_cartesian_torch(theta_r)
+        # jac = self.compute_jacobian_row(cartesian, theta_r)
+        # jac = jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2)
+        cartesian = spherical_to_cartesian_torch(theta_r)
+        jac = jacobian_sph_to_car(theta_r, cartesian)
+
+        grad_r = self.gradient_r_given_theta(theta, context=context)
+
+        jac = jac + torch.eye(jac.shape[-1], device=theta.device).unsqueeze(0) * eps
+        LU, pivots = torch.linalg.lu_factor(jac)
+        # LU, pivots = torch.linalg.lu_factor(jac.mT)
+        # jac_inv_grad = torch.linalg.lu_solve(LU, pivots, grad_r).squeeze()
+        jac_inv_grad = torch.linalg.lu_solve(LU, pivots, grad_r, adjoint=True).squeeze(-1)
+        fro_norm = torch.norm(jac_inv_grad.squeeze(-1), p='fro', dim=1)
+
+        logabsdet_fro_norm = torch.log(fro_norm + eps)
+        logabsdet_s_to_c = logabsdet_sph_to_car(theta_r)
+
+        logabsdet = logabsdet_s_to_c + logabsdet_fro_norm
 
         return logabsdet
 
     def logabs_jacobian_cholesky(self, theta, theta_r, context=None):
         eps = 1e-8
-        # spherical_dict = {name: theta_r[:, i].cpu() for i, name in enumerate(self.spherical_names)}
-        # jac_sph_cart = self.sph_to_cart_jac(**spherical_dict).reshape(-1, theta_r.shape[-1], theta_r.shape[-1]).to(theta.device)
         # jac_sph_cart = torch.autograd.functional.jacobian(spherical_to_cartesian_torch, theta_r).sum(-2)
         # jac_sph_cart = jacrev(spherical_to_cartesian_torch)(theta_r).sum(-2)
-        start_time = time.monotonic()
         cartesian = spherical_to_cartesian_torch(theta_r)
         jac_sph_cart = jacobian_sph_to_car(theta_r, cartesian)
-        end_time = time.monotonic()
-        total_time = end_time - start_time
-        print("Jacobian: ", total_time)
-        # jac_sph_cart_ = jacfwd(spherical_to_cartesian_torch)(theta_r).sum(-2)
-        # breakpoint()
-        # check_tensor(jac_sph_cart)
 
-        start_time = time.monotonic()
-        eye = torch.eye(theta.shape[-1]).repeat(theta.shape[0],1,1).to(theta.device)
-        r_given_theta = partial(self.r_given_theta, context=context)
-        # grad_r = torch.autograd.functional.jacobian(r_given_theta, theta).sum(-2)
-        grad_r = jacfwd(r_given_theta)(theta).sum(-2)
-        jac_r_theta = torch.cat((eye, grad_r), dim=1)
-        # check_tensor(jac_r_theta)
+        # jac_sph_cart_ = jacfwd(spherical_to_cartesian_torch)(theta_r).sum(-2)
+
+        # jac_r_theta = self.compute_jacobian_row(theta_r, theta)
+        eye = torch.eye(theta.shape[-1], device=theta.device).unsqueeze(0).expand(theta.shape[0], -1, -1)
+        # r_given_theta = partial(self.r_given_theta, context=context)
+        grad_r = self.gradient_r_given_theta(theta, context=context)
+        jac_r_theta = torch.cat((eye, grad_r[:, :-1].squeeze(-1).unsqueeze(1)), dim=1)
+        # jac_r_theta = torch.autograd.functional.jacobian(r_given_theta, theta).sum(-2)
+        # jac_r_theta = jacfwd(r_given_theta)(theta).sum(-2)
+        # jac_r_theta = self.compute_jacobian_row(theta_r, theta)
+        # grad_r = self.gradient_r_given_theta(theta, context=context)
+
         jac_forward = jac_sph_cart @ jac_r_theta
 
         # we need to compute 0.5 * sqrt(ac_forward.T @ jac_forward)
-        # naively we could compute it as
-        # logabsdet2 = 0.5 * torch.logdet(jac_full)
+        # naively we could compute it as logabsdet2 = 0.5 * torch.logdet(jac_full)
         # instead, we use cholesky decomposition to compute the determinant in O(d^3)
         jac_full = jac_forward.mT @ jac_forward
         jac_full_eye = torch.diag_embed(jac_full.new_ones(jac_full.shape[-1]))
@@ -183,15 +157,8 @@ class ManifoldFlow(Transform):
         jac_full_lower_diag = torch.diagonal(jac_full_lower, dim1=1, dim2=2)
         logabsdet = torch.log(jac_full_lower_diag).sum(1) # should be 2* but there is also a 0.5 factor
 
-        # logabsdet_ = self.logabs_pseudodet(theta, theta_r, context=context)
-        # max_diff = torch.square(logabsdet-logabsdet_).max().item()
-        # print("max diff: ", max_diff)
-
-        end_time = time.monotonic()
-        total_time = end_time - start_time
-        print("All the rest: ", total_time)
-
         return logabsdet
+
 
     def _initialize_jacobian(self, inputs):
         spherical_names, jac = sph_to_cart_jacobian_sympy(inputs.shape[1] + 1)
@@ -251,8 +218,30 @@ class LpManifoldFlow(ManifoldFlow):
         self.r_given_norm = r_given_norm
         # self.register_buffer("initialized", torch.tensor(False, dtype=torch.bool))
 
-
     def r_given_theta(self, theta, context=None):
+        if context is None:
+            given_norm = self.norm
+        else:
+            # the first element of context is assumed to be the norm value
+            given_norm = context[:, 0]
+
+        assert theta.shape[1] > 2
+        eps = 1e-10
+
+        r_theta = torch.cat((theta, torch.ones_like(theta[:,:1])), dim=1)
+        cartesian = spherical_to_cartesian_torch(r_theta)
+        p_norm = torch.linalg.vector_norm(cartesian, ord=self.p, dim=1)
+        r = given_norm / (p_norm + eps)
+
+        return r.unsqueeze(-1)
+
+    def r_given_theta_(self, theta, context=None):
+        if context is None:
+            given_norm = self.norm
+        else:
+            # the first element of context is assumed to be the norm value
+            given_norm = context[:, 0]
+
         assert theta.shape[1] >= 1
         eps = 1e-8
         n = theta.shape[-1]
@@ -265,8 +254,9 @@ class LpManifoldFlow(ManifoldFlow):
         norm_3 = (torch.abs(torch.prod(sin_thetas, dim=-1)) + eps) ** self.p
         check_tensor(norm_3)
 
+
         if theta.shape[1] == 1:
-            r = self.norm / ((norm_1 + norm_3 + eps) ** (1. / self.p))
+            r = given_norm / ((norm_1 + norm_3 + eps) ** (1. / self.p))
             check_tensor(r)
 
             return r.unsqueeze(-1)
@@ -275,18 +265,17 @@ class LpManifoldFlow(ManifoldFlow):
                        for k in range(2, n + 1)]
             norm_2 = torch.stack(norm_2_, dim=1).sum(-1)
             check_tensor(norm_2)
-
-            r = self.norm / ((norm_1 + norm_2 + norm_3 + eps) ** (1. / self.p))
+            r = given_norm / ((norm_1 + norm_2 + norm_3 + eps) ** (1. / self.p))
             check_tensor(r)
 
             return r.unsqueeze(-1)
 
     def gradient_r_given_theta(self, theta, context=None):
-        r = self.r_given_theta(theta).squeeze()
+        r = self.r_given_theta(theta=theta, context=context).squeeze()
         grad_r_theta = torch.autograd.grad(r, theta, grad_outputs=torch.ones_like(r))[0]
         grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
 
-        check_tensor(grad_r_theta)
+        # check_tensor(grad_r_theta)
         # print("gradient_shape", grad_r_theta.shape, grad_r_theta_aug.unsqueeze(-1).shape)
         return grad_r_theta_aug.unsqueeze(-1)
 

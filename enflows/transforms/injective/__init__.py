@@ -4,8 +4,12 @@ from enflows.transforms.injective.fixed_norm import (
     ConstrainedAnglesSigmoid,
     ResidualNetInput,
     ClampedAngles,
+    ClampedTheta,
     LearnableManifoldFlow,
-    LpManifoldFlow
+    LpManifoldFlow,
+    SphereFlow,
+    PeriodicElementwiseTransform,
+    ScaleLastDim,
 )
 from enflows.transforms.injective.utils import (
     sph_to_cart_jacobian_sympy,
@@ -15,3 +19,4 @@ from enflows.transforms.injective.utils import (
     check_tensor,
     sherman_morrison_inverse
 )
+from enflows.transforms.injective.circular import CircularAutoregressiveRationalQuadraticSpline

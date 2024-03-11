@@ -77,7 +77,7 @@ class MultimodalUniform(Distribution):
         self.build_means()
 
     def build_means(self):
-        self.means = torch.linspace(self._low, self._high, self._n_modes * 2)[::2]
+        self.means = torch.linspace(self._low.item(), self._high.item(), self._n_modes * 2, device=self._low.device)[::2]
         assert self.means.shape[0] == self._n_modes
         self.scale = (self._high - self._low) / (self._n_modes * 2 - 1)
 
@@ -103,7 +103,6 @@ class MultimodalUniform(Distribution):
 
     def _sample(self, num_samples, context):
         assert num_samples % self._n_modes == 0
-        import matplotlib.pyplot as plt
         if context is None:
             samples = torch.rand((num_samples, *self._shape), device=self._low.device)
             samples = samples.reshape(self._n_modes, num_samples//self._n_modes, *self._shape) * self.scale + self.means.reshape(-1,1,1)
@@ -119,6 +118,7 @@ class MultimodalUniform(Distribution):
 import numpy as np
 import scipy as sp
 from enflows.transforms.injective.utils import logabsdet_sph_to_car, cartesian_to_spherical_torch
+
 class UniformSphere(Distribution):
     """Uniform distribution on a (d+1)-sphere. Probabilities are defined over d angles"""
 
@@ -156,12 +156,13 @@ class UniformSphere(Distribution):
             # The value of the context is ignored, only its size and device are taken into account.
             context_size = context.shape[0]
             samples = torch.randn(context_size * num_samples, *self._shape, device=context.device)
-            add_dim = torch.randn(context_size * num_samples, *self._shape, device=context.device)
+            add_dim = torch.randn(context_size * num_samples, 1, device=context.device)
             samples = torch.cat((samples, add_dim), dim=-1)
             samples /= torch.norm(samples, dim=-1).reshape(-1, 1)
             samples *= self.radius
 
             samples = cartesian_to_spherical_torch(samples)[:, :-1]
+
             assert len(samples.shape) == 2
 
             return torchutils.split_leading_dim(samples, [context_size, num_samples])

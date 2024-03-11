@@ -1,3 +1,5 @@
+import time
+
 import torch
 from torch import nn
 import sympy as sym
@@ -135,7 +137,7 @@ def jacobian_sph_to_car(spherical, cartesian):
     # jac[:,:,:-1] = jac[:,:,:-1] * cotan.reshape(mb, 1, dim-1)
     # jac[:,:,:-1]  *= cotan.reshape(mb, 1, dim-1)
     jac = torch.diagonal_scatter(jac, tan * cartesian * (-1.), dim1=1, dim2=2)
-    jac[:,:,-1] = cartesian / r
+    jac[:,:,-1] = cartesian / (r+eps)
 
     return jac
 
@@ -144,13 +146,16 @@ from torch.utils.benchmark import Timer
 def sherman_morrison_inverse(A):
     # check_tensor(A_triu)
     # eye = torch.eye(*A.shape[1:], device=A.device).repeat(A.shape[0], 1, 1)
+
     eye = torch.eye(*A.shape[1:], device=A.device).reshape(1, *A.shape[1:])
     # A_triu_inv = torch.triangular_solve(eye, A_triu)[0]
-    eps = 1e-8
+    eps = 1e-5
 
     A_triu_inv = torch.linalg.solve_triangular(A.triu() + eye * eps, eye, upper=True)
+    # print(f"min: {A_triu_inv.min().item():.1f} max: {A_triu_inv.max().item():.1f}")
     # A_triu_inv = torch.linalg.inv(A_triu_eps)
     # check_tensor(A_triu_inv)
+    start_time = time.monotonic()
 
     u = torch.zeros_like(A[:, :, -1:])
     u[:, -1, :] = 1.
@@ -164,6 +169,10 @@ def sherman_morrison_inverse(A):
 
     # den = 1 + (v @ A_triu_inv) @ u
     den = 1 + (v @ A_triu_inv)[...,-1:]
+    # breakpoint()
+    end_time = time.monotonic()
+    total_time = end_time - start_time
+    # print("sherman morrison detail: ", total_time)
 
     # assert not torch.any(den==0)
 
@@ -181,6 +190,32 @@ def jacobian_det_spherical_cartesian(x):
     sines_k = torch.pow(sines, sine_powers)
 
     return sign * r_n_1 * sines_k.prod(1)
+
+def transform_to_triangular(A):
+    # implements one step of gaussian elimination to transform almost upper triangular matrix to upper triangular
+    mb, d = A.shape[:2]
+    alphas = torch.ones((mb, d-1), device=A.device)
+    alphas[:,0] = A[:,-1,0] / A[:,0,0]
+    for i in range(1,d-1):
+        mask_alphas = torch.ones_like(alphas)
+        mask_alphas[:,i] = 0.
+        # alphas[:,i] = (A[:,-1,i] - torch.sum(A[:,:i,i] * alphas[:,:i], -1) ) / A[:,i,i]
+        alphas = alphas * mask_alphas + (1-mask_alphas) * ((A[:,-1,i] - torch.sum(A[:,:i,i] * alphas[:,:i], -1) ) / A[:,i,i]).reshape(-1,1)
+    return alphas
+
+def solve_triangular_system(A_triu, y):
+    coeff = transform_to_triangular(A_triu)
+    mask_A = torch.zeros_like(A_triu)
+    mask_A[:, -1, -1] = 1
+    # A_triu[:, -1, -1] = A_triu[:, -1, -1] - torch.sum(A_triu[:, :-1, -1] * coeff, -1)
+    A_triu = A_triu - mask_A * torch.sum(A_triu[:, :-1, -1] * coeff, -1).reshape(-1,1,1)
+    mask_y = torch.zeros_like(y)
+    mask_y[:, -1] = 1
+    # y[:, -1] = y[:, -1] - torch.sum(y[:, :-1] * coeff, -1)
+    y = y - mask_y * torch.sum(y[:, :-1] * coeff, -1).reshape(-1,1)
+    triang_sol = torch.linalg.solve_triangular(A_triu.triu(),y.unsqueeze(-1), upper=True).squeeze()
+
+    return triang_sol
 
 
 def check_tensor(tensor):
