@@ -35,8 +35,9 @@ class ManifoldFlow(Transform):
         r = self.r_given_theta(theta, context=context)
         theta_r = torch.cat([theta, r], dim=1)
 
+        # print("theta", theta.min().item(), theta.max().item())
         outputs = spherical_to_cartesian_torch(theta_r)
-
+        # print(outputs.min().item(), outputs.max().item())
         if self.logabs_jacobian == "analytical_sm":
             logabsdet = self.logabs_jacobian_analytical_sm(theta, theta_r, context=context)
         elif self.logabs_jacobian == "analytical_lu":
@@ -46,11 +47,14 @@ class ManifoldFlow(Transform):
         else:
             raise ValueError(f"logabs_jacobian {self.logabs_jacobian} is not a valid choice")
 
+        # print("logabsdet", logabsdet.min().item(), logabsdet.max().item())
+
         return outputs, logabsdet
 
     def forward(self, inputs, context=None):
         # print("forward")
         outputs = cartesian_to_spherical_torch(inputs)
+
         if self.logabs_jacobian == "analytical_sm":
             logabsdet = self.logabs_jacobian_analytical_sm(outputs[:,:-1], outputs, context=context)
         elif self.logabs_jacobian == "analytical_lu":
@@ -215,23 +219,16 @@ class LpManifoldFlow(ManifoldFlow):
         super().__init__(logabs_jacobian=logabs_jacobian)
         self.norm = norm
         self.p = p
-        self.r_given_norm = r_given_norm
         # self.register_buffer("initialized", torch.tensor(False, dtype=torch.bool))
 
     def r_given_theta(self, theta, context=None):
-        if context is None:
-            given_norm = self.norm
-        else:
-            # the first element of context is assumed to be the norm value
-            given_norm = context[:, 0]
-
         assert theta.shape[1] > 2
         eps = 1e-10
 
         r_theta = torch.cat((theta, torch.ones_like(theta[:,:1])), dim=1)
         cartesian = spherical_to_cartesian_torch(r_theta)
         p_norm = torch.linalg.vector_norm(cartesian, ord=self.p, dim=1)
-        r = given_norm / (p_norm + eps)
+        r = self.norm / (p_norm + eps)
 
         return r.unsqueeze(-1)
 
@@ -273,6 +270,65 @@ class LpManifoldFlow(ManifoldFlow):
     def gradient_r_given_theta(self, theta, context=None):
         r = self.r_given_theta(theta=theta, context=context).squeeze()
         grad_r_theta = torch.autograd.grad(r, theta, grad_outputs=torch.ones_like(r))[0]
+        grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
+
+        # check_tensor(grad_r_theta)
+        # print("gradient_shape", grad_r_theta.shape, grad_r_theta_aug.unsqueeze(-1).shape)
+        return grad_r_theta_aug.unsqueeze(-1)
+
+class CondLpManifoldFlow(LpManifoldFlow):
+    def __init__(self, norm, p, logabs_jacobian):
+        super().__init__(norm, p, logabs_jacobian)
+
+    def r_given_theta(self, theta, context=None):
+        if context is None:
+            given_norm = self.norm
+        else:
+            # the first element of context is assumed to be the norm value
+            given_norm = context[:, 0]
+
+        assert theta.shape[1] > 2
+        eps = 1e-10
+
+        r_theta = torch.cat((theta, torch.ones_like(theta[:,:1])), dim=1)
+        cartesian = spherical_to_cartesian_torch(r_theta)
+        p_norm = torch.linalg.vector_norm(cartesian, ord=self.p, dim=1)
+        r = given_norm / (p_norm + eps)
+
+        return r.unsqueeze(-1)
+
+
+class PositiveL1ManifoldFlow(ManifoldFlow):
+    def __init__(self, logabs_jacobian):
+        super().__init__(logabs_jacobian=logabs_jacobian)
+
+    def r_given_theta(self, theta, context=None):
+        assert theta.shape[1] >= 2
+        assert torch.all(theta >= 0) and torch.all(theta <= 0.5 * torch.pi)
+
+        r_theta = torch.cat((theta, torch.ones_like(theta[:,:1])), dim=1)
+        cartesian = spherical_to_cartesian_torch(r_theta)
+        r = 1 / cartesian.sum(-1)
+
+        return r.unsqueeze(-1)
+
+    def gradient_r_given_theta(self, theta, context=None):
+        r_theta = torch.cat((theta, torch.ones_like(theta[:, :1])), dim=1)
+        cartesian = spherical_to_cartesian_torch(r_theta)
+
+
+        mb, dim = r_theta.shape
+        temp = torch.ones(mb, dim, dim-1, device=r_theta.device).tril()
+        cos_sin = torch.cos(theta) / torch.sin(theta)
+        temp = temp * cos_sin.reshape(mb, 1, dim-1)
+        temp = torch.diagonal_scatter(temp, -torch.reciprocal(cos_sin), dim1=1, dim2=2)
+
+        grad_den = (temp * cartesian.reshape(mb, dim, 1)).sum(-2)
+        grad_r_theta = - grad_den / (cartesian.sum(-1).reshape(mb, 1) ** 2)
+
+        # alternatively, grad_r_theta can be computed with autograd
+        # radius = self.r_given_theta(theta=theta, context=context).squeeze()
+        # grad_r_theta_ = torch.autograd.grad(radius, theta, grad_outputs=torch.ones_like(radius))[0]
         grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)
 
         # check_tensor(grad_r_theta)
@@ -415,6 +471,34 @@ class ClampedTheta(Transform):
         # clamped_last_theta = _0_2pi_mask * _0_2pi_clamp
 
         output = torch.cat((clamped_thetas, last_theta), dim = -1)
+        logabsdet = output.new_zeros(inputs.shape[:-1])
+
+        return output, logabsdet
+
+    def compute_mask(self, arr, vmin, vmax, right_included=False):
+        if right_included:
+            condition = (arr >= vmin) * (arr < vmax)
+        else:
+            condition = (arr >= vmin) * (arr <= vmax)
+
+        mask = condition.to(self.dtype)
+        arr_clamped = torch.clamp(arr, min=vmin + self.eps, max=vmax - self.eps)
+
+        return mask, arr_clamped
+
+
+    def inverse(self, inputs, context):
+        return inputs, torch.zeros_like(inputs[...,0])
+
+class ClampedThetaPositive(Transform):
+    def __init__(self, eps):
+        super().__init__()
+        self.eps = eps
+
+    def forward(self, inputs, context):
+        self.dtype = inputs.dtype
+        _0_pi_mask, _0_pi_clamp = self.compute_mask(arr=inputs, vmin=0., vmax=torch.pi*0.5, right_included=True)
+        output = _0_pi_mask * _0_pi_clamp
         logabsdet = output.new_zeros(inputs.shape[:-1])
 
         return output, logabsdet

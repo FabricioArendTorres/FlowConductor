@@ -65,7 +65,7 @@ def spherical_to_cartesian_torch(arr):
     # meant for batches of vectors, i.e. arr.shape = (mb, n)
     assert arr.shape[1] >= 2
     check_tensor(arr)
-    eps = 1e-5
+    eps = 1e-10
     r = arr[:, -1:]
     angles = arr[:, :-1]
 
@@ -81,8 +81,8 @@ def spherical_to_cartesian_torch(arr):
     # assert torch.all(angles_clamped[:, :-1] < np.pi)
     # assert torch.all(angles_clamped[:, -1] > 0)
     # assert torch.all(angles_clamped[:, -1] < 2 * np.pi)
-    sin_prods = torch.cumprod(torch.sin(angles), dim=1)
-    sin_prod_ = torch.cumsum(torch.sin(angles).log(), dim=1).exp()
+    sin_prods = torch.cumprod(torch.sin(angles), dim=1) + eps
+    # sin_prod_ = torch.cumsum(torch.sin(angles).log(), dim=1).exp()
     x1 = r * torch.cos(angles[:, :1])
     xs = r * sin_prods[:, :-1] * torch.cos(angles[:, 1:])
     xn = r * sin_prods[:, -1:]
@@ -94,11 +94,11 @@ def cartesian_to_spherical_torch(arr):
     assert arr.shape[-1] >= 2
     check_tensor(arr)
 
-    eps = 1e-5
+    eps = 0
     radius = torch.linalg.norm(arr, dim=-1)
-    flipped_cumsum = torch.cumsum(torch.flip(arr ** 2, dims=(-1,)), dim=-1)
-    sqrt_sums = torch.flip(torch.sqrt(flipped_cumsum + eps), dims=(-1,))[...,:-1]
-    angles = torch.acos(arr[..., :-1] / (sqrt_sums + eps))
+    flipped_cumsum = torch.cumsum(torch.flip((arr+eps) ** 2, dims=(-1,)), dim=-1)
+    sqrt_sums = torch.flip(torch.sqrt(flipped_cumsum), dims=(-1,))[...,:-1]
+    angles = torch.acos(arr[..., :-1] / (sqrt_sums))
     last_angle = ((arr[...,-1] >= 0).float() * angles[..., -1] + (arr[...,-1] < 0).float() * (2 * np.pi - angles[..., -1]))
 
     return torch.cat((angles[..., :-1], last_angle.unsqueeze(-1), radius.unsqueeze(-1)), dim=-1)
