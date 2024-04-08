@@ -6,6 +6,7 @@ from enflows.utils.torchutils import (
     gaussian_kde_log_eval,
     get_num_parameters,
     get_temperature,
+    gradient,
     logabsdet,
     merge_leading_dims,
     random_orthogonal,

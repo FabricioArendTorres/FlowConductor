@@ -22,4 +22,4 @@ from enflows.transforms.injective.utils import (
     check_tensor,
     sherman_morrison_inverse
 )
-from enflows.transforms.injective.circular import CircularAutoregressiveRationalQuadraticSpline
+# from enflows.transforms.injective.circular import CircularAutoregressiveRationalQuadraticSpline

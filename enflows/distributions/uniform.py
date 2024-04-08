@@ -122,10 +122,11 @@ from enflows.transforms.injective.utils import logabsdet_sph_to_car, cartesian_t
 class UniformSphere(Distribution):
     """Uniform distribution on a (d+1)-sphere. Probabilities are defined over d angles"""
 
-    def __init__(self, shape):
+    def __init__(self, shape, all_positive=False):
         super().__init__()
         self._shape = torch.Size(shape)
         self.radius = 1.
+        self.all_positive = all_positive
         self.compute_log_surface()
         self.register_buffer("_log_z", torch.tensor(self.log_surface_area, dtype=torch.float64), persistent=False)
 
@@ -148,6 +149,8 @@ class UniformSphere(Distribution):
             samples = torch.cat((samples, add_dim), dim=-1)
             samples /= torch.norm(samples, dim=-1).reshape(-1, 1)
             samples *= self.radius
+            if self.all_positive:
+                samples = samples.abs()
             samples = cartesian_to_spherical_torch(samples)[:,:-1]
             assert len(samples.shape) == 2
 
@@ -160,7 +163,8 @@ class UniformSphere(Distribution):
             samples = torch.cat((samples, add_dim), dim=-1)
             samples /= torch.norm(samples, dim=-1).reshape(-1, 1)
             samples *= self.radius
-
+            if self.all_positive:
+                samples = samples.abs()
             samples = cartesian_to_spherical_torch(samples)[:, :-1]
 
             assert len(samples.shape) == 2

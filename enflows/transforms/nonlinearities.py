@@ -149,6 +149,7 @@ class Sigmoid(Transform):
     def forward(self, inputs, context=None):
         inputs = self.temperature * inputs
         outputs = torch.sigmoid(inputs)
+        outputs = torch.clamp(outputs, self.eps, 1-self.eps)
         logabsdet = torchutils.sum_except_batch(
             torch.log(self.temperature) - F.softplus(-inputs) - F.softplus(inputs)
         )
