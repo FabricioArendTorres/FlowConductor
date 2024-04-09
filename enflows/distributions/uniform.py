@@ -176,9 +176,71 @@ class UniformSphere(Distribution):
         log_const_1 = np.log(2) + 0.5 * dim * np.log(np.pi)
         log_const_2 = (dim - 1) * np.log(self.radius)
         log_const_3 = - sp.special.loggamma(0.5 * dim)
+        log_const_4 = - np.log(2)*dim if self.all_positive else 0.0
 
-        self.log_surface_area = log_const_1 + log_const_2 + log_const_3
+        self.log_surface_area = log_const_1 + log_const_2 + log_const_3 + log_const_4
 
+
+class UniformSimplex(Distribution):
+    """Uniform distribution on a d-simplex. is then transformed to polar coordinates over d angles"""
+
+    def __init__(self, shape, extend_star_like=False):
+        super().__init__()
+        self._shape = torch.Size(shape)
+        self.cart_dim = self._shape[-1]+1
+        self.factor = 1.
+        self.extend_star_like = extend_star_like
+        self.log_surface_area = self.__compute_log_surface()
+        self.register_buffer("_log_z", torch.tensor(self.log_surface_area, dtype=torch.float64), persistent=False)
+
+    def _log_prob(self, inputs, context):
+        # Note: the context is ignored.
+        if inputs.shape[1:] != self._shape:
+            raise ValueError(
+                "Expected input of shape {}, got {}".format(
+                    self._shape, inputs.shape[1:]
+                )
+            )
+        # TODO what should be here?
+        jacobian = torch.zeros((inputs.shape[0]), device=inputs.device, dtype=inputs.dtype)
+        return jacobian - self._log_z
+
+    def _sample(self, num_samples, context):
+        if context is not None:
+            nnum_samples = num_samples * context.shape[0]
+        else:
+            nnum_samples = num_samples
+
+        # create the samples that are on the simplex. see Donald B. Rubin, The Bayesian bootstrap Ann. Statist. 9, 1981, 130-134
+        samples = torch.rand((nnum_samples, self.cart_dim-1), device=context.device, dtype=context.dtype)
+        samples = torch.concat([
+            torch.zeros((nnum_samples,1), device=context.device, dtype=context.dtype),
+            torch.sort(samples, dim=-1)[0],
+            torch.ones((nnum_samples,1), device=context.device, dtype=context.dtype),
+        ], dim=-1)
+        samples = samples[...,1:] - samples[...,:-1]  # we omit the multiplication with the basis (identity)
+
+        if self.extend_star_like:
+            # move samples randomly to other simplexes
+            #raise NotImplementedError("moving to other quadrants not yet implemented")
+            signs = torch.randn(samples.shape, device=context.device, dtype=context.dtype)
+            signs = torch.sign(signs)
+            samples = samples * signs
+
+        samples = cartesian_to_spherical_torch(samples)[:,:-1]
+
+        if context is not None:
+            samples = torchutils.split_leading_dim(samples, [context.shape[0], num_samples])
+        return samples
+
+    def __compute_log_surface(self):
+        # uses the specific way the vertices are chosen for an efficient formula
+        # see https://en.wikipedia.org/wiki/Simplex#Volume for the vertices e_i
+        d = self.cart_dim
+        sqrt_det = np.sqrt(d + 1)
+        factorial = (d*d+d) / 2
+        all_quandrants = np.log(2) * d if self.extend_star_like else 0.0
+        return sqrt_det - factorial + all_quandrants
 
 class MG1Uniform(distributions.Uniform):
     def log_prob(self, value):
