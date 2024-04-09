@@ -188,7 +188,6 @@ class UniformSimplex(Distribution):
         super().__init__()
         self._shape = torch.Size(shape)
         self.cart_dim = self._shape[-1]+1
-        self.factor = 1.
         self.extend_star_like = extend_star_like
         self.log_surface_area = self.__compute_log_surface()
         self.register_buffer("_log_z", torch.tensor(self.log_surface_area, dtype=torch.float64), persistent=False)
@@ -201,7 +200,6 @@ class UniformSimplex(Distribution):
                     self._shape, inputs.shape[1:]
                 )
             )
-        # TODO what should be here?
         jacobian = torch.zeros((inputs.shape[0]), device=inputs.device, dtype=inputs.dtype)
         return jacobian - self._log_z
 
