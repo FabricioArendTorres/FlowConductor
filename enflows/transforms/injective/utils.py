@@ -115,7 +115,7 @@ def logabsdet_sph_to_car(arr):
 
     logabsdet_r = (n - 1) * torch.log(r + eps)
 
-    logabsdet_sin = torch.sum(sin_exp * torch.log(torch.abs(sin_angles) + eps), dim=-1)
+    logabsdet_sin = torch.sum(sin_exp * torch.log(sin_angles + eps), dim=-1)
 
     return logabsdet_r + logabsdet_sin
 
