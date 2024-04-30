@@ -204,8 +204,8 @@ class UniformSimplex(Distribution):
         radius = torch.ones_like(inputs[:, :1])
         #TODO optimize such that only one transformation is required
         cartesian = spherical_to_cartesian_torch(torch.cat((inputs, radius), dim=-1))
-        radius_l1 = cartesian.norm(p=1, dim=-1, keepdim=True)
-        jacobian = logabsdet_sph_to_car(torch.cat((inputs, radius/radius_l1), dim=-1))
+        radius_l1 = 1. / cartesian.norm(p=1, dim=-1, keepdim=True)
+        jacobian = logabsdet_sph_to_car(torch.cat((inputs, radius_l1), dim=-1))
         return jacobian - self._log_z
 
     def _sample(self, num_samples, context):
@@ -241,11 +241,19 @@ class UniformSimplex(Distribution):
     def __compute_log_surface(self):
         # uses the specific way the vertices are chosen for an efficient formula
         # see https://en.wikipedia.org/wiki/Simplex#Volume for the vertices e_i
-        d = self.cart_dim
-        sqrt_det = np.sqrt(d + 1)
-        factorial = (d*d+d) / 2
-        all_quandrants = np.log(2) * d if self.extend_star_like else 0.0
-        return sqrt_det - factorial + all_quandrants
+        # d = self.cart_dim
+        # sqrt_det = np.sqrt(d + 1)
+        # factorial = (d*d+d) / 2
+        # all_quandrants = np.log(2) * d if self.extend_star_like else 0.0
+        # return sqrt_det - factorial + all_quandrants
+
+        # side_length = np.sqrt(2.)
+        # log_num = self.cart_dim * np.log(side_length) + 0.5 * np.log(self.cart_dim)
+        # log_den = 2 * sp.special.gammaln(self.cart_dim)
+        log_const =  - sp.special.loggamma(self.cart_dim)
+        all_quadrants = np.log(2) * d if self.extend_star_like else 0.0
+
+        return log_const + all_quadrants
 
 class MG1Uniform(distributions.Uniform):
     def log_prob(self, value):
