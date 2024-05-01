@@ -10,7 +10,10 @@ from enflows.datasets import load_plane_dataset, InfiniteLoader
 from enflows.transforms import *
 from enflows.nn.nets import *
 
-device = "cuda"
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
 
 CONTINUE_TRAINING = False
 
