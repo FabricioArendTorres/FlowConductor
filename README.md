@@ -19,7 +19,8 @@ In addition, we improved the testing, so that the Jacobian determinants are actu
 The bijective layers we additionally provide includes but are not limited to Planar Flows, (conditional) invertible ResNets/DenseNets, a variant of neural autoregressive flows, and a basic support of continuous normalizing flows (and FFJORD) based on the `torchdiffeq` package.
 
 
-## Install.
+## Install
+### PIP
 FlowConductor is installable via `pip`.
 We recommend using a virtual environment, where you set up your pytorch version beforehand.
 You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
@@ -37,7 +38,7 @@ $ cd FlowConductor
 $ pip install . 
 ```
 
-## Docker
+### Docker
 We provide some basic Dockerfiles in `./docker`, which are very simple extensions of the pytorch docker images.
 The dockerfiles we list are the ones used for testing, so you can be sure they work.
 If you are unfamiliar with Docker, you can use our package with it as follows (assuming it is at least installed).
