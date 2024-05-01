@@ -6,7 +6,6 @@ from enflows.version import VERSION
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
-
 setup(
     name="enflows",
     version=VERSION,
@@ -22,14 +21,17 @@ setup(
     install_requires=[
         "matplotlib",
         "numpy",
+        "pandas",
         "torch",
         "torchdiffeq",
-        "tqdm",
         "umnn",
+        "tqdm",
         "ninja",
         "scikit-learn",
-        "pandas",
-        "h5py"
+        "h5py",
+        "pytest",
+        "torchtestcase",
+        "parameterized"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -37,6 +39,7 @@ setup(
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha "
     ],
-    python_requires='<3.11',
+    # python_requires='>3.7',
     dependency_links=[],
 )
+
