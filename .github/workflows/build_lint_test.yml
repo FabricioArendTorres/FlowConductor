@@ -22,7 +22,7 @@ jobs:
         docker run flowc-${{ matrix.dockerfile }} flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
-      run: docker run flowc-${{ matrix.dockerfile }} pytest --cov --cov-report=xml
+      run: docker run flowc-${{ matrix.dockerfile }} pytest /flowc --cov --cov-report=xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
