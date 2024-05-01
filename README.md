@@ -67,12 +67,6 @@ $ docker run --rm -it -v .:/app flowc-pytorchlatest
 $ python examples/toy_2d.py
 ```
 
-
-
-Ideally, after a successfull install you should also  be able to run and pass the unit tests with:` 
-(enflows) /lagrangian_flow_net$  pytest
-`
-
 ## Package Usage
 
 As the core is based on `nflows`, its usage is similar. To define a flow:
