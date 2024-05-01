@@ -1,0 +1,11 @@
+FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+
+WORKDIR /app
+
+# Copy requirements and install dependencies
+
+# Copy the source code and install the package
+COPY . /app
+RUN pip install .
+
+CMD ["/bin/bash"]

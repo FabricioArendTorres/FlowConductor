@@ -1,0 +1,14 @@
+# Dockerfile-pytorch1.13.1
+FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
+
+WORKDIR /app
+
+# Copy requirements and install dependencies
+#COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the source code and install the package
+COPY . /app
+RUN pip install .
+
+CMD ["/bin/bash"]

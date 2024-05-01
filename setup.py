@@ -31,7 +31,8 @@ setup(
         "h5py",
         "pytest",
         "torchtestcase",
-        "parameterized"
+        "parameterized",
+        "flake8"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
