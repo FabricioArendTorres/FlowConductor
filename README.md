@@ -26,7 +26,12 @@ We recommend using a virtual environment, where you set up your pytorch version 
 You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
 for any version after 1.13.
 
-For now, please install it directly from github via pip, as our pipy link might be deprecated 
+You may either install the latest release from pipy:
+```
+$  pip install flowcon
+```
+
+or install it directly from github via pip 
 ```
 $  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
 ```
@@ -37,6 +42,7 @@ $ git clone https://github.com/FabricioArendTorres/FlowConductor
 $ cd FlowConductor
 $ pip install . 
 ```
+
 
 ### Docker
 We provide some basic Dockerfiles in `./docker`, which are very simple extensions of the pytorch docker images.
