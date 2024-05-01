@@ -29,10 +29,13 @@ setup(
         "ninja",
         "scikit-learn",
         "h5py",
-        "pytest",
         "torchtestcase",
         "parameterized",
-        "flake8"
+        # testing
+        "flake8",
+        "pytest",
+        "pytest-cov",
+        "black"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
