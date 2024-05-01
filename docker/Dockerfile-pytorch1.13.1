@@ -8,7 +8,8 @@ WORKDIR /app
 # RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code and install the package
-COPY . /app
-RUN pip install .
+
+COPY . /flowc
+RUN pip install /flowc
 
 CMD ["/bin/bash"]

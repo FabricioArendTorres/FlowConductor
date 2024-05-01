@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy requirements and install dependencies
 
 # Copy the source code and install the package
-COPY . /app
-RUN pip install .
+COPY . /flowc
+RUN pip install /flowc
 
 CMD ["/bin/bash"]
