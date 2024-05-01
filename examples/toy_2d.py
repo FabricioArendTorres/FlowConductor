@@ -4,11 +4,11 @@ import os
 import torch
 from torch import optim
 
-from enflows.flows import Flow
-from enflows.distributions import StandardNormal
-from enflows.datasets import load_plane_dataset, InfiniteLoader
-from enflows.transforms import *
-from enflows.nn.nets import *
+from flowcon.flows import Flow
+from flowcon.distributions import StandardNormal
+from flowcon.datasets import load_plane_dataset, InfiniteLoader
+from flowcon.transforms import *
+from flowcon.nn.nets import *
 
 if torch.cuda.is_available():
     device = "cuda"

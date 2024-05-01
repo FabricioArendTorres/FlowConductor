@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from enflows.transforms import permutations, FillTriangular, InverseTransform
+from flowcon.transforms import permutations, FillTriangular, InverseTransform
 from tests.transforms.transform_test import TransformTest
 from parameterized import parameterized_class
 

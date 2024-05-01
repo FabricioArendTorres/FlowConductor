@@ -5,7 +5,7 @@ import unittest
 import torch
 import torchtestcase
 
-from enflows.flows import autoregressive as ar
+from flowcon.flows import autoregressive as ar
 
 
 class MaskedAutoregressiveFlowTest(torchtestcase.TorchTestCase):

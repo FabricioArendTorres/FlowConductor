@@ -3,9 +3,9 @@
 import unittest
 
 import torch
-from enflows.transforms import lu
-from enflows.transforms.conditional import ConditionalLUTransform
-from enflows.utils import torchutils
+from flowcon.transforms import lu
+from flowcon.transforms.conditional import ConditionalLUTransform
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import ConditionalTransformTest
 import pytest
 from parameterized import parameterized, parameterized_class

@@ -2,7 +2,7 @@ import unittest
 
 import torch
 
-from enflows.transforms.conv import OneByOneConvolution
+from flowcon.transforms.conv import OneByOneConvolution
 from tests.transforms.transform_test import TransformTest
 
 

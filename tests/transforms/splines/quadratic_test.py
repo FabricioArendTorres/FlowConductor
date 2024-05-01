@@ -1,7 +1,7 @@
 import torch
 import torchtestcase
 
-from enflows.transforms import splines
+from flowcon.transforms import splines
 
 
 class QuadraticSplineTest(torchtestcase.TorchTestCase):

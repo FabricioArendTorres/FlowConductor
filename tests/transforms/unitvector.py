@@ -4,10 +4,10 @@ import unittest
 
 import torch
 
-from enflows.transforms import UnitVector, InverseTransform
-from enflows.utils import torchutils
+from flowcon.transforms import UnitVector, InverseTransform
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
-from enflows.utils import torchutils
+from flowcon.utils import torchutils
 from parameterized import parameterized_class
 
 

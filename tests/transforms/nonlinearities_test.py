@@ -4,10 +4,10 @@ import unittest
 
 import torch
 
-from enflows.transforms import nonlinearities as nl
-from enflows.transforms import standard
-from enflows.transforms.base import InputOutsideDomain
-from enflows.utils import torchutils
+from flowcon.transforms import nonlinearities as nl
+from flowcon.transforms import standard
+from flowcon.transforms.base import InputOutsideDomain
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 

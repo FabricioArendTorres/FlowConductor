@@ -2,7 +2,7 @@ import unittest
 
 import torch
 
-from enflows.transforms.reshape import SqueezeTransform
+from flowcon.transforms.reshape import SqueezeTransform
 from tests.transforms.transform_test import TransformTest
 
 

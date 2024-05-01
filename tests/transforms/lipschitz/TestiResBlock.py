@@ -2,9 +2,9 @@ import torch
 import unittest
 from parameterized import parameterized_class
 
-from enflows.nn.nets import activations
-from enflows.nn.nets.invertible_densenet import DenseNet
-from enflows.transforms.lipschitz.iresblock import iResBlock
+from flowcon.nn.nets import activations
+from flowcon.nn.nets.invertible_densenet import DenseNet
+from flowcon.transforms.lipschitz.iresblock import iResBlock
 from tests.transforms.transform_test import TransformTest
 
 torch.set_default_dtype(torch.float32)

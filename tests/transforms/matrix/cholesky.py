@@ -3,8 +3,8 @@ import numpy as np
 
 from tests.transforms.transform_test import TransformTest
 from parameterized import parameterized_class
-from enflows.utils import torchutils
-from enflows.transforms import CholeskyOuterProduct, FillTriangular, InverseTransform
+from flowcon.utils import torchutils
+from flowcon.transforms import CholeskyOuterProduct, FillTriangular, InverseTransform
 
 torch.set_default_dtype(torch.float64)
 

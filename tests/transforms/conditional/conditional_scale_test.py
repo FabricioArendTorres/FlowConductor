@@ -3,8 +3,8 @@
 import unittest
 
 import torch
-from enflows.transforms.conditional import ConditionalScaleTransform
-from enflows.utils import torchutils
+from flowcon.transforms.conditional import ConditionalScaleTransform
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import ConditionalTransformTest
 import pytest
 from parameterized import parameterized, parameterized_class

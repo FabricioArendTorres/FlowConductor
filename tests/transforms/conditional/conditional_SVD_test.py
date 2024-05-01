@@ -2,8 +2,8 @@ import unittest
 
 import torch
 
-from enflows.transforms.conditional import ConditionalSVDTransform
-from enflows.utils import torchutils
+from flowcon.transforms.conditional import ConditionalSVDTransform
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import ConditionalTransformTest
 
 from parameterized import parameterized_class

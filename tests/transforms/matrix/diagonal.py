@@ -2,11 +2,11 @@ import unittest
 
 import torch
 
-from enflows.transforms import InverseTransform, TransformDiagonal, Exp, CompositeTransform, Sigmoid, ScalarScale, \
+from flowcon.transforms import InverseTransform, TransformDiagonal, Exp, CompositeTransform, Sigmoid, ScalarScale, \
     ScalarShift, Softplus, TransformDiagonalSoftplus, TransformDiagonalExponential
 from tests.transforms.transform_test import TransformTest
 from parameterized import parameterized_class
-from enflows.utils import torchutils
+from flowcon.utils import torchutils
 
 fancy_exp_transform = CompositeTransform([Sigmoid(),
                                           ScalarShift(1e-4, trainable=False),

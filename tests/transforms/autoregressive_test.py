@@ -4,8 +4,8 @@ import unittest
 
 import torch
 
-from enflows.transforms import autoregressive, InverseTransform
-from enflows.utils import torchutils
+from flowcon.transforms import autoregressive, InverseTransform
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 from parameterized import parameterized_class
 

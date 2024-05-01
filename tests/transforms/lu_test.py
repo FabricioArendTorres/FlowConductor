@@ -4,8 +4,8 @@ import unittest
 
 import torch
 
-from enflows.transforms import lu
-from enflows.utils import torchutils
+from flowcon.transforms import lu
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 

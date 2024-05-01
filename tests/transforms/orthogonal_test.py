@@ -4,8 +4,8 @@ import unittest
 
 import torch
 
-from enflows.transforms import orthogonal
-from enflows.utils import torchutils
+from flowcon.transforms import orthogonal
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 class BatchwiseParameterizedHouseholderTest(TransformTest):

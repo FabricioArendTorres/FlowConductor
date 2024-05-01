@@ -5,7 +5,7 @@ import unittest
 import torch
 import torchtestcase
 
-from enflows.distributions import normal
+from flowcon.distributions import normal
 
 
 class StandardNormalTest(torchtestcase.TorchTestCase):
