@@ -20,32 +20,59 @@ The bijective layers we additionally provide includes but are not limited to Pla
 
 
 ## Install.
-Our releases are available on `pip`.
-We recommend using a virtual environment.
-Make sure to set up your pytorch version beforehand.
+FlowConductor is installable via `pip`.
+We recommend using a virtual environment, where you set up your pytorch version beforehand.
+You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
+for any version after 1.13.
+
+For now, please install it directly from github via pip, as our pipy link might be deprecated 
+```
+$  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+```
+
+Of course, you may also just download the repo and install it locally
+```
+$ git clone https://github.com/FabricioArendTorres/FlowConductor
+$ cd FlowConductor
+$ pip install . 
+```
+
+## Docker
+We provide some basic Dockerfiles in `./docker`, which are very simple extensions of the pytorch docker images.
+The dockerfiles we list are the ones used for testing, so you can be sure they work.
+If you are unfamiliar with Docker, you can use our package with it as follows (assuming it is at least installed).
+
+This also works on Windows (cpu at least)!
 
 ```
-(base) $  pip install enflows
+$ git clone https://github.com/FabricioArendTorres/FlowConductor
+$ cd FlowConductor
+
+# Build the docker image, see the ./docker dir for different versions.
+$ docker build -f ./docker/Dockerfile-pytorchlatest -t flowc-pytorchlatest .
+
+# you can run the tests with
+docker run flowc-pytorchlatest pytest /flowc
 ```
 
-## Using the current version from Github.
-If you want to use the current version, or contribute, you can directly clone this github repository.
-The requirements.txt is provided if you use pip.
-The `.yml` file for the environment is given in `env/conda_env.yml`, and can be created with conda from the base directory via:
+For working with this container, you may either choose to adapt our Dockerfiles, 
+or simply bind the current directory when starting the container interactively.
+For the latter, you can run a script (here `examples/toy_2d.py`) with
 
+```$ docker run --rm -it -v .:/app flowc-pytorchlatest python examples/toy_2d.py```
+Or you may swap an interactive shell within the container with
 ```
-(base) $  conda env create --file environment.yml
-(base) $  conda activate environment.yml
+$ docker run --rm -it -v .:/app flowc-pytorchlatest
+$ python examples/toy_2d.py
+```
 
-# This code should then work:
-(enflows) $  python examples/conditional_toy_2d.py
-```
+
 
 Ideally, after a successfull install you should also  be able to run and pass the unit tests with:` 
 (enflows) /lagrangian_flow_net$  pytest
 `
 
-## Usage
+## Package Usage
 
 As the core is based on `nflows`, its usage is similar. To define a flow:
 
