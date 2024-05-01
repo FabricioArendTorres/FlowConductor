@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from enflows.transforms.adaptive_sigmoids import SumOfSigmoids, DeepSigmoid
+from flowcon.transforms.adaptive_sigmoids import SumOfSigmoids, DeepSigmoid
 from tests.transforms.transform_test import TransformTest
 from parameterized import parameterized_class
 

@@ -4,11 +4,11 @@ import unittest
 from parameterized import parameterized_class
 import numpy as np
 
-from enflows.nn.nets import mlp, spectral_norm, activations, lipschitz_dense
-from enflows.nn.nets.spectral_norm import scaled_spectral_norm
+from flowcon.nn.nets import mlp, spectral_norm, activations, lipschitz_dense
+from flowcon.nn.nets.spectral_norm import scaled_spectral_norm
 from torch.nn.utils.parametrize import is_parametrized
 from types import SimpleNamespace
-from enflows.utils.torchutils import tensor_to_np, batch_jacobian, logabsdet
+from flowcon.utils.torchutils import tensor_to_np, batch_jacobian, logabsdet
 
 
 def _spectral_norm(model):

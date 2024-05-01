@@ -4,8 +4,8 @@ import unittest
 
 import torch
 
-from enflows.transforms import base
-from enflows.transforms import normalization as norm
+from flowcon.transforms import base
+from flowcon.transforms import normalization as norm
 from tests.transforms.transform_test import TransformTest
 
 

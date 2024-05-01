@@ -1,8 +1,8 @@
 import torch
 import torchtestcase
 
-from enflows.transforms import base
-from enflows.utils import torchutils
+from flowcon.transforms import base
+from flowcon.utils import torchutils
 
 
 class TransformTest(torchtestcase.TorchTestCase):

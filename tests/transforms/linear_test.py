@@ -5,12 +5,12 @@ from unittest.mock import MagicMock
 
 import torch
 
-from enflows.transforms import linear
-from enflows.transforms.linear import Linear, ScalarScale, ScalarShift
-from enflows.utils import torchutils
+from flowcon.transforms import linear
+from flowcon.transforms.linear import Linear, ScalarScale, ScalarShift
+from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
-from enflows.utils import torchutils
+from flowcon.utils import torchutils
 from parameterized import parameterized_class
 
 

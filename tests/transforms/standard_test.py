@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 import torch
 
-from enflows.transforms import standard
+from flowcon.transforms import standard
 from tests.transforms.transform_test import TransformTest
 
 

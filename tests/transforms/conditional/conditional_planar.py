@@ -3,8 +3,8 @@ import unittest
 import nflows.transforms
 import torch
 
-from enflows.transforms.conditional import ConditionalPlanarTransform
-from enflows.utils import torchutils
+from flowcon.transforms.conditional import ConditionalPlanarTransform
+from flowcon.utils import torchutils
 # from tests.transforms.transform_test import ConditionalTransformTest
 from tests.transforms.transform_test import TransformTest
 

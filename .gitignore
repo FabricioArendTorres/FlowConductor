@@ -1,5 +1,5 @@
 # data location
-enflows/datasets/uci/data/
+flowcon/datasets/uci/data/
 
 
 # Development files and python cache

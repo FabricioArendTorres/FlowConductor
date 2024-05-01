@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import torch
 
-from enflows.transforms import base, standard, ConditionalTransform, InverseTransform
+from flowcon.transforms import base, standard, ConditionalTransform, InverseTransform
 from tests.transforms.transform_test import TransformTest
 
 

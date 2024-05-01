@@ -72,17 +72,16 @@ $ python examples/toy_2d.py
 As the core is based on `nflows`, its usage is similar. To define a flow:
 
 ```python
-from enflows import transforms, distributions, flows
+from flowcon import transforms, distributions, flows
 
 # Define an invertible transformation.
 transform = transforms.CompositeTransform([
-    transforms.MaskedAffineAutoregressiveTransform(features=2, hidden_features=4),
-    transforms.RandomPermutation(features=2)
+  transforms.MaskedAffineAutoregressiveTransform(features=2, hidden_features=4),
+  transforms.RandomPermutation(features=2)
 ])
 
 # Define a base distribution.
 base_distribution = distributions.StandardNormal(shape=[2])
-
 
 # Combine into a flow.
 flow = flows.Flow(transform=transform, distribution=base_distribution)

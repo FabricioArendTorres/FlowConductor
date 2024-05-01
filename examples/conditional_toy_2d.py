@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 
 from torch import optim
 
-from enflows.flows import Flow
-from enflows.distributions.normal import DiagonalNormal
-from enflows.transforms import (ActNorm,
+from flowcon.flows import Flow
+from flowcon.distributions.normal import DiagonalNormal
+from flowcon.transforms import (ActNorm,
                                 iResBlock,
                                 CompositeTransform,
                                 )
-from enflows.nn.nets import *
-from enflows.utils.torchutils import *
-from enflows.datasets.base import load_plane_dataset, InfiniteLoader, PlaneDataset
+from flowcon.nn.nets import *
+from flowcon.utils.torchutils import *
+from flowcon.datasets.base import load_plane_dataset, InfiniteLoader, PlaneDataset
 import logging
 
 logging.basicConfig(

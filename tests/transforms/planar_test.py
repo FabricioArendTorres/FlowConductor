@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from enflows.transforms import PlanarTransform
+from flowcon.transforms import PlanarTransform
 from tests.transforms.transform_test import TransformTest
 import numpy as np
 import random

@@ -4,7 +4,7 @@ import unittest
 
 import torch
 
-from enflows.utils import torchutils
+from flowcon.utils import torchutils
 import torchtestcase
 import numpy as np
 

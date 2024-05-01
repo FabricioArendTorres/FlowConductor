@@ -1,13 +1,13 @@
 from os import path
 from setuptools import find_packages, setup
-from enflows.version import VERSION
+from flowcon.version import VERSION
 
 
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
-    name="enflows",
+    name="flowcon",
     version=VERSION,
     description="Normalizing flows in PyTorch. An extension of nflows.",
     long_description=long_description,
