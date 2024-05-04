@@ -6,6 +6,7 @@ from flowcon.distributions.base import Distribution
 from flowcon.utils import torchutils
 from inspect import signature
 
+__all__ = ['Flow']
 
 class Flow(Distribution):
     """Base class for all flow objects."""

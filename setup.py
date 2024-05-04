@@ -1,6 +1,6 @@
 from os import path
 from setuptools import find_packages, setup
-from flowcon.version import VERSION
+from flowcon._version import VERSION
 
 
 this_directory = path.abspath(path.dirname(__file__))
