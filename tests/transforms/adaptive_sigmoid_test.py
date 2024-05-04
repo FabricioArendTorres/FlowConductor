@@ -23,7 +23,7 @@ class AdaptiveSigmoidTest(TransformTest):
     def setUp(self):
         torch.manual_seed(1234)
         self.inputs = torch.randn(self.batch_size, self.features)
-        self.transform = SumOfSigmoids(features=self.features, n_sigmoids=self.n_sigmoids, num_iterations=30)
+        self.transform = SumOfSigmoids(features=self.features, n_sigmoids=self.n_sigmoids, iterations_bisection_inverse=30)
         self.eps = 1e-5
 
     def test_forward(self):

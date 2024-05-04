@@ -11,16 +11,50 @@ from flowcon.transforms.nonlinearities import ExtendedSoftplus, Sigmoid, Softplu
 
 
 class SumOfSigmoids(MonotonicTransform):
+    """
+    Implements non-linear elementwise transformation as the sum of multiple shifted scaled sigmoid functions,
+    which are combined with an extended softplus function to get linear behaviour far away from the origin.
+
+    See Appendix A.1 in [1] for more details.
+
+    [1] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. "Conditional Matrix Flows for Gaussian Graphical Models." Advances in Neural Information Processing Systems 36 (2024).
+    """
     PREACT_SCALE_MIN = .1
     PREACT_SCALE_MAX = 10.
     PREACT_SHIFT_MAX = 10
 
-    def __init__(self, features, n_sigmoids=10, num_iterations=50, lim=120,
+    def __init__(self, features, n_sigmoids=10, iterations_bisection_inverse=50, lim_bisection_inverse=120,
                  raw_params: torch.Tensor = None):
+        """
+        Initialize the SumOfSigmoids transformation.
+
+        Parameters
+        ----------
+        features : int
+            The number of features for each input. This defines the dimensionality of the input space.
+        n_sigmoids : int, optional
+            Number of sigmoid functions to apply per feature. This controls the complexity of the transformation. Default is 10.
+        iterations_bisection_inverse : int, optional
+            Max number of iterations for computing the numerical inverse with bisection search if it doesn't converge. Default is 50.
+        lim_bisection_inverse : int, optional
+            [-lim_bisection_inverse, lim_bisection_inverse] provides the search region for the inverse via bisection search . Default is 120.
+        raw_params : torch.Tensor, optional
+            A tensor containing pre-initialized parameters for the transformation. If provided, the parameters are set directly from this tensor; otherwise, they are initialized internally.
+
+        Raises
+        ------
+        AssertionError
+            If `raw_params` is provided but does not match the required shape of (features, 3 * n_sigmoids + 1).
+
+        Notes
+        -----
+        This constructor sets up the transformation by initializing parameters, either from the `raw_params` tensor
+        or by creating new parameters if `raw_params` is None.
+        """
         self.n_sigmoids = n_sigmoids
         self.features = features
 
-        super(SumOfSigmoids, self).__init__(num_iterations=num_iterations, lim=lim)
+        super(SumOfSigmoids, self).__init__(num_iterations=iterations_bisection_inverse, lim=lim_bisection_inverse)
         if raw_params is None:
             self.shift_preact = nn.Parameter(torch.randn(1, features, self.n_sigmoids), requires_grad=True)
             self.log_scale_preact = nn.Parameter(torch.zeros(1, features, self.n_sigmoids), requires_grad=True)
@@ -35,6 +69,16 @@ class SumOfSigmoids(MonotonicTransform):
         self.eps = 1e-6
 
     def get_raw_params(self):
+        """
+        Concatenate and return all raw parameters of the transformation in a single tensor.
+        The Tensor is of shape [self.n_sigmoids, self.features, -1].
+
+        Returns
+        -------
+        torch.Tensor
+            A concatenated tensor of all raw parameters, including shifts, log scales for
+            the sigmoid functions, softmax weights, and the shift from the extended softplus.
+        """
         return torch.cat((self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
                           self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
                           self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
@@ -98,8 +142,6 @@ class SumOfSigmoids(MonotonicTransform):
         return shift_preact, scale_preact, scale_postact
 
 
-
-
 class DeepSigmoidModule(Transform):
     @staticmethod
     def softmax(x, dim=-1):
@@ -122,7 +164,7 @@ class DeepSigmoidModule(Transform):
         self.softplus = lambda x: self.softplus_(x) + self.eps
         self.sigmoid_ = nn.Sigmoid()
         self.sigmoid = lambda x: self.sigmoid_(x) * (
-                    1 - self.delta) + 0.5 * self.delta
+                1 - self.delta) + 0.5 * self.delta
         self.logsigmoid = lambda x: -self.softplus(-x)
         self.log = lambda x: torch.log(x * 1e2) - np.log(1e2)
         self.logit = lambda x: self.log(x) - self.log(1 - x)
@@ -175,11 +217,12 @@ class DeepSigmoidModule(Transform):
     def inverse(self, inputs, context=None):
         raise NotImplementedError("..")
 
+
 class DeepSigmoid(DeepSigmoidModule):
     def __init__(self, features, *args, **kwargs):
         self.features = features
         super().__init__(*args, **kwargs)
-        _a_preact = -2*torch.ones(self.features, self.n_sigmoids)  # scale
+        _a_preact = -2 * torch.ones(self.features, self.n_sigmoids)  # scale
         _b_preact = torch.zeros(self.features, self.n_sigmoids)  # shift
         _w_preact = torch.ones(self.features, self.n_sigmoids)  # softmax
 
