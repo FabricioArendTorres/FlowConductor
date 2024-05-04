@@ -12,7 +12,7 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url="https://github.com/FabricioArendTorres/FlowConductor/",
-    author="Fabricio Arend Torres, Marcello Massima Negri, Jonathan Aellen",
+    author="Fabricio Arend Torres, Marcello Massimo Negri, Jonathan Aellen",
     packages=find_packages(exclude=["tests"]),
     license="MIT",
     # setup_requires=['pbr'],
