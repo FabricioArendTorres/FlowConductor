@@ -47,7 +47,9 @@ class FullSort(nn.Module):
 
 
 class MaxMin(nn.Module):
-
+    """
+    Module that computes max and min values of input tensor.
+    """
     def forward(self, x):
         b, d = x.shape
         max_vals = torch.max(x.view(b, d // 2, 2), 2)[0]

@@ -42,23 +42,45 @@ __all__ = ['iResBlock']
 
 
 class iResBlock(Transform):
+    """
+    Implements an invertible residual block (iResBlock) using a provided Lipschitz-Constrained neural network model.
+    This block can either calculate the exact log determinant of the Jacobian or use an unbiased estimator based on power
+    series expansions.
+
+    It supports two modes of operation: training and testing, with different determinant
+    estimators used in each mode. At test time, the Jacobian is computed with Brute Force.
+    """
     def __init__(
             self,
-            nnet:_DenseNet,
+            contractive_network:_DenseNet,
             brute_force=False,
             unbiased_estimator=True,
             **options
     ):
         """
-        Args:
-            nnet: a nn.Module
-            brute_force: If true, computes the exact logdet.
-            unbiased_estimator: If true, uses an unbiased estimator for the logdet, else a power series is used.
-            options:
-                trace_estimator: 'neumann' or 'basic'. Only used if brute_force=False.
+        Initializes an iResBlock with a specified neural network and configuration options for determinant estimation.
+
+        Parameters
+        ----------
+        contractive_network : _DenseNet
+            The neural network module to be used for transformation within the residual block.
+            Must be a neural network with a Lipschitz-Constant smaller than 1.
+        brute_force : bool, optional
+            If True, the exact log determinant of the Jacobian is computed during training. Default is False.
+        unbiased_estimator : bool, optional
+            If True, an unbiased estimator is used for the log determinant during training; otherwise, a biased power
+            series approximation is used. Only has an effect if brute_force is false. Default is True.
+        **options : dict
+            Additional keyword arguments to configure the determinant estimator. Key options include:
+            'trace_estimator' which specifies the type of trace estimator ('neumann' or 'basic') when brute_force is False.
+
+        Notes
+        -----
+        This method sets up two configurations for the determinant estimator: one for training and another for testing,
+        with the testing configuration always using brute force for exact computations regardless of the `brute_force` parameter.
         """
         super().__init__()
-        self.nnet = nnet
+        self.nnet = contractive_network
         self.brute_force = brute_force
         self.unbiased_estimator = unbiased_estimator
 
@@ -72,7 +94,7 @@ class iResBlock(Transform):
                                                                           **options)
 
     def forward(self, x, context=None):
-        g, logdetgrad = self._logabsdet(x, context=context)
+        g, logdetgrad = self._g_and_logabsdet(x, context=context)
         return x + g, logdetgrad.view(-1)
 
     @property
@@ -84,9 +106,22 @@ class iResBlock(Transform):
 
     def inverse(self, y, context=None):
         x = self._inverse_fixed_point(y, context)
-        return x, -self._logabsdet(x, context=context)[1]
+        return x, -self._g_and_logabsdet(x, context=context)[1]
 
     def _inverse_fixed_point(self, y, context=None, atol=1e-5, rtol=1e-5):
+        """
+
+        Parameters
+        ----------
+        y
+        context
+        atol
+        rtol
+
+        Returns
+        -------
+
+        """
         x, x_prev = y - self.nnet(y, context), y
         i = 0
         tol = atol + y.abs() * rtol
@@ -98,8 +133,19 @@ class iResBlock(Transform):
                 break
         return x
 
-    def _logabsdet(self, x, context=None):
-        """Returns g(x) and logdet|d(x+g(x))/dx|."""
+    def _g_and_logabsdet(self, x, context=None):
+        """
+        Helper function that returns g = self.nnet(x) and logdet|d(x+self.nnet(x))/dx|.
+
+        Parameters
+        ----------
+        x
+        context
+
+        Returns
+        -------
+
+        """
         with torch.enable_grad():
             g, logabsdet = self.logabsdet_estimator.logabsdet_and_g(x, training=self.training,
                                                                     context=context)
@@ -112,6 +158,29 @@ class iResBlock(Transform):
         )
 
     class Factory:
+        """
+        A factory class for constructing instances of `iResBlock` with specified configurations for the neural network and determinant estimator.
+
+        This class facilitates the customization of the underlying DenseNet and determinant estimation strategies before building an iResBlock instance.
+
+        Methods
+        -------
+        set_densenet(**kwargs)
+            Configures the DenseNet settings for the iResBlock. This method initializes the DenseNet with the specified arguments.
+
+        set_logabsdet_estimator(brute_force=False, unbiased_estimator=True, **options)
+            Sets the configuration for the log determinant estimator used in iResBlock. This includes options for whether to use a brute force method, an unbiased estimator, and other determinant estimator specific options.
+
+        build()
+            Constructs and returns an iResBlock instance with the previously configured settings for DenseNet and the log determinant estimator.
+
+        Example
+        -------
+        factory = iResBlock.Factory()
+        factory.set_densenet(layers=10, growth_rate=12)
+        factory.set_logabsdet_estimator(brute_force=True, trace_estimator='neumann')
+        iresblock_instance = factory.build()
+        """
         def __init__(self):
             self.args_iResBlock = None
             self.densenet_factory = None
@@ -132,13 +201,46 @@ class iResBlock(Transform):
         def build(self) -> 'iResBlock':
             assert self.args_iResBlock is not None, "iResBlock arguments not set. Call set_iresblock."
             assert self.densenet_factory is not None, "DenseNet arguments not set. Call set_densenet."
-            return iResBlock(nnet=self.densenet_factory(),
+            return iResBlock(contractive_network=self.densenet_factory(),
                              **self.args_iResBlock)
 
 
 
 class DeterminantEstimator(torch.nn.Module):
+    """
+    Abstract base class for a determinant estimator that provides methods to compute the network output (g) and
+    log determinant of the Jacobian (logabsdet) for given inputs using a neural network model.
+
+    This class is designed to be subclassed by specific implementations that compute the determinant using
+    different methods such as brute force calculation or approximations through power series expansions.
+
+
+    Notes
+    -----
+    Subclasses must implement the _g_and_logabsdet method, which is called by logabsdet_and_g. The design allows
+    for flexible adaptation to different computational strategies for determinant estimation.
+    """
     def __init__(self, network:_DenseNet, parameter_generator: ParameterGenerator):
+        """
+        Initializes a DeterminantEstimator with a specified neural network and a parameter generator for determinant estimation.
+
+        Parameters
+        ----------
+        network : _DenseNet
+            The neural network model that will be used to apply transformations to the inputs. This model's output
+            is used in the computation of the transformation output (g) and the log determinant of the Jacobian (logabsdet).
+
+        parameter_generator : ParameterGenerator
+            A generator for creating parameters that influence the behavior of the estimator, particularly in
+            approximation modes of the logabsdet. This generator helps adapt the behavior of the determinant estimation according to
+            the training or testing phase and specific estimation strategies.
+
+        Notes
+        -----
+        This constructor sets up the necessary components for determinant estimation, binding the neural network
+        and parameter generation strategies which are essential for the implementation of the log determinant computations.
+
+        """
         super().__init__()
         self.nnet = network
         self.parameter_generator = parameter_generator
@@ -172,7 +274,11 @@ class DeterminantEstimator(torch.nn.Module):
 
 class BruteForceDeterminantEstimator(DeterminantEstimator):
     """
-        Brute-force compute Jacobian determinant
+    A subclass of DeterminantEstimator that computes the Jacobian determinant in a brute-force manner. This estimator
+    directly calculates the determinant using the full Jacobian matrix derived from the neural network outputs, which
+    provides exact results but at higher computational cost.
+
+    This approach is typically used for small-dimensional problems or during testing phases where precision is critical.
     """
 
     def __init__(self, network:_DenseNet):
@@ -191,7 +297,13 @@ class BruteForceDeterminantEstimator(DeterminantEstimator):
 
 class ApproxTraceDeterminantEstimator(DeterminantEstimator):
     """
-        Power series with trace estimation.
+    Implements an approximate method for calculating the determinant of the Jacobian of a transformation. This class
+    uses trace estimation techniques for the log determinant, providing a balance between computational efficiency
+     and accuracy. It is particularly suited for high-dimensional problems where brute-force computation is infeasible.
+
+    Notes
+    -----
+    If you don't know what you're doing or choosing, just take the default settings.
     """
 
     def __init__(self, *args, trace_estimator="neumann", **kwargs):
