@@ -148,25 +148,3 @@ class LipSwish(nn.Module):
         return self.swish(x).div_(1.004)
 
 
-'''
-By default, forward() and backward() of torch.autograd.Function
-   is supplied with torch.no_grad() context.
-   Hence, no need to worry about that inefficiency.
-'''
-
-class Pila(nn.Module):
-
-    def __init__(self, k=5, device=None):
-        super(Pila, self).__init__()
-        assert k > 0
-
-        from flowcon.nn.nets.pila import PilaFunction
-        self.PilaFunction = PilaFunction
-        self.k = k
-
-    def forward(self, x):
-        k = self.k
-        kabcdmn = torch.tensor((k, k ** 2 / 2, -k, 1, 0, 1, 0), dtype=x.dtype, device=x.device)
-        return self.PilaFunction.apply(x, kabcdmn)
-
-
