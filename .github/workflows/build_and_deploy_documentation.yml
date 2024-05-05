@@ -1,39 +1,31 @@
-name: Documentation - Build and Deploy
+name: Build and Deploy Documentation
 
 on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Check out code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v3
       with:
         python-version: 3.8
-        cache: 'pip'
+
+    - uses: actions/cache@v2
+      name: Set up caches
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}
 
     - name: Install dependencies
       run: |
@@ -44,18 +36,17 @@ jobs:
     - name: Build documentation
       run: |
         pdoc3 flowcon -o docs/ --html --force 
-        mkdir docs/_build
-        mv docs/flowcon/* docs/_build
+        mv docs/flowcon/* docs
         rmdir docs/flowcon
 
     # Upload for introspection, useful for pull requests and debugging
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v3
       with:
-        name: docs-artifact
-        path: docs/_build
+        name: generated-site
+        path: docs/
 
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        folder: docs/_build # The folder the action should deploy.
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs
