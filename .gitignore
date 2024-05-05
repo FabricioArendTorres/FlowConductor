@@ -7,7 +7,6 @@ flowcon/datasets/uci/data/
 /*.egg
 /*.egg-info
 
-html
 # Notebook checkpoints
 .ipynb_checkpoints
 
