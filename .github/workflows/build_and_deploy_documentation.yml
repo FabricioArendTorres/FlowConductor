@@ -53,9 +53,9 @@ jobs:
         rmdir docs/flowcon
 
     # Upload for introspection, useful for pull requests and debugging
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: generated-site
+        name: github-pages
         path: docs/
 
   deploy:
