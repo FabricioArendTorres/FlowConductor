@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'flowcon'
-      - '.githib/workflows/build_and_deploy_documentation.yml'
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
