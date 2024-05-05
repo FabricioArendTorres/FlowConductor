@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.datasets.base API documentation</title>
+<meta name="description" content="Based on https://github.com/bayesiains/nsf" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.datasets.base</code></h1>
+</header>
+<section id="section-intro">
+<p>Based on <a href="https://github.com/bayesiains/nsf">https://github.com/bayesiains/nsf</a></p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Based on https://github.com/bayesiains/nsf
+&#34;&#34;&#34;
+
+from .plane import *
+
+from torch.utils import data
+
+def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
+    &#34;&#34;&#34;Loads and returns a plane dataset.
+
+    Args:
+        name: string, the name of the dataset.
+        num_points: int, the number of points the dataset should have,
+        flip_axes: bool, flip x and y axes if True.
+
+    Possible Names:
+        &#39;gaussian&#39;
+        &#39;crescent&#39;
+        &#39;crescent_cubed&#39;
+        &#39;sine_wave&#39;
+        &#39;abs&#39;
+        &#39;sign&#39;
+        &#39;four_circles&#39;
+        &#39;diamond&#39;
+        &#39;two_spirals&#39;
+        &#39;checkerboard&#39;
+        &#34;eight_gaussians&#34;
+        &#39;two_circles&#39;
+        &#39;two_moons&#39;
+        &#39;pinwheel&#39;
+        &#39;swissroll&#39;
+        &#39;rings&#39;
+
+    Returns:
+        A Dataset object, the requested dataset.
+
+    Raises:
+         ValueError: If `name` an unknown dataset.
+    &#34;&#34;&#34;
+
+    try:
+        return {
+            &#39;gaussian&#39;: GaussianDataset,
+            &#39;crescent&#39;: CrescentDataset,
+            &#39;crescent_cubed&#39;: CrescentCubedDataset,
+            &#39;sine_wave&#39;: SineWaveDataset,
+            &#39;abs&#39;: AbsDataset,
+            &#39;sign&#39;: SignDataset,
+            &#39;four_circles&#39;: FourCircles,
+            &#39;diamond&#39;: DiamondDataset,
+            &#39;two_spirals&#39;: TwoSpiralsDataset,
+            &#39;checkerboard&#39;: CheckerboardDataset,
+            &#34;eight_gaussians&#34;: EightGaussianDataset,
+            &#39;two_circles&#39;: TwoCircles,
+            &#39;two_moons&#39;: TwoMoonsDataset,
+            &#39;pinwheel&#39;: PinWheelDataset,
+            &#39;swissroll&#39;: SwissRollDataset,
+            &#39;rings&#39;: ConcentricRingsDataset
+        }[name](num_points=num_points, flip_axes=flip_axes, return_label=return_label)
+
+    except KeyError:
+        raise ValueError(&#39;Unknown dataset: {}&#39;.format(name))
+
+
+def batch_generator(loader, num_batches=int(1e10)):
+    batch_counter = 0
+    while True:
+        for batch in loader:
+            yield batch
+            batch_counter += 1
+            if batch_counter == num_batches:
+                return
+
+
+class InfiniteLoader(data.DataLoader):
+    &#34;&#34;&#34;A data loader that can load a dataset repeatedly.&#34;&#34;&#34;
+
+    def __init__(self, num_epochs=None, *args, **kwargs):
+        &#34;&#34;&#34;Constructor.
+
+        Args:
+            dataset: A `Dataset` object to be loaded.
+            batch_size: int, the size of each batch.
+            shuffle: bool, whether to shuffle the dataset after each epoch.
+            drop_last: bool, whether to drop last batch if its size is less than
+                `batch_size`.
+            num_epochs: int or None, number of epochs to iterate over the dataset.
+                If None, defaults to infinity.
+        &#34;&#34;&#34;
+        super().__init__(
+            *args, **kwargs
+        )
+        self.finite_iterable = super().__iter__()
+        self.counter = 0
+        self.num_epochs = float(&#39;inf&#39;) if num_epochs is None else num_epochs
+
+    def __next__(self):
+        try:
+            return next(self.finite_iterable)
+        except StopIteration:
+            self.counter += 1
+            if self.counter &gt;= self.num_epochs:
+                raise StopIteration
+            self.finite_iterable = super().__iter__()
+            return next(self.finite_iterable)
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return None
+
+
+def load_num_batches(loader, num_batches):
+    &#34;&#34;&#34;A generator that returns num_batches batches from the loader, irrespective of the length
+    of the dataset.&#34;&#34;&#34;
+    batch_counter = 0
+    while True:
+        for batch in loader:
+            yield batch
+            batch_counter += 1
+            if batch_counter == num_batches:
+                return</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="flowcon.datasets.base.batch_generator"><code class="name flex">
+<span>def <span class="ident">batch_generator</span></span>(<span>loader, num_batches=10000000000)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def batch_generator(loader, num_batches=int(1e10)):
+    batch_counter = 0
+    while True:
+        for batch in loader:
+            yield batch
+            batch_counter += 1
+            if batch_counter == num_batches:
+                return</code></pre>
+</details>
+</dd>
+<dt id="flowcon.datasets.base.load_num_batches"><code class="name flex">
+<span>def <span class="ident">load_num_batches</span></span>(<span>loader, num_batches)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A generator that returns num_batches batches from the loader, irrespective of the length
+of the dataset.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_num_batches(loader, num_batches):
+    &#34;&#34;&#34;A generator that returns num_batches batches from the loader, irrespective of the length
+    of the dataset.&#34;&#34;&#34;
+    batch_counter = 0
+    while True:
+        for batch in loader:
+            yield batch
+            batch_counter += 1
+            if batch_counter == num_batches:
+                return</code></pre>
+</details>
+</dd>
+<dt id="flowcon.datasets.base.load_plane_dataset"><code class="name flex">
+<span>def <span class="ident">load_plane_dataset</span></span>(<span>name, num_points, flip_axes=False, return_label=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Loads and returns a plane dataset.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>string, the name of the dataset.</dd>
+<dt><strong><code>num_points</code></strong></dt>
+<dd>int, the number of points the dataset should have,</dd>
+<dt><strong><code>flip_axes</code></strong></dt>
+<dd>bool, flip x and y axes if True.</dd>
+</dl>
+<p>Possible Names:
+'gaussian'
+'crescent'
+'crescent_cubed'
+'sine_wave'
+'abs'
+'sign'
+'four_circles'
+'diamond'
+'two_spirals'
+'checkerboard'
+"eight_gaussians"
+'two_circles'
+'two_moons'
+'pinwheel'
+'swissroll'
+'rings'</p>
+<h2 id="returns">Returns</h2>
+<p>A Dataset object, the requested dataset.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>ValueError</code></dt>
+<dd>If <code>name</code> an unknown dataset.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
+    &#34;&#34;&#34;Loads and returns a plane dataset.
+
+    Args:
+        name: string, the name of the dataset.
+        num_points: int, the number of points the dataset should have,
+        flip_axes: bool, flip x and y axes if True.
+
+    Possible Names:
+        &#39;gaussian&#39;
+        &#39;crescent&#39;
+        &#39;crescent_cubed&#39;
+        &#39;sine_wave&#39;
+        &#39;abs&#39;
+        &#39;sign&#39;
+        &#39;four_circles&#39;
+        &#39;diamond&#39;
+        &#39;two_spirals&#39;
+        &#39;checkerboard&#39;
+        &#34;eight_gaussians&#34;
+        &#39;two_circles&#39;
+        &#39;two_moons&#39;
+        &#39;pinwheel&#39;
+        &#39;swissroll&#39;
+        &#39;rings&#39;
+
+    Returns:
+        A Dataset object, the requested dataset.
+
+    Raises:
+         ValueError: If `name` an unknown dataset.
+    &#34;&#34;&#34;
+
+    try:
+        return {
+            &#39;gaussian&#39;: GaussianDataset,
+            &#39;crescent&#39;: CrescentDataset,
+            &#39;crescent_cubed&#39;: CrescentCubedDataset,
+            &#39;sine_wave&#39;: SineWaveDataset,
+            &#39;abs&#39;: AbsDataset,
+            &#39;sign&#39;: SignDataset,
+            &#39;four_circles&#39;: FourCircles,
+            &#39;diamond&#39;: DiamondDataset,
+            &#39;two_spirals&#39;: TwoSpiralsDataset,
+            &#39;checkerboard&#39;: CheckerboardDataset,
+            &#34;eight_gaussians&#34;: EightGaussianDataset,
+            &#39;two_circles&#39;: TwoCircles,
+            &#39;two_moons&#39;: TwoMoonsDataset,
+            &#39;pinwheel&#39;: PinWheelDataset,
+            &#39;swissroll&#39;: SwissRollDataset,
+            &#39;rings&#39;: ConcentricRingsDataset
+        }[name](num_points=num_points, flip_axes=flip_axes, return_label=return_label)
+
+    except KeyError:
+        raise ValueError(&#39;Unknown dataset: {}&#39;.format(name))</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.datasets.base.InfiniteLoader"><code class="flex name class">
+<span>class <span class="ident">InfiniteLoader</span></span>
+<span>(</span><span>num_epochs=None, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A data loader that can load a dataset repeatedly.</p>
+<p>Constructor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dataset</code></strong></dt>
+<dd>A <code>Dataset</code> object to be loaded.</dd>
+<dt><strong><code>batch_size</code></strong></dt>
+<dd>int, the size of each batch.</dd>
+<dt><strong><code>shuffle</code></strong></dt>
+<dd>bool, whether to shuffle the dataset after each epoch.</dd>
+<dt><strong><code>drop_last</code></strong></dt>
+<dd>bool, whether to drop last batch if its size is less than
+<code>batch_size</code>.</dd>
+<dt><strong><code>num_epochs</code></strong></dt>
+<dd>int or None, number of epochs to iterate over the dataset.
+If None, defaults to infinity.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InfiniteLoader(data.DataLoader):
+    &#34;&#34;&#34;A data loader that can load a dataset repeatedly.&#34;&#34;&#34;
+
+    def __init__(self, num_epochs=None, *args, **kwargs):
+        &#34;&#34;&#34;Constructor.
+
+        Args:
+            dataset: A `Dataset` object to be loaded.
+            batch_size: int, the size of each batch.
+            shuffle: bool, whether to shuffle the dataset after each epoch.
+            drop_last: bool, whether to drop last batch if its size is less than
+                `batch_size`.
+            num_epochs: int or None, number of epochs to iterate over the dataset.
+                If None, defaults to infinity.
+        &#34;&#34;&#34;
+        super().__init__(
+            *args, **kwargs
+        )
+        self.finite_iterable = super().__iter__()
+        self.counter = 0
+        self.num_epochs = float(&#39;inf&#39;) if num_epochs is None else num_epochs
+
+    def __next__(self):
+        try:
+            return next(self.finite_iterable)
+        except StopIteration:
+            self.counter += 1
+            if self.counter &gt;= self.num_epochs:
+                raise StopIteration
+            self.finite_iterable = super().__iter__()
+            return next(self.finite_iterable)
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.utils.data.dataloader.DataLoader</li>
+<li>typing.Generic</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.datasets.base.InfiniteLoader.batch_size"><code class="name">var <span class="ident">batch_size</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.dataset"><code class="name">var <span class="ident">dataset</span> : torch.utils.data.dataset.Dataset[+T_co]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.drop_last"><code class="name">var <span class="ident">drop_last</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.num_workers"><code class="name">var <span class="ident">num_workers</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.pin_memory"><code class="name">var <span class="ident">pin_memory</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.pin_memory_device"><code class="name">var <span class="ident">pin_memory_device</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.prefetch_factor"><code class="name">var <span class="ident">prefetch_factor</span> : Optional[int]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.sampler"><code class="name">var <span class="ident">sampler</span> : Union[torch.utils.data.sampler.Sampler, Iterable[+T_co]]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.datasets.base.InfiniteLoader.timeout"><code class="name">var <span class="ident">timeout</span> : float</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon.datasets" href="index.html">flowcon.datasets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="flowcon.datasets.base.batch_generator" href="#flowcon.datasets.base.batch_generator">batch_generator</a></code></li>
+<li><code><a title="flowcon.datasets.base.load_num_batches" href="#flowcon.datasets.base.load_num_batches">load_num_batches</a></code></li>
+<li><code><a title="flowcon.datasets.base.load_plane_dataset" href="#flowcon.datasets.base.load_plane_dataset">load_plane_dataset</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.datasets.base.InfiniteLoader" href="#flowcon.datasets.base.InfiniteLoader">InfiniteLoader</a></code></h4>
+<ul class="two-column">
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.batch_size" href="#flowcon.datasets.base.InfiniteLoader.batch_size">batch_size</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.dataset" href="#flowcon.datasets.base.InfiniteLoader.dataset">dataset</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.drop_last" href="#flowcon.datasets.base.InfiniteLoader.drop_last">drop_last</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.num_workers" href="#flowcon.datasets.base.InfiniteLoader.num_workers">num_workers</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.pin_memory" href="#flowcon.datasets.base.InfiniteLoader.pin_memory">pin_memory</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.pin_memory_device" href="#flowcon.datasets.base.InfiniteLoader.pin_memory_device">pin_memory_device</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.prefetch_factor" href="#flowcon.datasets.base.InfiniteLoader.prefetch_factor">prefetch_factor</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.sampler" href="#flowcon.datasets.base.InfiniteLoader.sampler">sampler</a></code></li>
+<li><code><a title="flowcon.datasets.base.InfiniteLoader.timeout" href="#flowcon.datasets.base.InfiniteLoader.timeout">timeout</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

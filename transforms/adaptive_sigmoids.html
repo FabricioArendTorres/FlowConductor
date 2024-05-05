@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.transforms.adaptive_sigmoids API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.transforms.adaptive_sigmoids</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import abc
+
+import torch
+import torch.nn as nn
+import numpy as np
+from abc import abstractmethod
+
+from flowcon.transforms.no_analytic_inv.base import MonotonicTransform
+from flowcon.transforms.base import Transform
+from flowcon.transforms.nonlinearities import ExtendedSoftplus, Sigmoid, Softplus
+
+
+class SumOfSigmoids(MonotonicTransform):
+    &#34;&#34;&#34;
+    Implements non-linear elementwise transformation as the sum of multiple shifted scaled sigmoid functions,
+    which are combined with an extended softplus function to get linear behaviour far away from the origin.
+
+    See Appendix A.1 in [1] for more details.
+
+    [1] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. &#34;Conditional Matrix Flows for Gaussian Graphical Models.&#34; Advances in Neural Information Processing Systems 36 (2024).
+    &#34;&#34;&#34;
+    PREACT_SCALE_MIN = .1
+    PREACT_SCALE_MAX = 10.
+    PREACT_SHIFT_MAX = 10
+
+    def __init__(self, features, n_sigmoids=10, iterations_bisection_inverse=50, lim_bisection_inverse=120,
+                 raw_params: torch.Tensor = None):
+        &#34;&#34;&#34;
+        Initialize the SumOfSigmoids transformation.
+
+        Parameters
+        ----------
+        features : int
+            The number of features for each input. This defines the dimensionality of the input space.
+        n_sigmoids : int, optional
+            Number of sigmoid functions to apply per feature. This controls the complexity of the transformation. Default is 10.
+        iterations_bisection_inverse : int, optional
+            Max number of iterations for computing the numerical inverse with bisection search if it doesn&#39;t converge. Default is 50.
+        lim_bisection_inverse : int, optional
+            [-lim_bisection_inverse, lim_bisection_inverse] provides the search region for the inverse via bisection search . Default is 120.
+        raw_params : torch.Tensor, optional
+            A tensor containing pre-initialized parameters for the transformation. If provided, the parameters are set directly from this tensor; otherwise, they are initialized internally.
+
+        Raises
+        ------
+        AssertionError
+            If `raw_params` is provided but does not match the required shape of (features, 3 * n_sigmoids + 1).
+
+        Notes
+        -----
+        This constructor sets up the transformation by initializing parameters, either from the `raw_params` tensor
+        or by creating new parameters if `raw_params` is None.
+        &#34;&#34;&#34;
+        self.n_sigmoids = n_sigmoids
+        self.features = features
+
+        super(SumOfSigmoids, self).__init__(num_iterations=iterations_bisection_inverse, lim=lim_bisection_inverse)
+        if raw_params is None:
+            self.shift_preact = nn.Parameter(torch.randn(1, features, self.n_sigmoids), requires_grad=True)
+            self.log_scale_preact = nn.Parameter(torch.zeros(1, features, self.n_sigmoids), requires_grad=True)
+            self.raw_softmax = nn.Parameter((torch.ones(1, features, self.n_sigmoids, requires_grad=False)))
+            self.extended_softplus = ExtendedSoftplus(features=features)
+        else:
+            assert raw_params.shape[1:] == (features, 3 * self.n_sigmoids + 1)
+            self.set_raw_params(features, raw_params)
+
+        self.log_scale_postact = nn.Parameter(torch.log(torch.ones(1, device=self.shift_preact.device)),
+                                              requires_grad=False)
+        self.eps = 1e-6
+
+    def get_raw_params(self):
+        &#34;&#34;&#34;
+        Concatenate and return all raw parameters of the transformation in a single tensor.
+        The Tensor is of shape [self.n_sigmoids, self.features, -1].
+
+        Returns
+        -------
+        torch.Tensor
+            A concatenated tensor of all raw parameters, including shifts, log scales for
+            the sigmoid functions, softmax weights, and the shift from the extended softplus.
+        &#34;&#34;&#34;
+        return torch.cat((self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
+                          self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
+                          self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
+                          self.extended_softplus.shift.reshape(-1, self.features, 1),
+                          # self.extended_softplus.log_scale.reshape(-1, self.features, 1)
+                          ), dim=-1)
+
+    def set_raw_params(self, features, raw_params):
+        # 3 = shift, scale, softmax for sigmoids
+        # 2 = log_scale, log_shift for extended softplus
+        vals = torch.split(raw_params, [self.n_sigmoids, self.n_sigmoids, self.n_sigmoids, 1], dim=-1)
+        self.shift_preact, self.log_scale_preact, self.raw_softmax = vals[:3]
+        self.extended_softplus = ExtendedSoftplus(features=features, shift=vals[3])
+
+    def get_sigmoid_params(self, features, n_features_x_sigmoids, unconstrained_params):
+        shift_preact = unconstrained_params[:, :features * self.n_sigmoids]
+        shift_preact = shift_preact.view(-1, features, self.n_sigmoids)
+
+        log_scale_preact = unconstrained_params[:, n_features_x_sigmoids: 2 * n_features_x_sigmoids]
+        log_scale_preact = log_scale_preact.view(-1, features, self.n_sigmoids)
+
+        raw_softmax_preact = unconstrained_params[:, 2 * n_features_x_sigmoids: 3 * n_features_x_sigmoids]
+        raw_softmax_preact = raw_softmax_preact.view(-1, features, self.n_sigmoids)
+
+        return shift_preact, log_scale_preact, raw_softmax_preact
+
+    def sigmoid_log_derivative(self, x):
+        return x - 2 * torch.nn.functional.softplus(x)
+
+    def forward(self, inputs, context=None):
+        output_sum_of_sigmoids, log_diag_jac_sigmoids = self.sum_of_sigmoids(inputs)
+        output_extended_softplus, log_diag_jac_esoftplus = self.extended_softplus(inputs)
+
+        output = output_sum_of_sigmoids + output_extended_softplus
+        logabsdet = torch.logaddexp(log_diag_jac_sigmoids, log_diag_jac_esoftplus).sum(-1)
+
+        return output, logabsdet
+
+    def sum_of_sigmoids(self, inputs):
+        shift_preact, scale_preact, scale_postact = self.get_params()
+
+        pre_act = scale_preact * (inputs.unsqueeze(-1) - shift_preact)
+
+        sigmoids_expanded = scale_postact * torch.sigmoid(pre_act)
+        log_jac_sigmoid_expanded = torch.log(scale_postact) + torch.log(scale_preact) + self.sigmoid_log_derivative(
+            pre_act)
+        tmp = sigmoids_expanded.sum(-1) / (scale_postact.sum(-1))
+
+        return tmp, torch.logsumexp(log_jac_sigmoid_expanded, -1)
+
+    def get_params(self):
+        soft_max = torch.nn.functional.softmax(self.raw_softmax, dim=-1) + self.eps
+        soft_max /= soft_max.sum(-1).unsqueeze(-1)
+        scale_postact = torch.exp(self.log_scale_postact) * soft_max
+
+        scale_preact = torch.sigmoid(self.log_scale_preact)
+        scale_preact = scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
+
+        shift_preact = torch.tanh(self.shift_preact) * self.PREACT_SHIFT_MAX
+
+        return shift_preact, scale_preact, scale_postact
+
+
+class DeepSigmoidModule(Transform):
+    @staticmethod
+    def softmax(x, dim=-1):
+        e_x = torch.exp(x - x.max(dim=dim, keepdim=True)[0])
+        out = e_x / e_x.sum(dim=dim, keepdim=True)
+        return out
+
+    def __init__(self, n_sigmoids=4, mollify=0., eps=1e-4, num_inverse_iterations=100, lim=10):
+        super(DeepSigmoidModule, self).__init__()
+
+        self.n_sigmoids = n_sigmoids
+
+        self.act_a = torch.nn.Softplus()
+        self.act_b = torch.nn.Identity()
+        self.act_w = torch.nn.Softmax(dim=-1)
+        self._mollify = mollify
+        self.eps = eps
+
+        self.softplus_ = nn.Softplus()
+        self.softplus = lambda x: self.softplus_(x) + self.eps
+        self.sigmoid_ = nn.Sigmoid()
+        self.sigmoid = lambda x: self.sigmoid_(x) * (
+                1 - self.delta) + 0.5 * self.delta
+        self.logsigmoid = lambda x: -self.softplus(-x)
+        self.log = lambda x: torch.log(x * 1e2) - np.log(1e2)
+        self.logit = lambda x: self.log(x) - self.log(1 - x)
+
+    @abstractmethod
+    def forward(self, inputs, context=None):
+        dsparams = self.get_params(inputs, context)
+        return self.forward_given_params(inputs, dsparams=dsparams)
+
+    def forward_given_params(self, inputs, dsparams=None):
+        scale_ = self.act_a(self.raw_scales(dsparams))
+        shift_ = self.act_b(self.raw_shifts(dsparams))
+        weight = self.act_w(self.raw_weights(dsparams))
+
+        scale, shift = self.mollify(scale_, shift_)
+
+        pre_sigm = scale * inputs.unsqueeze(-1) + shift
+        x_pre = torch.sum(weight * torch.sigmoid(pre_sigm), dim=-1)
+        x_pre_clipped = x_pre * (1 - self.eps) + self.eps * 0.5
+        x_ = self.logit(x_pre_clipped)
+        outputs = x_
+
+        logdet = self._forward_logabsdet(scale, dsparams, self.n_sigmoids, pre_sigm, x_pre_clipped)
+
+        return outputs, logdet
+
+    def raw_scales(self, dsparams):
+        return dsparams[..., 0 * self.n_sigmoids:1 * self.n_sigmoids]
+
+    def raw_shifts(self, dsparams):
+        return dsparams[..., 1 * self.n_sigmoids:2 * self.n_sigmoids]
+
+    def raw_weights(self, dsparams):
+        return dsparams[..., 2 * self.n_sigmoids:3 * self.n_sigmoids]
+
+    def _forward_logabsdet(self, a, dsparams, ndim, pre_sigm, x_pre_clipped):
+        logj = torch.nn.functional.log_softmax(self.raw_weights(dsparams), dim=-1) + \
+               self.logsigmoid(pre_sigm) + \
+               self.logsigmoid(-pre_sigm) + self.log(a)
+
+        logj = torch.logsumexp(logj, -1)
+        logabsdet_ = logj + np.log(1 - self.eps) - (self.log(x_pre_clipped) + self.log(-x_pre_clipped + 1))
+        return logabsdet_.sum(-1)
+
+    def mollify(self, a_, b_):
+        a = a_ * (1 - self._mollify) + 1.0 * self._mollify
+        b = b_ * (1 - self._mollify) + 0.0 * self._mollify
+        return a, b
+
+    def inverse(self, inputs, context=None):
+        raise NotImplementedError(&#34;..&#34;)
+
+
+class DeepSigmoid(DeepSigmoidModule):
+    def __init__(self, features, *args, **kwargs):
+        self.features = features
+        super().__init__(*args, **kwargs)
+        _a_preact = -2 * torch.ones(self.features, self.n_sigmoids)  # scale
+        _b_preact = torch.zeros(self.features, self.n_sigmoids)  # shift
+        _w_preact = torch.ones(self.features, self.n_sigmoids)  # softmax
+
+        self.dsparams = torch.nn.Parameter(torch.concatenate([_a_preact + 1e-5 * torch.randn_like(_a_preact),
+                                                              _b_preact + 1e-5 * torch.randn_like(_b_preact),
+                                                              _w_preact + 1e-3 * torch.randn_like(_w_preact)], -1),
+                                           requires_grad=True)
+
+    def forward(self, inputs, context=None) -&gt; torch.Tensor:
+        return self.forward_given_params(inputs=inputs, dsparams=self.dsparams)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoid"><code class="flex name class">
+<span>class <span class="ident">DeepSigmoid</span></span>
+<span>(</span><span>features, *args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all transform objects.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeepSigmoid(DeepSigmoidModule):
+    def __init__(self, features, *args, **kwargs):
+        self.features = features
+        super().__init__(*args, **kwargs)
+        _a_preact = -2 * torch.ones(self.features, self.n_sigmoids)  # scale
+        _b_preact = torch.zeros(self.features, self.n_sigmoids)  # shift
+        _w_preact = torch.ones(self.features, self.n_sigmoids)  # softmax
+
+        self.dsparams = torch.nn.Parameter(torch.concatenate([_a_preact + 1e-5 * torch.randn_like(_a_preact),
+                                                              _b_preact + 1e-5 * torch.randn_like(_b_preact),
+                                                              _w_preact + 1e-3 * torch.randn_like(_w_preact)], -1),
+                                           requires_grad=True)
+
+    def forward(self, inputs, context=None) -&gt; torch.Tensor:
+        return self.forward_given_params(inputs=inputs, dsparams=self.dsparams)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule">DeepSigmoidModule</a></li>
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule">DeepSigmoidModule</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule"><code class="flex name class">
+<span>class <span class="ident">DeepSigmoidModule</span></span>
+<span>(</span><span>n_sigmoids=4, mollify=0.0, eps=0.0001, num_inverse_iterations=100, lim=10)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all transform objects.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DeepSigmoidModule(Transform):
+    @staticmethod
+    def softmax(x, dim=-1):
+        e_x = torch.exp(x - x.max(dim=dim, keepdim=True)[0])
+        out = e_x / e_x.sum(dim=dim, keepdim=True)
+        return out
+
+    def __init__(self, n_sigmoids=4, mollify=0., eps=1e-4, num_inverse_iterations=100, lim=10):
+        super(DeepSigmoidModule, self).__init__()
+
+        self.n_sigmoids = n_sigmoids
+
+        self.act_a = torch.nn.Softplus()
+        self.act_b = torch.nn.Identity()
+        self.act_w = torch.nn.Softmax(dim=-1)
+        self._mollify = mollify
+        self.eps = eps
+
+        self.softplus_ = nn.Softplus()
+        self.softplus = lambda x: self.softplus_(x) + self.eps
+        self.sigmoid_ = nn.Sigmoid()
+        self.sigmoid = lambda x: self.sigmoid_(x) * (
+                1 - self.delta) + 0.5 * self.delta
+        self.logsigmoid = lambda x: -self.softplus(-x)
+        self.log = lambda x: torch.log(x * 1e2) - np.log(1e2)
+        self.logit = lambda x: self.log(x) - self.log(1 - x)
+
+    @abstractmethod
+    def forward(self, inputs, context=None):
+        dsparams = self.get_params(inputs, context)
+        return self.forward_given_params(inputs, dsparams=dsparams)
+
+    def forward_given_params(self, inputs, dsparams=None):
+        scale_ = self.act_a(self.raw_scales(dsparams))
+        shift_ = self.act_b(self.raw_shifts(dsparams))
+        weight = self.act_w(self.raw_weights(dsparams))
+
+        scale, shift = self.mollify(scale_, shift_)
+
+        pre_sigm = scale * inputs.unsqueeze(-1) + shift
+        x_pre = torch.sum(weight * torch.sigmoid(pre_sigm), dim=-1)
+        x_pre_clipped = x_pre * (1 - self.eps) + self.eps * 0.5
+        x_ = self.logit(x_pre_clipped)
+        outputs = x_
+
+        logdet = self._forward_logabsdet(scale, dsparams, self.n_sigmoids, pre_sigm, x_pre_clipped)
+
+        return outputs, logdet
+
+    def raw_scales(self, dsparams):
+        return dsparams[..., 0 * self.n_sigmoids:1 * self.n_sigmoids]
+
+    def raw_shifts(self, dsparams):
+        return dsparams[..., 1 * self.n_sigmoids:2 * self.n_sigmoids]
+
+    def raw_weights(self, dsparams):
+        return dsparams[..., 2 * self.n_sigmoids:3 * self.n_sigmoids]
+
+    def _forward_logabsdet(self, a, dsparams, ndim, pre_sigm, x_pre_clipped):
+        logj = torch.nn.functional.log_softmax(self.raw_weights(dsparams), dim=-1) + \
+               self.logsigmoid(pre_sigm) + \
+               self.logsigmoid(-pre_sigm) + self.log(a)
+
+        logj = torch.logsumexp(logj, -1)
+        logabsdet_ = logj + np.log(1 - self.eps) - (self.log(x_pre_clipped) + self.log(-x_pre_clipped + 1))
+        return logabsdet_.sum(-1)
+
+    def mollify(self, a_, b_):
+        a = a_ * (1 - self._mollify) + 1.0 * self._mollify
+        b = b_ * (1 - self._mollify) + 0.0 * self._mollify
+        return a, b
+
+    def inverse(self, inputs, context=None):
+        raise NotImplementedError(&#34;..&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoid" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoid">DeepSigmoid</a></li>
+<li><a title="flowcon.transforms.autoregressive.deep_sigmoid.MaskedDeepSigmoidTransform.DeepSigmoidMadeModule" href="autoregressive/deep_sigmoid.html#flowcon.transforms.autoregressive.deep_sigmoid.MaskedDeepSigmoidTransform.DeepSigmoidMadeModule">MaskedDeepSigmoidTransform.DeepSigmoidMadeModule</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.softmax"><code class="name flex">
+<span>def <span class="ident">softmax</span></span>(<span>x, dim=-1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def softmax(x, dim=-1):
+    e_x = torch.exp(x - x.max(dim=dim, keepdim=True)[0])
+    out = e_x / e_x.sum(dim=dim, keepdim=True)
+    return out</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.forward_given_params"><code class="name flex">
+<span>def <span class="ident">forward_given_params</span></span>(<span>self, inputs, dsparams=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward_given_params(self, inputs, dsparams=None):
+    scale_ = self.act_a(self.raw_scales(dsparams))
+    shift_ = self.act_b(self.raw_shifts(dsparams))
+    weight = self.act_w(self.raw_weights(dsparams))
+
+    scale, shift = self.mollify(scale_, shift_)
+
+    pre_sigm = scale * inputs.unsqueeze(-1) + shift
+    x_pre = torch.sum(weight * torch.sigmoid(pre_sigm), dim=-1)
+    x_pre_clipped = x_pre * (1 - self.eps) + self.eps * 0.5
+    x_ = self.logit(x_pre_clipped)
+    outputs = x_
+
+    logdet = self._forward_logabsdet(scale, dsparams, self.n_sigmoids, pre_sigm, x_pre_clipped)
+
+    return outputs, logdet</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.inverse"><code class="name flex">
+<span>def <span class="ident">inverse</span></span>(<span>self, inputs, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse(self, inputs, context=None):
+    raise NotImplementedError(&#34;..&#34;)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.mollify"><code class="name flex">
+<span>def <span class="ident">mollify</span></span>(<span>self, a_, b_)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mollify(self, a_, b_):
+    a = a_ * (1 - self._mollify) + 1.0 * self._mollify
+    b = b_ * (1 - self._mollify) + 0.0 * self._mollify
+    return a, b</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_scales"><code class="name flex">
+<span>def <span class="ident">raw_scales</span></span>(<span>self, dsparams)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def raw_scales(self, dsparams):
+    return dsparams[..., 0 * self.n_sigmoids:1 * self.n_sigmoids]</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_shifts"><code class="name flex">
+<span>def <span class="ident">raw_shifts</span></span>(<span>self, dsparams)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def raw_shifts(self, dsparams):
+    return dsparams[..., 1 * self.n_sigmoids:2 * self.n_sigmoids]</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_weights"><code class="name flex">
+<span>def <span class="ident">raw_weights</span></span>(<span>self, dsparams)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def raw_weights(self, dsparams):
+    return dsparams[..., 2 * self.n_sigmoids:3 * self.n_sigmoids]</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.base.Transform.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids"><code class="flex name class">
+<span>class <span class="ident">SumOfSigmoids</span></span>
+<span>(</span><span>features, n_sigmoids=10, iterations_bisection_inverse=50, lim_bisection_inverse=120, raw_params: torch.Tensor = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Implements non-linear elementwise transformation as the sum of multiple shifted scaled sigmoid functions,
+which are combined with an extended softplus function to get linear behaviour far away from the origin.</p>
+<p>See Appendix A.1 in [1] for more details.</p>
+<p>[1] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. "Conditional Matrix Flows for Gaussian Graphical Models." Advances in Neural Information Processing Systems 36 (2024).</p>
+<p>Initialize the SumOfSigmoids transformation.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>features</code></strong> :&ensp;<code>int</code></dt>
+<dd>The number of features for each input. This defines the dimensionality of the input space.</dd>
+<dt><strong><code>n_sigmoids</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Number of sigmoid functions to apply per feature. This controls the complexity of the transformation. Default is 10.</dd>
+<dt><strong><code>iterations_bisection_inverse</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>Max number of iterations for computing the numerical inverse with bisection search if it doesn't converge. Default is 50.</dd>
+<dt><strong><code>lim_bisection_inverse</code></strong> :&ensp;<code>int</code>, optional</dt>
+<dd>[-lim_bisection_inverse, lim_bisection_inverse] provides the search region for the inverse via bisection search . Default is 120.</dd>
+<dt><strong><code>raw_params</code></strong> :&ensp;<code>torch.Tensor</code>, optional</dt>
+<dd>A tensor containing pre-initialized parameters for the transformation. If provided, the parameters are set directly from this tensor; otherwise, they are initialized internally.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>AssertionError</code></dt>
+<dd>If <code>raw_params</code> is provided but does not match the required shape of (features, 3 * n_sigmoids + 1).</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<p>This constructor sets up the transformation by initializing parameters, either from the <code>raw_params</code> tensor
+or by creating new parameters if <code>raw_params</code> is None.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SumOfSigmoids(MonotonicTransform):
+    &#34;&#34;&#34;
+    Implements non-linear elementwise transformation as the sum of multiple shifted scaled sigmoid functions,
+    which are combined with an extended softplus function to get linear behaviour far away from the origin.
+
+    See Appendix A.1 in [1] for more details.
+
+    [1] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. &#34;Conditional Matrix Flows for Gaussian Graphical Models.&#34; Advances in Neural Information Processing Systems 36 (2024).
+    &#34;&#34;&#34;
+    PREACT_SCALE_MIN = .1
+    PREACT_SCALE_MAX = 10.
+    PREACT_SHIFT_MAX = 10
+
+    def __init__(self, features, n_sigmoids=10, iterations_bisection_inverse=50, lim_bisection_inverse=120,
+                 raw_params: torch.Tensor = None):
+        &#34;&#34;&#34;
+        Initialize the SumOfSigmoids transformation.
+
+        Parameters
+        ----------
+        features : int
+            The number of features for each input. This defines the dimensionality of the input space.
+        n_sigmoids : int, optional
+            Number of sigmoid functions to apply per feature. This controls the complexity of the transformation. Default is 10.
+        iterations_bisection_inverse : int, optional
+            Max number of iterations for computing the numerical inverse with bisection search if it doesn&#39;t converge. Default is 50.
+        lim_bisection_inverse : int, optional
+            [-lim_bisection_inverse, lim_bisection_inverse] provides the search region for the inverse via bisection search . Default is 120.
+        raw_params : torch.Tensor, optional
+            A tensor containing pre-initialized parameters for the transformation. If provided, the parameters are set directly from this tensor; otherwise, they are initialized internally.
+
+        Raises
+        ------
+        AssertionError
+            If `raw_params` is provided but does not match the required shape of (features, 3 * n_sigmoids + 1).
+
+        Notes
+        -----
+        This constructor sets up the transformation by initializing parameters, either from the `raw_params` tensor
+        or by creating new parameters if `raw_params` is None.
+        &#34;&#34;&#34;
+        self.n_sigmoids = n_sigmoids
+        self.features = features
+
+        super(SumOfSigmoids, self).__init__(num_iterations=iterations_bisection_inverse, lim=lim_bisection_inverse)
+        if raw_params is None:
+            self.shift_preact = nn.Parameter(torch.randn(1, features, self.n_sigmoids), requires_grad=True)
+            self.log_scale_preact = nn.Parameter(torch.zeros(1, features, self.n_sigmoids), requires_grad=True)
+            self.raw_softmax = nn.Parameter((torch.ones(1, features, self.n_sigmoids, requires_grad=False)))
+            self.extended_softplus = ExtendedSoftplus(features=features)
+        else:
+            assert raw_params.shape[1:] == (features, 3 * self.n_sigmoids + 1)
+            self.set_raw_params(features, raw_params)
+
+        self.log_scale_postact = nn.Parameter(torch.log(torch.ones(1, device=self.shift_preact.device)),
+                                              requires_grad=False)
+        self.eps = 1e-6
+
+    def get_raw_params(self):
+        &#34;&#34;&#34;
+        Concatenate and return all raw parameters of the transformation in a single tensor.
+        The Tensor is of shape [self.n_sigmoids, self.features, -1].
+
+        Returns
+        -------
+        torch.Tensor
+            A concatenated tensor of all raw parameters, including shifts, log scales for
+            the sigmoid functions, softmax weights, and the shift from the extended softplus.
+        &#34;&#34;&#34;
+        return torch.cat((self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
+                          self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
+                          self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
+                          self.extended_softplus.shift.reshape(-1, self.features, 1),
+                          # self.extended_softplus.log_scale.reshape(-1, self.features, 1)
+                          ), dim=-1)
+
+    def set_raw_params(self, features, raw_params):
+        # 3 = shift, scale, softmax for sigmoids
+        # 2 = log_scale, log_shift for extended softplus
+        vals = torch.split(raw_params, [self.n_sigmoids, self.n_sigmoids, self.n_sigmoids, 1], dim=-1)
+        self.shift_preact, self.log_scale_preact, self.raw_softmax = vals[:3]
+        self.extended_softplus = ExtendedSoftplus(features=features, shift=vals[3])
+
+    def get_sigmoid_params(self, features, n_features_x_sigmoids, unconstrained_params):
+        shift_preact = unconstrained_params[:, :features * self.n_sigmoids]
+        shift_preact = shift_preact.view(-1, features, self.n_sigmoids)
+
+        log_scale_preact = unconstrained_params[:, n_features_x_sigmoids: 2 * n_features_x_sigmoids]
+        log_scale_preact = log_scale_preact.view(-1, features, self.n_sigmoids)
+
+        raw_softmax_preact = unconstrained_params[:, 2 * n_features_x_sigmoids: 3 * n_features_x_sigmoids]
+        raw_softmax_preact = raw_softmax_preact.view(-1, features, self.n_sigmoids)
+
+        return shift_preact, log_scale_preact, raw_softmax_preact
+
+    def sigmoid_log_derivative(self, x):
+        return x - 2 * torch.nn.functional.softplus(x)
+
+    def forward(self, inputs, context=None):
+        output_sum_of_sigmoids, log_diag_jac_sigmoids = self.sum_of_sigmoids(inputs)
+        output_extended_softplus, log_diag_jac_esoftplus = self.extended_softplus(inputs)
+
+        output = output_sum_of_sigmoids + output_extended_softplus
+        logabsdet = torch.logaddexp(log_diag_jac_sigmoids, log_diag_jac_esoftplus).sum(-1)
+
+        return output, logabsdet
+
+    def sum_of_sigmoids(self, inputs):
+        shift_preact, scale_preact, scale_postact = self.get_params()
+
+        pre_act = scale_preact * (inputs.unsqueeze(-1) - shift_preact)
+
+        sigmoids_expanded = scale_postact * torch.sigmoid(pre_act)
+        log_jac_sigmoid_expanded = torch.log(scale_postact) + torch.log(scale_preact) + self.sigmoid_log_derivative(
+            pre_act)
+        tmp = sigmoids_expanded.sum(-1) / (scale_postact.sum(-1))
+
+        return tmp, torch.logsumexp(log_jac_sigmoid_expanded, -1)
+
+    def get_params(self):
+        soft_max = torch.nn.functional.softmax(self.raw_softmax, dim=-1) + self.eps
+        soft_max /= soft_max.sum(-1).unsqueeze(-1)
+        scale_postact = torch.exp(self.log_scale_postact) * soft_max
+
+        scale_preact = torch.sigmoid(self.log_scale_preact)
+        scale_preact = scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
+
+        shift_preact = torch.tanh(self.shift_preact) * self.PREACT_SHIFT_MAX
+
+        return shift_preact, scale_preact, scale_postact</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.no_analytic_inv.base.MonotonicTransform" href="no_analytic_inv/base.html#flowcon.transforms.no_analytic_inv.base.MonotonicTransform">MonotonicTransform</a></li>
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+<li>abc.ABC</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MAX"><code class="name">var <span class="ident">PREACT_SCALE_MAX</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MIN"><code class="name">var <span class="ident">PREACT_SCALE_MIN</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SHIFT_MAX"><code class="name">var <span class="ident">PREACT_SHIFT_MAX</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_params"><code class="name flex">
+<span>def <span class="ident">get_params</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_params(self):
+    soft_max = torch.nn.functional.softmax(self.raw_softmax, dim=-1) + self.eps
+    soft_max /= soft_max.sum(-1).unsqueeze(-1)
+    scale_postact = torch.exp(self.log_scale_postact) * soft_max
+
+    scale_preact = torch.sigmoid(self.log_scale_preact)
+    scale_preact = scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
+
+    shift_preact = torch.tanh(self.shift_preact) * self.PREACT_SHIFT_MAX
+
+    return shift_preact, scale_preact, scale_postact</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_raw_params"><code class="name flex">
+<span>def <span class="ident">get_raw_params</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Concatenate and return all raw parameters of the transformation in a single tensor.
+The Tensor is of shape [self.n_sigmoids, self.features, -1].</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>torch.Tensor</code></dt>
+<dd>A concatenated tensor of all raw parameters, including shifts, log scales for
+the sigmoid functions, softmax weights, and the shift from the extended softplus.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_raw_params(self):
+    &#34;&#34;&#34;
+    Concatenate and return all raw parameters of the transformation in a single tensor.
+    The Tensor is of shape [self.n_sigmoids, self.features, -1].
+
+    Returns
+    -------
+    torch.Tensor
+        A concatenated tensor of all raw parameters, including shifts, log scales for
+        the sigmoid functions, softmax weights, and the shift from the extended softplus.
+    &#34;&#34;&#34;
+    return torch.cat((self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
+                      self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
+                      self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
+                      self.extended_softplus.shift.reshape(-1, self.features, 1),
+                      # self.extended_softplus.log_scale.reshape(-1, self.features, 1)
+                      ), dim=-1)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_sigmoid_params"><code class="name flex">
+<span>def <span class="ident">get_sigmoid_params</span></span>(<span>self, features, n_features_x_sigmoids, unconstrained_params)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sigmoid_params(self, features, n_features_x_sigmoids, unconstrained_params):
+    shift_preact = unconstrained_params[:, :features * self.n_sigmoids]
+    shift_preact = shift_preact.view(-1, features, self.n_sigmoids)
+
+    log_scale_preact = unconstrained_params[:, n_features_x_sigmoids: 2 * n_features_x_sigmoids]
+    log_scale_preact = log_scale_preact.view(-1, features, self.n_sigmoids)
+
+    raw_softmax_preact = unconstrained_params[:, 2 * n_features_x_sigmoids: 3 * n_features_x_sigmoids]
+    raw_softmax_preact = raw_softmax_preact.view(-1, features, self.n_sigmoids)
+
+    return shift_preact, log_scale_preact, raw_softmax_preact</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.set_raw_params"><code class="name flex">
+<span>def <span class="ident">set_raw_params</span></span>(<span>self, features, raw_params)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_raw_params(self, features, raw_params):
+    # 3 = shift, scale, softmax for sigmoids
+    # 2 = log_scale, log_shift for extended softplus
+    vals = torch.split(raw_params, [self.n_sigmoids, self.n_sigmoids, self.n_sigmoids, 1], dim=-1)
+    self.shift_preact, self.log_scale_preact, self.raw_softmax = vals[:3]
+    self.extended_softplus = ExtendedSoftplus(features=features, shift=vals[3])</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sigmoid_log_derivative"><code class="name flex">
+<span>def <span class="ident">sigmoid_log_derivative</span></span>(<span>self, x)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sigmoid_log_derivative(self, x):
+    return x - 2 * torch.nn.functional.softplus(x)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sum_of_sigmoids"><code class="name flex">
+<span>def <span class="ident">sum_of_sigmoids</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sum_of_sigmoids(self, inputs):
+    shift_preact, scale_preact, scale_postact = self.get_params()
+
+    pre_act = scale_preact * (inputs.unsqueeze(-1) - shift_preact)
+
+    sigmoids_expanded = scale_postact * torch.sigmoid(pre_act)
+    log_jac_sigmoid_expanded = torch.log(scale_postact) + torch.log(scale_preact) + self.sigmoid_log_derivative(
+        pre_act)
+    tmp = sigmoids_expanded.sum(-1) / (scale_postact.sum(-1))
+
+    return tmp, torch.logsumexp(log_jac_sigmoid_expanded, -1)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.no_analytic_inv.base.MonotonicTransform" href="no_analytic_inv/base.html#flowcon.transforms.no_analytic_inv.base.MonotonicTransform">MonotonicTransform</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.no_analytic_inv.base.MonotonicTransform.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon.transforms" href="index.html">flowcon.transforms</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoid" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoid">DeepSigmoid</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.call_super_init" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoid.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.dump_patches" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoid.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoid.training" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoid.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule">DeepSigmoidModule</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.call_super_init" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.dump_patches" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.forward_given_params" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.forward_given_params">forward_given_params</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.inverse" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.inverse">inverse</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.mollify" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.mollify">mollify</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_scales" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_scales">raw_scales</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_shifts" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_shifts">raw_shifts</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_weights" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.raw_weights">raw_weights</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.softmax" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.softmax">softmax</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.training" href="#flowcon.transforms.adaptive_sigmoids.DeepSigmoidModule.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids">SumOfSigmoids</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MAX" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MAX">PREACT_SCALE_MAX</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MIN" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SCALE_MIN">PREACT_SCALE_MIN</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SHIFT_MAX" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.PREACT_SHIFT_MAX">PREACT_SHIFT_MAX</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.call_super_init" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.dump_patches" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_params" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_params">get_params</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_raw_params" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_raw_params">get_raw_params</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_sigmoid_params" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.get_sigmoid_params">get_sigmoid_params</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.set_raw_params" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.set_raw_params">set_raw_params</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sigmoid_log_derivative" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sigmoid_log_derivative">sigmoid_log_derivative</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sum_of_sigmoids" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.sum_of_sigmoids">sum_of_sigmoids</a></code></li>
+<li><code><a title="flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.training" href="#flowcon.transforms.adaptive_sigmoids.SumOfSigmoids.training">training</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

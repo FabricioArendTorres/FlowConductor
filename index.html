@@ -1,0 +1,527 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon API documentation</title>
+<meta name="description" content="The Python package FlowConductor, or short `flowcon`, provides a collection of Normalizing Flows
+architectures and utilities in PyTorch.
+We …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Package <code>flowcon</code></h1>
+</header>
+<section id="section-intro">
+<p>The Python package FlowConductor, or short <code><a title="flowcon" href="#flowcon">flowcon</a></code>, provides a collection of Normalizing Flows
+architectures and utilities in PyTorch.
+We specifically focus on conditional Normalizing Flows, which may find use in tasks such as variational inference
+of conditional density estimation.</p>
+<p>Each submodule in <code><a title="flowcon" href="#flowcon">flowcon</a></code> reflects a different component in Normalizing Flows.
+The following table provides a rough description.</p>
+<table>
+<thead>
+<tr>
+<th><div style="width:150px">Submodule</div></th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="&lt;code&gt;&lt;a title=&quot;flowcon.flows&quot; href=&quot;flows/index.html&quot;&gt;flowcon.flows&lt;/a&gt;&lt;/code&gt;"><code>flows</code></a></td>
+<td>Contains the core logic of the Normalizing Flow for evaluating densities, sampling, and conditioning of these.</td>
+</tr>
+<tr>
+<td><a href="&lt;code&gt;&lt;a title=&quot;flowcon.distributions&quot; href=&quot;distributions/index.html&quot;&gt;flowcon.distributions&lt;/a&gt;&lt;/code&gt;"><code>distributions</code></a></td>
+<td>Contains different base distributions that can be used. The base flow that you will mostly need is <a href="&lt;code&gt;&lt;a title=&quot;flowcon.flows.Flow&quot; href=&quot;flows/index.html#flowcon.flows.Flow&quot;&gt;Flow&lt;/a&gt;&lt;/code&gt;"><code>flows.Flow</code></a>.</td>
+</tr>
+<tr>
+<td><a href="&lt;code&gt;&lt;a title=&quot;flowcon.transforms&quot; href=&quot;transforms/index.html&quot;&gt;flowcon.transforms&lt;/a&gt;&lt;/code&gt;"><code>transforms</code></a></td>
+<td>Contains the invertible layers to be used within a <a href="&lt;code&gt;&lt;a title=&quot;flowcon.flows.Flow&quot; href=&quot;flows/index.html#flowcon.flows.Flow&quot;&gt;Flow&lt;/a&gt;&lt;/code&gt;"><code>flows.Flow</code></a>. Transforms implement at the very least a forward pass with corresponding log-absolute Jacobian. Most transforms also provide an inverse transform, which might however be more expensive to compute.</td>
+</tr>
+<tr>
+<td><a href="&lt;code&gt;&lt;a title=&quot;flowcon.nn&quot; href=&quot;nn/index.html&quot;&gt;flowcon.nn&lt;/a&gt;&lt;/code&gt;"><code>nn</code></a></td>
+<td>Contains general (non-invertible) neural network layers and architectures. These might be used either for transforms or conditioning.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="getting-started">Getting Started</h2>
+<p>In general, you need to follow these step to build a Normalizing Flow with <code><a title="flowcon" href="#flowcon">flowcon</a></code>:</p>
+<ol>
+<li>Decide on a Base Distribution. Usually this is a Gaussian.</li>
+<li>Build the invertible transformations, i.e. the bijective layers that maps between your Base distribution and the target distribution.</li>
+<li>Generate a Flow object, with the previous two components.</li>
+</ol>
+<p>A more detailed explanation for different settings will follow at some point.
+For now, take a look at the examples.</p>
+<h2 id="examples">Examples</h2>
+<p>You can find some basic examples for the usage of this library in <code>examples/toy_2d.py</code> and <code>examples/conditional_toy_2d.py</code>.</p>
+<h2 id="some-flow-architectures-that-work-well">Some Flow Architectures That Work Well</h2>
+<p>There are many papers on Normalizing Flows and thus many possible combination of layers.
+Some work well togethers - other don't. Although you might want to try a range of combinations for your project, we provide you a list of
+basic combinations that usually worked well for us.</p>
+<h3 id="actnorm-i-densenet-svd">ActNorm + i-DenseNet + SVD</h3>
+<p>This architecture is based on the invertible DenseNet paper, which is an
+extension of invertible ResNets.
+We extended it by providing a more flexible activation function, a rescaled sine similar to SIREN networks,
+in <code>flowcon.nn.CSIN</code>.
+Compared to the CLipSwish activation in the paper, the CSIN activation is much more flexible
+in lower dimensions.
+We used this architecture in [1]</p>
+<pre><code class="language-python">from flowcon import transforms, nn
+
+def build_transform(n_features, num_layers=10) -&gt; transforms.Transform:
+    transform_list = []
+    densenet_factory = (transforms.iResBlock.Factory()
+                        .set_logabsdet_estimator(brute_force=True)
+                        .set_densenet(dimension=2,
+                                      densenet_depth=3,
+                                      densenet_growth=16,
+                                      activation_function=nn.CSin(10))
+                        )
+    for _ in range(num_layers):
+        transform_list.append(transforms.ActNorm(features=2))
+        transform_list.append(transforms.SVDLinear(features=n_features, num_householder=n_features))
+        transform_list.append(densenet_factory.build())
+
+    transform = transforms.CompositeTransform(transform_list)
+    return transform
+</code></pre>
+<h4 id="caveats-and-things-to-consider">Caveats and things to consider</h4>
+<ul>
+<li>If you data has more than 3 dimensions, turn of the brute-force estimation of the logabsdet.</li>
+<li>The inverse of iResBlocks is not available in closed-form and computed via a fix-point iteration. While it converges quickly, backpropagating through it is slow and not exact.</li>
+<li>Play around with the number of layers. The range from 5 to 30 is often reasonable.</li>
+</ul>
+<p>[1] Torres, Fabricio Arend, et al. "Lagrangian Flow Networks for Conservation Laws." The Twelfth International Conference on Learning Representations. 2023.</p>
+<h3 id="actnorm-maskedsumofsigmoids">ActNorm + MaskedSumOfSigmoids</h3>
+<p>This is essentially based on our work in [2].
+The SumOfSigmoids layers are really flexible element-wise transformations,
+which have the nice property of getting linear for large / small inputs, and are only non-linear within some region around the origin.</p>
+<p>Putting them into a masked autoregressive flow, where the parameters of each element-wise transformation are conditioned
+on previous parameters, makes them powerful density estimators.</p>
+<pre><code class="language-python">from flowcon import transforms
+
+def build_transform(n_features=2, num_layers=5) -&gt; transforms.Transform:
+    transform_list = []
+
+    for _ in range(num_layers):
+        transform_list.append(transforms.ActNorm(features=n_features))
+        transform_list.append(transforms.ReversePermutation(features=n_features))
+        transform_list.append(transforms.MaskedSumOfSigmoidsTransform(features=n_features,
+                                                                      hidden_features=32))
+
+    transform = transforms.CompositeTransform(transform_list)
+    return transform
+</code></pre>
+<h4 id="caveats-and-things-to-consider_1">Caveats and things to consider</h4>
+<ul>
+<li>You don't need a large <code>n_sigmoids</code> for the autoregressive version of the SumOfSigmoidTransform.</li>
+<li>Similarly, you do not need many layers.</li>
+<li>For higher dimensions you might want to try random permutations.</li>
+<li>Be careful with the inverse of SumOfSigmoids:</li>
+<li>The inverse is only numerically approximated and based on a bisection search, and may in some cases be inexact.</li>
+<li>This is an autoregressive model. The inverse is always painfully slow, as it can not be computed in parallel.</li>
+</ul>
+<p>[2] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. "Conditional Matrix Flows for Gaussian Graphical Models." Advances in Neural Information Processing Systems 36 (2023).</p>
+<h2 id="about-the-package">About The Package</h2>
+<p>During our research with Normalizing Flows (NFs) we noticed a lack of support for conditional NF
+libraries in PyTorch, even though Normalizing Flows are by now a well-established and well-studied field.</p>
+<p>We decided to work with the PyTorch package
+<a href="https://github.com/bayesiains/nflows">nflows</a> for Normalizing Flows,
+as its core logic and design were very straight-forward to work with and extend.
+While the core logic and code design is still used, we expanded the support for conditional transformations,
+extended on the unit tests, added some new Normalizing Flow layers, and overall wish to develop this into a more mature library.</p>
+<p>It should be noted that we mainly focus on conditional density estimation in structured data, i.e. we do not (yet?) provide current architectures for image generation.
+If anyone wants to contribute, we would be open to that.</p>
+<h2 id="backward-compatibility-issues-and-contributing">Backward-compatibility, Issues, and Contributing</h2>
+<p>This package is very much in an alpha phase.
+That is, code-breaking changes at some points can not be avoided, and backward-compatibility
+is not guaranteed when pulling a new version.</p>
+<p>If you notice a bug, implementation error, or would like to request some additional feature,
+please just open an issue on GitHub.</p>
+<p>If you want to contribute yourself, feel free to send a pull-request!</p>
+<h2 id="license">License</h2>
+<p><code><a title="flowcon" href="#flowcon">flowcon</a></code> is licensed under the <a href="https://opensource.org/license/MIT">MIT License</a>,
+which it inherited from the <a href="https://github.com/bayesiains/nflows">nflows</a> package it is based on.</p>
+<p>Copyright (c) 2020 Conor Durkan, Artur Bekasov, Iain Murray, George Papamakarios</p>
+<p>Copyright (c) 2023 Fabricio Arend Torres, Marcello Massimo Negri, Jonathan Aellen</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+The Python package FlowConductor, or short `flowcon`, provides a collection of Normalizing Flows
+ architectures and utilities in PyTorch.
+We specifically focus on conditional Normalizing Flows, which may find use in tasks such as variational inference
+of conditional density estimation.
+
+.. include:: ./documentation.md
+&#34;&#34;&#34;
+from flowcon.flows import Flow, MaskedAutoregressiveFlow
+
+__all__ = [&#39;Flow&#39;]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="flowcon.CNF" href="CNF/index.html">flowcon.CNF</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.datasets" href="datasets/index.html">flowcon.datasets</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.distributions" href="distributions/index.html">flowcon.distributions</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.flows" href="flows/index.html">flowcon.flows</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.nn" href="nn/index.html">flowcon.nn</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.transforms" href="transforms/index.html">flowcon.transforms</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.utils" href="utils/index.html">flowcon.utils</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.Flow"><code class="flex name class">
+<span>class <span class="ident">Flow</span></span>
+<span>(</span><span>transform, distribution, embedding_net=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all flow objects.</p>
+<p>Constructor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>transform</code></strong></dt>
+<dd>A <code>Transform</code> object, it transforms data into noise.</dd>
+<dt><strong><code>distribution</code></strong></dt>
+<dd>A <code>AutoregressiveTransform</code> object, the base distribution of the flow that
+generates the noise.</dd>
+<dt><strong><code>embedding_net</code></strong></dt>
+<dd>A <code>nn.Module</code> which has trainable parameters to encode the
+context (condition). It is trained jointly with the flow.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Flow(Distribution):
+    &#34;&#34;&#34;Base class for all flow objects.&#34;&#34;&#34;
+
+    def __init__(self, transform, distribution, embedding_net=None):
+        &#34;&#34;&#34;Constructor.
+
+        Args:
+            transform: A `Transform` object, it transforms data into noise.
+            distribution: A `AutoregressiveTransform` object, the base distribution of the flow that
+                generates the noise.
+            embedding_net: A `nn.Module` which has trainable parameters to encode the
+                context (condition). It is trained jointly with the flow.
+        &#34;&#34;&#34;
+        super().__init__()
+        self._transform = transform
+        self._distribution = distribution
+        distribution_signature = signature(self._distribution.log_prob)
+        distribution_arguments = distribution_signature.parameters.keys()
+        self._context_used_in_base = &#39;context&#39; in distribution_arguments
+        if embedding_net is not None:
+            assert isinstance(embedding_net, torch.nn.Module), (
+                &#34;embedding_net is not a nn.Module. &#34;
+                &#34;If you want to use hard-coded summary features, &#34;
+                &#34;please simply pass the encoded features and pass &#34;
+                &#34;embedding_net=None&#34;
+            )
+            self._embedding_net = embedding_net
+        else:
+            self._embedding_net = torch.nn.Identity()
+
+    def _log_prob(self, inputs, context):
+        embedded_context = self._embedding_net(context)
+        noise, logabsdet = self._transform(inputs, context=embedded_context)
+        if self._context_used_in_base:
+            log_prob = self._distribution.log_prob(noise, context=embedded_context)
+        else:
+            log_prob = self._distribution.log_prob(noise)
+        return log_prob + logabsdet
+
+    def _sample(self, num_samples, context):
+        embedded_context = self._embedding_net(context)
+        if self._context_used_in_base:
+            noise = self._distribution.sample(num_samples, context=embedded_context)
+        else:
+            repeat_noise = self._distribution.sample(num_samples * embedded_context.shape[0])
+            noise = torch.reshape(
+                repeat_noise,
+                (embedded_context.shape[0], -1, repeat_noise.shape[1])
+            )
+
+        if embedded_context is not None:
+            # Merge the context dimension with sample dimension in order to apply the transform.
+            noise = torchutils.merge_leading_dims(noise, num_dims=2)
+            embedded_context = torchutils.repeat_rows(
+                embedded_context, num_reps=num_samples
+            )
+
+        samples, _ = self._transform.inverse(noise, context=embedded_context)
+
+        if embedded_context is not None:
+            # Split the context dimension from sample dimension.
+            samples = torchutils.split_leading_dim(samples, shape=[-1, num_samples])
+
+        return samples
+
+    def sample_and_log_prob(self, num_samples, context=None):
+        &#34;&#34;&#34;Generates samples from the flow, together with their log probabilities.
+
+        For flows, this is more efficient that calling `sample` and `log_prob` separately.
+        &#34;&#34;&#34;
+        embedded_context = self._embedding_net(context)
+        if self._context_used_in_base:
+            noise, log_prob = self._distribution.sample_and_log_prob(
+                num_samples, context=embedded_context
+            )
+        else:
+            noise, log_prob = self._distribution.sample_and_log_prob(
+                num_samples
+            )
+
+        if embedded_context is not None:
+            # Merge the context dimension with sample dimension in order to apply the transform.
+            noise = torchutils.merge_leading_dims(noise, num_dims=2)
+            embedded_context = torchutils.repeat_rows(
+                embedded_context, num_reps=num_samples
+            )
+
+        samples, logabsdet = self._transform.inverse(noise, context=embedded_context)
+
+        if embedded_context is not None:
+            # Split the context dimension from sample dimension.
+            samples = torchutils.split_leading_dim(samples, shape=[-1, num_samples])
+            logabsdet = torchutils.split_leading_dim(logabsdet, shape=[-1, num_samples])
+
+        return samples, log_prob - logabsdet
+
+    def transform_to_noise(self, inputs, context=None):
+        &#34;&#34;&#34;Transforms given data into noise. Useful for goodness-of-fit checking.
+
+        Args:
+            inputs: A `Tensor` of shape [batch_size, ...], the data to be transformed.
+            context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
+                with the data.
+
+        Returns:
+            A `Tensor` of shape [batch_size, ...], the noise.
+        &#34;&#34;&#34;
+        noise, _ = self._transform(inputs, context=self._embedding_net(context))
+        return noise</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.distributions.base.Distribution" href="distributions/base.html#flowcon.distributions.base.Distribution">Distribution</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="flowcon.flows.autoregressive.MaskedAutoregressiveFlow" href="flows/autoregressive.html#flowcon.flows.autoregressive.MaskedAutoregressiveFlow">MaskedAutoregressiveFlow</a></li>
+<li><a title="flowcon.flows.realnvp.SimpleRealNVP" href="flows/realnvp.html#flowcon.flows.realnvp.SimpleRealNVP">SimpleRealNVP</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.Flow.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.Flow.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.Flow.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.Flow.sample_and_log_prob"><code class="name flex">
+<span>def <span class="ident">sample_and_log_prob</span></span>(<span>self, num_samples, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates samples from the flow, together with their log probabilities.</p>
+<p>For flows, this is more efficient that calling <code>sample</code> and <code>log_prob</code> separately.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sample_and_log_prob(self, num_samples, context=None):
+    &#34;&#34;&#34;Generates samples from the flow, together with their log probabilities.
+
+    For flows, this is more efficient that calling `sample` and `log_prob` separately.
+    &#34;&#34;&#34;
+    embedded_context = self._embedding_net(context)
+    if self._context_used_in_base:
+        noise, log_prob = self._distribution.sample_and_log_prob(
+            num_samples, context=embedded_context
+        )
+    else:
+        noise, log_prob = self._distribution.sample_and_log_prob(
+            num_samples
+        )
+
+    if embedded_context is not None:
+        # Merge the context dimension with sample dimension in order to apply the transform.
+        noise = torchutils.merge_leading_dims(noise, num_dims=2)
+        embedded_context = torchutils.repeat_rows(
+            embedded_context, num_reps=num_samples
+        )
+
+    samples, logabsdet = self._transform.inverse(noise, context=embedded_context)
+
+    if embedded_context is not None:
+        # Split the context dimension from sample dimension.
+        samples = torchutils.split_leading_dim(samples, shape=[-1, num_samples])
+        logabsdet = torchutils.split_leading_dim(logabsdet, shape=[-1, num_samples])
+
+    return samples, log_prob - logabsdet</code></pre>
+</details>
+</dd>
+<dt id="flowcon.Flow.transform_to_noise"><code class="name flex">
+<span>def <span class="ident">transform_to_noise</span></span>(<span>self, inputs, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transforms given data into noise. Useful for goodness-of-fit checking.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>inputs</code></strong></dt>
+<dd>A <code>Tensor</code> of shape [batch_size, &hellip;], the data to be transformed.</dd>
+<dt><strong><code>context</code></strong></dt>
+<dd>A <code>Tensor</code> of shape [batch_size, &hellip;] or None, optional context associated
+with the data.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>A <code>Tensor</code> of shape [batch_size, &hellip;], the noise.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def transform_to_noise(self, inputs, context=None):
+    &#34;&#34;&#34;Transforms given data into noise. Useful for goodness-of-fit checking.
+
+    Args:
+        inputs: A `Tensor` of shape [batch_size, ...], the data to be transformed.
+        context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
+            with the data.
+
+    Returns:
+        A `Tensor` of shape [batch_size, ...], the noise.
+    &#34;&#34;&#34;
+    noise, _ = self._transform(inputs, context=self._embedding_net(context))
+    return noise</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.distributions.base.Distribution" href="distributions/base.html#flowcon.distributions.base.Distribution">Distribution</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.distributions.base.Distribution.forward" href="distributions/base.html#flowcon.distributions.base.Distribution.forward">forward</a></code></li>
+<li><code><a title="flowcon.distributions.base.Distribution.log_prob" href="distributions/base.html#flowcon.distributions.base.Distribution.log_prob">log_prob</a></code></li>
+<li><code><a title="flowcon.distributions.base.Distribution.sample" href="distributions/base.html#flowcon.distributions.base.Distribution.sample">sample</a></code></li>
+<li><code><a title="flowcon.distributions.base.Distribution.sample_maxima" href="distributions/base.html#flowcon.distributions.base.Distribution.sample_maxima">sample_maxima</a></code></li>
+<li><code><a title="flowcon.distributions.base.Distribution.sample_maximum" href="distributions/base.html#flowcon.distributions.base.Distribution.sample_maximum">sample_maximum</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#some-flow-architectures-that-work-well">Some Flow Architectures that work well</a><ul>
+<li><a href="#actnorm-i-densenet-svd">ActNorm + i-DenseNet + SVD</a><ul>
+<li><a href="#caveats-and-things-to-consider">Caveats and things to consider</a></li>
+</ul>
+</li>
+<li><a href="#actnorm-maskedsumofsigmoids">ActNorm + MaskedSumOfSigmoids</a><ul>
+<li><a href="#caveats-and-things-to-consider_1">Caveats and things to consider</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#about-the-package">About the Package</a></li>
+<li><a href="#backward-compatibility-issues-and-contributing">Backward-compatibility, Issues, and Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="flowcon.CNF" href="CNF/index.html">flowcon.CNF</a></code></li>
+<li><code><a title="flowcon.datasets" href="datasets/index.html">flowcon.datasets</a></code></li>
+<li><code><a title="flowcon.distributions" href="distributions/index.html">flowcon.distributions</a></code></li>
+<li><code><a title="flowcon.flows" href="flows/index.html">flowcon.flows</a></code></li>
+<li><code><a title="flowcon.nn" href="nn/index.html">flowcon.nn</a></code></li>
+<li><code><a title="flowcon.transforms" href="transforms/index.html">flowcon.transforms</a></code></li>
+<li><code><a title="flowcon.utils" href="utils/index.html">flowcon.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.Flow" href="#flowcon.Flow">Flow</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.Flow.call_super_init" href="#flowcon.Flow.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.Flow.dump_patches" href="#flowcon.Flow.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.Flow.sample_and_log_prob" href="#flowcon.Flow.sample_and_log_prob">sample_and_log_prob</a></code></li>
+<li><code><a title="flowcon.Flow.training" href="#flowcon.Flow.training">training</a></code></li>
+<li><code><a title="flowcon.Flow.transform_to_noise" href="#flowcon.Flow.transform_to_noise">transform_to_noise</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

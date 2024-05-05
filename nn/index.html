@@ -1,0 +1,2193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.nn API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.nn</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from flowcon.nn.nets import *
+
+__all__ = [&#39;DenseNet&#39;,
+           &#39;MixedConditionalDenseNet&#39;,
+           &#39;InputConditionalDenseNet&#39;,
+           &#39;LastLayerConditionalDenseNet&#39;,
+           &#39;MultiplicativeAndInputConditionalDenseNet&#39;,
+           &#39;Swish&#39;,
+           &#39;CLipSwish&#39;,
+           &#39;LeakyLSwish&#39;,
+           &#39;FullSort&#39;,
+           &#39;LipschitzCube&#39;,
+           &#39;MaxMin&#39;,
+           &#39;Sin&#39;,
+           &#39;CSin&#39;,
+           &#39;LipSwish&#39;,
+           &#39;ConvResidualNet&#39;,
+           &#39;ResidualNet&#39;,
+           &#39;MLP&#39;,
+           &#39;FCBlock&#39;
+           ]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="flowcon.nn.nde" href="nde/index.html">flowcon.nn.nde</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="flowcon.nn.nets" href="nets/index.html">flowcon.nn.nets</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.nn.CLipSwish"><code class="flex name class">
+<span>class <span class="ident">CLipSwish</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CLipSwish(nn.Module):
+
+    def __init__(self):
+        super(CLipSwish, self).__init__()
+        self.swish = Swish()
+        self._does_concat = True
+
+    def forward(self, x):
+        x = torch.cat((x, -x), 1)
+        return self.swish(x).div_(1.004)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.CLipSwish.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.CLipSwish.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.CLipSwish.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.CLipSwish.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    x = torch.cat((x, -x), 1)
+    return self.swish(x).div_(1.004)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.CSin"><code class="flex name class">
+<span>class <span class="ident">CSin</span></span>
+<span>(</span><span>w0=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CSin(nn.Module):
+    def __init__(self, w0=1):
+        super(CSin, self).__init__()
+        self.w0 = w0
+        self._does_concat = True
+
+    def forward(self, x):
+        x = torch.cat((x, -x), 1)
+        return torch.sin(x * self.w0) / (self.w0 * math.sqrt(2))
+
+    def build_clone(self):
+        return copy.deepcopy(self)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.CSin.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.CSin.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.CSin.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.CSin.build_clone"><code class="name flex">
+<span>def <span class="ident">build_clone</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_clone(self):
+    return copy.deepcopy(self)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.CSin.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    x = torch.cat((x, -x), 1)
+    return torch.sin(x * self.w0) / (self.w0 * math.sqrt(2))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.ConvResidualNet"><code class="flex name class">
+<span>class <span class="ident">ConvResidualNet</span></span>
+<span>(</span><span>in_channels, out_channels, hidden_channels, context_channels=None, num_blocks=2, activation=&lt;function relu&gt;, dropout_probability=0.0, use_batch_norm=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ConvResidualNet(nn.Module):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        hidden_channels,
+        context_channels=None,
+        num_blocks=2,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+    ):
+        super().__init__()
+        self.context_channels = context_channels
+        self.hidden_channels = hidden_channels
+        if context_channels is not None:
+            self.initial_layer = nn.Conv2d(
+                in_channels=in_channels + context_channels,
+                out_channels=hidden_channels,
+                kernel_size=1,
+                padding=0,
+            )
+        else:
+            self.initial_layer = nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=hidden_channels,
+                kernel_size=1,
+                padding=0,
+            )
+        self.blocks = nn.ModuleList(
+            [
+                ConvResidualBlock(
+                    channels=hidden_channels,
+                    context_channels=context_channels,
+                    activation=activation,
+                    dropout_probability=dropout_probability,
+                    use_batch_norm=use_batch_norm,
+                )
+                for _ in range(num_blocks)
+            ]
+        )
+        self.final_layer = nn.Conv2d(
+            hidden_channels, out_channels, kernel_size=1, padding=0
+        )
+
+    def forward(self, inputs, context=None):
+        if context is None:
+            temps = self.initial_layer(inputs)
+        else:
+            temps = self.initial_layer(torch.cat((inputs, context), dim=1))
+        for block in self.blocks:
+            temps = block(temps, context)
+        outputs = self.final_layer(temps)
+        return outputs</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.ConvResidualNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.ConvResidualNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.ConvResidualNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.ConvResidualNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    if context is None:
+        temps = self.initial_layer(inputs)
+    else:
+        temps = self.initial_layer(torch.cat((inputs, context), dim=1))
+    for block in self.blocks:
+        temps = block(temps, context)
+    outputs = self.final_layer(temps)
+    return outputs</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.DenseNet"><code class="flex name class">
+<span>class <span class="ident">DenseNet</span></span>
+<span>(</span><span>dimension, densenet_depth: int = 2, densenet_growth: int = 16, activation_function: Union[str, Callable] = 'CLipSwish', lip_coeff: float = 0.98, n_lipschitz_iters: int = 5, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a Lipschitz contiuous network g(x)
+with a fixed lipschitz constant.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DenseNet(_DenseNet):
+    &#34;&#34;&#34;
+    Provides a Lipschitz contiuous network g(x)  with a fixed lipschitz constant.
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 dimension,
+                 densenet_depth: int = 2,
+                 densenet_growth: int = 16,
+                 activation_function: Union[str, Callable] = &#34;CLipSwish&#34;,
+                 lip_coeff: float = 0.98,
+                 n_lipschitz_iters: int = 5,
+                 **kwargs):
+        super().__init__(dimension=dimension,
+                         densenet_depth=densenet_depth,
+                         densenet_growth=densenet_growth,
+                         activation_function=activation_function,
+                         lip_coeff=lip_coeff,
+                         n_lipschitz_iters=n_lipschitz_iters)
+
+        if len(kwargs) &gt; 0:
+            logger.warning(&#34;Unused kwargs for {}: {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(self.dimension,
+                                                                            self.densenet_depth,
+                                                                            self.densenet_growth)
+
+    def forward(self, x, context=None):
+        assert context is None, &#34;Context not supported for this Class.&#34;
+        return self.dense_net(x)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>flowcon.nn.nets.invertible_densenet._DenseNet</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.DenseNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.DenseNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.DenseNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.DenseNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x, context=None):
+    assert context is None, &#34;Context not supported for this Class.&#34;
+    return self.dense_net(x)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.FCBlock"><code class="flex name class">
+<span>class <span class="ident">FCBlock</span></span>
+<span>(</span><span>in_shape, out_shape, hidden_sizes, activation='tanh', activate_output=False, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Fully Connected Block, that also supports sine activations (they need a specific initialization)</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FCBlock(torch.nn.Module):
+    &#34;&#34;&#34;
+    Fully Connected Block, that also supports sine activations (they need a specific initialization)
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 in_shape,
+                 out_shape,
+                 hidden_sizes,
+                 activation=&#34;tanh&#34;,
+                 activate_output=False,
+                 **kwargs):
+        super().__init__()
+
+        self._in_shape = torch.Size(in_shape)
+        self._in_prod = self._in_shape.numel()
+        self._out_shape = torch.Size(out_shape)
+        self._out_prod = self._out_shape.numel()
+        self._hidden_sizes = hidden_sizes
+        self._activation = activation
+        self._activate_output = activate_output
+
+        if len(hidden_sizes) == 0:
+            raise ValueError(&#34;List of hidden sizes can&#39;t be empty.&#34;)
+
+        nls_and_inits = {&#39;sine&#39;: (Sine(kwargs.get(&#34;sine_frequency&#34;, 7)),
+                                  gen_sine_init(kwargs.get(&#34;sine_frequency&#34;, 7)),
+                                  first_layer_sine_init),
+                         &#39;relu&#39;: (nn.ReLU(inplace=True), init_weights_normal, None),
+                         &#39;sigmoid&#39;: (nn.Sigmoid(), init_weights_xavier, None),
+                         &#39;tanh&#39;: (nn.Tanh(), init_weights_xavier, None),
+                         &#39;selu&#39;: (nn.SELU(inplace=True), init_weights_selu, None),
+                         &#39;softplus&#39;: (nn.Softplus(), init_weights_normal, None),
+                         &#39;elu&#39;: (nn.ELU(inplace=True), init_weights_elu, None)}
+
+        nl, self.weight_init, first_layer_init = nls_and_inits[activation]
+
+        net = self.build_net(hidden_sizes, in_shape, nl, out_shape)
+        self.net = torch.nn.Sequential(*net)
+        self.initialize_weights(first_layer_init)
+
+    def build_net(self, hidden_sizes, in_shape, nl, out_shape):
+        net = []
+        net.append(nn.Linear(self._in_prod, hidden_sizes[0]))
+        for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
+            net.append(nl)
+            net.append(nn.Linear(in_size, out_size))
+        net.append(nl)
+        net.append(nn.Linear(hidden_sizes[-1], self._out_prod))
+        if self._activate_output:
+            net.append(nl)
+        return net
+
+    def initialize_weights(self, first_layer_init):
+        self.net.apply(self.weight_init)
+        if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
+            self.net[0].apply(first_layer_init)
+
+    def forward(self, inputs):
+        return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.FCBlock.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.FCBlock.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.FCBlock.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.FCBlock.build_net"><code class="name flex">
+<span>def <span class="ident">build_net</span></span>(<span>self, hidden_sizes, in_shape, nl, out_shape)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_net(self, hidden_sizes, in_shape, nl, out_shape):
+    net = []
+    net.append(nn.Linear(self._in_prod, hidden_sizes[0]))
+    for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
+        net.append(nl)
+        net.append(nn.Linear(in_size, out_size))
+    net.append(nl)
+    net.append(nn.Linear(hidden_sizes[-1], self._out_prod))
+    if self._activate_output:
+        net.append(nl)
+    return net</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.FCBlock.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs):
+    return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.FCBlock.initialize_weights"><code class="name flex">
+<span>def <span class="ident">initialize_weights</span></span>(<span>self, first_layer_init)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_weights(self, first_layer_init):
+    self.net.apply(self.weight_init)
+    if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
+        self.net[0].apply(first_layer_init)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.FullSort"><code class="flex name class">
+<span>class <span class="ident">FullSort</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class FullSort(nn.Module):
+
+    def forward(self, x):
+        return torch.sort(x, 1)[0]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.FullSort.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.FullSort.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.FullSort.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.FullSort.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return torch.sort(x, 1)[0]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.InputConditionalDenseNet"><code class="flex name class">
+<span>class <span class="ident">InputConditionalDenseNet</span></span>
+<span>(</span><span>dimension, context_features, densenet_depth, densenet_growth=16, c_embed_hidden_sizes=(128, 128, 10), activation_function=flowcon.nn.nets.activations.Swish, lip_coeff=0.98, n_lipschitz_iters=5, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a Lipschitz contiuous network g(x;t) = h(concat[x, f(c)]) with a fixed lipschitz constant.
+The network h(x;t) is a DenseNet and Lipschitz Continuous w.r.t. x.
+the network f provides an embedding of the context.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class InputConditionalDenseNet(_DenseNet):
+    &#34;&#34;&#34;
+    Provides a Lipschitz contiuous network g(x;t) = h(concat[x, f(c)]) with a fixed lipschitz constant.
+    The network h(x;t) is a DenseNet and Lipschitz Continuous w.r.t. x.
+    the network f provides an embedding of the context.
+    &#34;&#34;&#34;
+
+    def __init__(self, dimension, context_features,
+                 densenet_depth,
+                 densenet_growth=16,
+                 c_embed_hidden_sizes=(128, 128, 10),
+                 activation_function=activations.Swish,
+                 lip_coeff=0.98,
+                 n_lipschitz_iters=5,
+                 **kwargs
+                 ):
+        super().__init__(dimension=dimension,
+                         densenet_depth=densenet_depth,
+                         densenet_growth=densenet_growth,
+                         activation_function=activation_function,
+                         lip_coeff=lip_coeff,
+                         n_lipschitz_iters=n_lipschitz_iters)
+        if len(kwargs) &gt; 0:
+            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
+
+        self.context_features = context_features
+        self.c_embed_hidden_sizes = c_embed_hidden_sizes
+
+        self.bn = torch.nn.BatchNorm1d(self.context_features)
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
+            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
+            densenet_growth=densenet_growth,
+            densenet_depth=densenet_depth,
+            include_last_layer=True)
+
+        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
+                                         hidden_sizes=self.c_embed_hidden_sizes,
+                                         activation=torch.nn.SiLU())
+
+    def forward(self, inputs, context=None):
+        context = self.bn(context)
+        context_embedding = self.context_embedding_net(context)
+        concat_inputs = torch.cat([inputs, context_embedding], -1)
+        outputs = self.dense_net(concat_inputs)
+        return outputs</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>flowcon.nn.nets.invertible_densenet._DenseNet</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.InputConditionalDenseNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.InputConditionalDenseNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.InputConditionalDenseNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.InputConditionalDenseNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    context = self.bn(context)
+    context_embedding = self.context_embedding_net(context)
+    concat_inputs = torch.cat([inputs, context_embedding], -1)
+    outputs = self.dense_net(concat_inputs)
+    return outputs</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.LastLayerConditionalDenseNet"><code class="flex name class">
+<span>class <span class="ident">LastLayerConditionalDenseNet</span></span>
+<span>(</span><span>dimension, context_features, densenet_depth, densenet_growth=16, last_layer_hidden_sizes=(64, 64), activation_function=flowcon.nn.nets.activations.Swish, lip_coeff=0.98, n_lipschitz_iters=5, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a Lipschitz contiuous network g(x;c) = h(x;t) with a fixed lipschitz constant.
+The network h(x;c) is a DenseNet.
+Let xϵR^d.
+For a unconditional DenseNet the last layer is given by Az, where zϵR^k with k&gt;d is a
+higher dimensional embedding and AϵR^(d
+imes k) is a matrix with spectral norm &lt;1.
+For making this last layer conditional, we instead parameterize A(c) with a hypernetwork.
+We further pass each row through a softmax (making A row stochastic), such that the Lipschitz constant of remains unchanged.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LastLayerConditionalDenseNet(_DenseNet):
+    &#34;&#34;&#34;
+    Provides a Lipschitz contiuous network g(x;c) = h(x;t) with a fixed lipschitz constant.
+    The network h(x;c) is a DenseNet.
+    Let xϵR^d.
+    For a unconditional DenseNet the last layer is given by Az, where zϵR^k with k&gt;d is a
+    higher dimensional embedding and AϵR^(d\times k) is a matrix with spectral norm &lt;1.
+    For making this last layer conditional, we instead parameterize A(c) with a hypernetwork.
+    We further pass each row through a softmax (making A row stochastic), such that the Lipschitz constant of remains unchanged.
+    &#34;&#34;&#34;
+
+    def __init__(self, dimension, context_features,
+                 densenet_depth,
+                 densenet_growth=16,
+                 last_layer_hidden_sizes=(64, 64),
+                 activation_function=activations.Swish,
+                 lip_coeff=0.98,
+                 n_lipschitz_iters=5,
+                 **kwargs
+                 ):
+        super().__init__(dimension=dimension,
+                         densenet_depth=densenet_depth,
+                         densenet_growth=densenet_growth,
+                         activation_function=activation_function,
+                         lip_coeff=lip_coeff,
+                         n_lipschitz_iters=n_lipschitz_iters)
+        if len(kwargs) &gt; 0:
+            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
+
+        self.context_features = context_features
+        self.last_layer_hidden_sizes = last_layer_hidden_sizes
+
+        self.bn = torch.nn.BatchNorm1d(self.context_features)
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(total_in_channels=self.dimension,
+                                                                            densenet_growth=densenet_growth,
+                                                                            densenet_depth=densenet_depth,
+                                                                            include_last_layer=False)
+
+        self.custom_attention = LastLayerAttention(dimension=self.dimension,
+                                                   context_features=self.context_features,
+                                                   value_dim=self.densenet_final_layer_dim,
+                                                   hidden_sizes=self.last_layer_hidden_sizes)
+
+    def forward(self, inputs, context=None):
+        context = self.bn(context)
+        values_weights = self.dense_net(inputs).unsqueeze(-1)
+        weights = self.custom_attention.attention(context, values_weights)
+        return weights</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>flowcon.nn.nets.invertible_densenet._DenseNet</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.LastLayerConditionalDenseNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LastLayerConditionalDenseNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LastLayerConditionalDenseNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.LastLayerConditionalDenseNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    context = self.bn(context)
+    values_weights = self.dense_net(inputs).unsqueeze(-1)
+    weights = self.custom_attention.attention(context, values_weights)
+    return weights</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.LeakyLSwish"><code class="flex name class">
+<span>class <span class="ident">LeakyLSwish</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LeakyLSwish(nn.Module):
+
+    def __init__(self):
+        super(LeakyLSwish, self).__init__()
+        self.alpha = nn.Parameter(torch.tensor([-3.]))
+        self.beta = nn.Parameter(torch.tensor([0.5]))
+
+    def forward(self, x):
+        alpha = torch.sigmoid(self.alpha)
+        return alpha * x + (1 - alpha) * (x * torch.sigmoid_(x * F.softplus(self.beta))).div_(1.1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.LeakyLSwish.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LeakyLSwish.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LeakyLSwish.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.LeakyLSwish.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    alpha = torch.sigmoid(self.alpha)
+    return alpha * x + (1 - alpha) * (x * torch.sigmoid_(x * F.softplus(self.beta))).div_(1.1)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.LipSwish"><code class="flex name class">
+<span>class <span class="ident">LipSwish</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LipSwish(nn.Module):
+
+    def __init__(self):
+        super(LipSwish, self).__init__()
+        self.swish = Swish()
+
+    def forward(self, x):
+        return self.swish(x).div_(1.004)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.LipSwish.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LipSwish.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LipSwish.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.LipSwish.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return self.swish(x).div_(1.004)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.LipschitzCube"><code class="flex name class">
+<span>class <span class="ident">LipschitzCube</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LipschitzCube(nn.Module):
+
+    def forward(self, x):
+        return (x &gt;= 1).to(x) * (x - 2 / 3) + (x &lt;= -1).to(x) * (x + 2 / 3) + ((x &gt; -1) * (x &lt; 1)).to(x) * x ** 3 / 3</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.LipschitzCube.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LipschitzCube.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.LipschitzCube.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.LipschitzCube.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return (x &gt;= 1).to(x) * (x - 2 / 3) + (x &lt;= -1).to(x) * (x + 2 / 3) + ((x &gt; -1) * (x &lt; 1)).to(x) * x ** 3 / 3</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.MLP"><code class="flex name class">
+<span>class <span class="ident">MLP</span></span>
+<span>(</span><span>in_shape, out_shape, hidden_sizes, activation=ReLU(), activate_output=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A standard multi-layer perceptron.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>in_shape</code></strong></dt>
+<dd>tuple, list or torch.Size, the shape of the input.</dd>
+<dt><strong><code>out_shape</code></strong></dt>
+<dd>tuple, list or torch.Size, the shape of the output.</dd>
+<dt><strong><code>hidden_sizes</code></strong></dt>
+<dd>iterable of ints, the hidden-layer sizes.</dd>
+<dt><strong><code>activation</code></strong></dt>
+<dd>callable, the activation function.</dd>
+<dt><strong><code>activate_output</code></strong></dt>
+<dd>bool, whether to apply the activation to the output.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MLP(nn.Module):
+    &#34;&#34;&#34;A standard multi-layer perceptron.&#34;&#34;&#34;
+
+    def __init__(
+            self,
+            in_shape,
+            out_shape,
+            hidden_sizes,
+            activation=torch.nn.ReLU(),
+            activate_output=False,
+    ):
+        &#34;&#34;&#34;
+        Args:
+            in_shape: tuple, list or torch.Size, the shape of the input.
+            out_shape: tuple, list or torch.Size, the shape of the output.
+            hidden_sizes: iterable of ints, the hidden-layer sizes.
+            activation: callable, the activation function.
+            activate_output: bool, whether to apply the activation to the output.
+        &#34;&#34;&#34;
+        super().__init__()
+        self._in_shape = torch.Size(in_shape)
+        self._in_prod = self._in_shape.numel()
+        self._out_shape = torch.Size(out_shape)
+        self._hidden_sizes = hidden_sizes
+        self._activation = activation
+        self._activate_output = activate_output
+
+        if len(hidden_sizes) == 0:
+            raise ValueError(&#34;List of hidden sizes can&#39;t be empty.&#34;)
+
+        net = self.build_net(hidden_sizes, in_shape, nl=activation, out_shape=out_shape)
+        self.net = torch.nn.Sequential(*net)
+
+        # self.net = torch.jit.script(self.net)
+
+    def build_net(self, hidden_sizes, in_shape, nl, out_shape):
+        net = []
+        net.append(nn.Linear(self._in_shape.numel(), hidden_sizes[0]))
+        for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
+            net.append(nl)
+            net.append(nn.Linear(in_size, out_size))
+        net.append(nl)
+        net.append(nn.Linear(hidden_sizes[-1], self._out_shape.numel()))
+        if self._activate_output:
+            net.append(nl)
+        return net
+
+    def initialize_weights(self, first_layer_init):
+        self.net.apply(self.weight_init)
+        if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
+            self.net[0].apply(first_layer_init)
+
+    def forward(self, inputs):
+        return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.MLP.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MLP.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MLP.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.MLP.build_net"><code class="name flex">
+<span>def <span class="ident">build_net</span></span>(<span>self, hidden_sizes, in_shape, nl, out_shape)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_net(self, hidden_sizes, in_shape, nl, out_shape):
+    net = []
+    net.append(nn.Linear(self._in_shape.numel(), hidden_sizes[0]))
+    for in_size, out_size in zip(hidden_sizes[:-1], hidden_sizes[1:]):
+        net.append(nl)
+        net.append(nn.Linear(in_size, out_size))
+    net.append(nl)
+    net.append(nn.Linear(hidden_sizes[-1], self._out_shape.numel()))
+    if self._activate_output:
+        net.append(nl)
+    return net</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.MLP.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs):
+    return self.net(inputs.view(-1, self._in_prod)).view(-1, *self._out_shape)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.MLP.initialize_weights"><code class="name flex">
+<span>def <span class="ident">initialize_weights</span></span>(<span>self, first_layer_init)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_weights(self, first_layer_init):
+    self.net.apply(self.weight_init)
+    if first_layer_init is not None:  # Apply special initialization to first layer, if applicable.
+        self.net[0].apply(first_layer_init)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.MaxMin"><code class="flex name class">
+<span>class <span class="ident">MaxMin</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Module that computes max and min values of input tensor.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MaxMin(nn.Module):
+    &#34;&#34;&#34;
+    Module that computes max and min values of input tensor.
+    &#34;&#34;&#34;
+    def forward(self, x):
+        b, d = x.shape
+        max_vals = torch.max(x.view(b, d // 2, 2), 2)[0]
+        min_vals = torch.min(x.view(b, d // 2, 2), 2)[0]
+        return torch.cat([max_vals, min_vals], 1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.MaxMin.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MaxMin.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MaxMin.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.MaxMin.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    b, d = x.shape
+    max_vals = torch.max(x.view(b, d // 2, 2), 2)[0]
+    min_vals = torch.min(x.view(b, d // 2, 2), 2)[0]
+    return torch.cat([max_vals, min_vals], 1)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.MixedConditionalDenseNet"><code class="flex name class">
+<span>class <span class="ident">MixedConditionalDenseNet</span></span>
+<span>(</span><span>dimension, context_features, densenet_depth, densenet_growth=16, last_layer_hidden_sizes=(64, 64), c_embed_hidden_sizes=(32, 32, 10), activation_function=flowcon.nn.nets.activations.Swish, lip_coeff=0.98, n_lipschitz_iters=5, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Combination of LastLayerConditionalDenseNet and InputConditionalDenseNet,
+i.e. both the first and last layer of the densenet are conditional.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MixedConditionalDenseNet(_DenseNet):
+    &#34;&#34;&#34;
+    Combination of LastLayerConditionalDenseNet and InputConditionalDenseNet,
+    i.e. both the first and last layer of the densenet are conditional.
+    &#34;&#34;&#34;
+
+    def __init__(self, dimension, context_features,
+                 densenet_depth,
+                 densenet_growth=16,
+                 last_layer_hidden_sizes=(64, 64),
+                 c_embed_hidden_sizes=(32, 32, 10),
+                 activation_function=activations.Swish,
+                 lip_coeff=0.98,
+                 n_lipschitz_iters=5,
+                 **kwargs
+                 ):
+        super().__init__(dimension=dimension,
+                         densenet_depth=densenet_depth,
+                         densenet_growth=densenet_growth,
+                         activation_function=activation_function,
+                         lip_coeff=lip_coeff,
+                         n_lipschitz_iters=n_lipschitz_iters)
+
+        if len(kwargs) &gt; 0:
+            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
+
+        self.context_features = context_features
+        self.c_embed_hidden_sizes = c_embed_hidden_sizes
+        self.last_layer_hidden_sizes = last_layer_hidden_sizes
+
+        self.output_channels = self.calc_output_channels(self.activation,
+                                                         self.densenet_growth)
+        self.bn = torch.nn.BatchNorm1d(self.context_features)
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
+            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
+            densenet_growth=densenet_growth,
+            densenet_depth=densenet_depth,
+            include_last_layer=False)
+
+        self.custom_attention = LastLayerAttention(dimension=self.dimension,
+                                                   context_features=self.context_features,
+                                                   value_dim=self.densenet_final_layer_dim,
+                                                   hidden_sizes=self.last_layer_hidden_sizes)
+
+        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
+                                         hidden_sizes=self.c_embed_hidden_sizes,
+                                         activation=torch.nn.SiLU())
+
+    def forward(self, inputs, context=None):
+        context = self.bn(context)
+        context_embedding = self.context_embedding_net(context)
+        concat_inputs = torch.cat([inputs, context_embedding], -1)
+        values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
+        weights = self.custom_attention.attention(context, values_weights)
+        return weights</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>flowcon.nn.nets.invertible_densenet._DenseNet</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.MixedConditionalDenseNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MixedConditionalDenseNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MixedConditionalDenseNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.MixedConditionalDenseNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    context = self.bn(context)
+    context_embedding = self.context_embedding_net(context)
+    concat_inputs = torch.cat([inputs, context_embedding], -1)
+    values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
+    weights = self.custom_attention.attention(context, values_weights)
+    return weights</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.MultiplicativeAndInputConditionalDenseNet"><code class="flex name class">
+<span>class <span class="ident">MultiplicativeAndInputConditionalDenseNet</span></span>
+<span>(</span><span>dimension, context_features, densenet_depth, densenet_growth=16, c_embed_hidden_sizes=(128, 128, 10), m_embed_hidden_sizes=(128, 128), activation_function=flowcon.nn.nets.activations.Swish, lip_coeff=0.98, n_lipschitz_iters=5, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Provides a Lipschitz contiuous network g(x;c) = φ(c) h(x;t) with a fixed lipschitz constant.
+The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class MultiplicativeAndInputConditionalDenseNet(_DenseNet):
+    &#34;&#34;&#34;
+    Provides a Lipschitz contiuous network g(x;c) = φ(c) h(x;t) with a fixed lipschitz constant.
+    The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.
+    &#34;&#34;&#34;
+
+    def __init__(self, dimension, context_features,
+                 densenet_depth,
+                 densenet_growth=16,
+                 c_embed_hidden_sizes=(128, 128, 10),
+                 m_embed_hidden_sizes=(128, 128),
+                 activation_function=activations.Swish,
+                 lip_coeff=0.98,
+                 n_lipschitz_iters=5,
+                 **kwargs
+                 ):
+        super().__init__(dimension=dimension,
+                         densenet_depth=densenet_depth,
+                         densenet_growth=densenet_growth,
+                         activation_function=activation_function,
+                         lip_coeff=lip_coeff,
+                         n_lipschitz_iters=n_lipschitz_iters)
+        if len(kwargs) &gt; 0:
+            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
+
+        self.context_features = context_features
+        self.c_embed_hidden_sizes = c_embed_hidden_sizes
+        self.m_embed_hidden_sizes = m_embed_hidden_sizes
+
+        self.bn = torch.nn.BatchNorm1d(self.context_features)
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
+            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
+            densenet_growth=densenet_growth,
+            densenet_depth=densenet_depth,
+            include_last_layer=True)
+
+        self.factor_net = MLP((self.context_features,), (1,),
+                              hidden_sizes=self.m_embed_hidden_sizes,
+                              activation=torch.nn.SiLU())
+
+        self.embedding = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
+                             hidden_sizes=self.c_embed_hidden_sizes,
+                             activation=torch.nn.SiLU())
+
+    def forward(self, inputs, context=None):
+        context = self.bn(context)
+        factor = self.factor_net(context)
+        context_embedding = self.embedding(context)
+        concat_inputs = torch.cat([inputs, context_embedding], -1)
+        outputs = torch.nn.functional.tanh(factor) * self.dense_net(concat_inputs)
+        return outputs</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>flowcon.nn.nets.invertible_densenet._DenseNet</li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    context = self.bn(context)
+    factor = self.factor_net(context)
+    context_embedding = self.embedding(context)
+    concat_inputs = torch.cat([inputs, context_embedding], -1)
+    outputs = torch.nn.functional.tanh(factor) * self.dense_net(concat_inputs)
+    return outputs</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.ResidualNet"><code class="flex name class">
+<span>class <span class="ident">ResidualNet</span></span>
+<span>(</span><span>in_features, out_features, hidden_features, context_features=None, num_blocks=2, activation=ReLU(), dropout_probability=0.0, use_batch_norm=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A general-purpose residual network. Works only with 1-dim inputs.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ResidualNet(nn.Module):
+    &#34;&#34;&#34;A general-purpose residual network. Works only with 1-dim inputs.&#34;&#34;&#34;
+
+    def __init__(
+        self,
+        in_features,
+        out_features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        activation=torch.nn.ReLU(),
+        dropout_probability=0.0,
+        use_batch_norm=False,
+    ):
+        super().__init__()
+        self.hidden_features = hidden_features
+        self.context_features = context_features
+        if context_features is not None:
+            self.initial_layer = nn.Linear(
+                in_features + context_features, hidden_features
+            )
+        else:
+            self.initial_layer = nn.Linear(in_features, hidden_features)
+        self.blocks = nn.ModuleList(
+            [
+                ResidualBlock(
+                    features=hidden_features,
+                    context_features=context_features,
+                    activation=activation,
+                    dropout_probability=dropout_probability,
+                    use_batch_norm=use_batch_norm,
+                )
+                for _ in range(num_blocks)
+            ]
+        )
+        self.final_layer = nn.Linear(hidden_features, out_features)
+
+    def forward(self, inputs, context=None):
+        if context is None:
+            temps = self.initial_layer(inputs)
+        else:
+            temps = self.initial_layer(torch.cat((inputs, context), dim=1))
+        for block in self.blocks:
+            temps = block(temps, context=context)
+        outputs = self.final_layer(temps)
+        return outputs</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.ResidualNet.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.ResidualNet.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.ResidualNet.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.ResidualNet.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, inputs, context=None) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, inputs, context=None):
+    if context is None:
+        temps = self.initial_layer(inputs)
+    else:
+        temps = self.initial_layer(torch.cat((inputs, context), dim=1))
+    for block in self.blocks:
+        temps = block(temps, context=context)
+    outputs = self.final_layer(temps)
+    return outputs</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.Sin"><code class="flex name class">
+<span>class <span class="ident">Sin</span></span>
+<span>(</span><span>w0=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Sin(nn.Module):
+    def __init__(self, w0=1):
+        super(Sin, self).__init__()
+        self.w0 = w0
+
+    def forward(self, x):
+        return torch.sin(x * self.w0) / self.w0
+
+    def build_clone(self):
+        return copy.deepcopy(self)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.Sin.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.Sin.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.Sin.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.Sin.build_clone"><code class="name flex">
+<span>def <span class="ident">build_clone</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_clone(self):
+    return copy.deepcopy(self)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.nn.Sin.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return torch.sin(x * self.w0) / self.w0</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.nn.Swish"><code class="flex name class">
+<span>class <span class="ident">Swish</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Swish(nn.Module):
+
+    def __init__(self):
+        super(Swish, self).__init__()
+        self.beta = nn.Parameter(torch.tensor([0.5]))
+
+    def forward(self, x):
+        return (x * torch.sigmoid_(x * F.softplus(self.beta))).div_(1.1)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.nn.Swish.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.Swish.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.nn.Swish.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.nn.Swish.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, x) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, x):
+    return (x * torch.sigmoid_(x * F.softplus(self.beta))).div_(1.1)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon" href="../index.html">flowcon</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="flowcon.nn.nde" href="nde/index.html">flowcon.nn.nde</a></code></li>
+<li><code><a title="flowcon.nn.nets" href="nets/index.html">flowcon.nn.nets</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.nn.CLipSwish" href="#flowcon.nn.CLipSwish">CLipSwish</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.CLipSwish.call_super_init" href="#flowcon.nn.CLipSwish.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.CLipSwish.dump_patches" href="#flowcon.nn.CLipSwish.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.CLipSwish.forward" href="#flowcon.nn.CLipSwish.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.CLipSwish.training" href="#flowcon.nn.CLipSwish.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.CSin" href="#flowcon.nn.CSin">CSin</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.CSin.build_clone" href="#flowcon.nn.CSin.build_clone">build_clone</a></code></li>
+<li><code><a title="flowcon.nn.CSin.call_super_init" href="#flowcon.nn.CSin.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.CSin.dump_patches" href="#flowcon.nn.CSin.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.CSin.forward" href="#flowcon.nn.CSin.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.CSin.training" href="#flowcon.nn.CSin.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.ConvResidualNet" href="#flowcon.nn.ConvResidualNet">ConvResidualNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.ConvResidualNet.call_super_init" href="#flowcon.nn.ConvResidualNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.ConvResidualNet.dump_patches" href="#flowcon.nn.ConvResidualNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.ConvResidualNet.forward" href="#flowcon.nn.ConvResidualNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.ConvResidualNet.training" href="#flowcon.nn.ConvResidualNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.DenseNet" href="#flowcon.nn.DenseNet">DenseNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.DenseNet.call_super_init" href="#flowcon.nn.DenseNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.DenseNet.dump_patches" href="#flowcon.nn.DenseNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.DenseNet.forward" href="#flowcon.nn.DenseNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.DenseNet.training" href="#flowcon.nn.DenseNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.FCBlock" href="#flowcon.nn.FCBlock">FCBlock</a></code></h4>
+<ul class="two-column">
+<li><code><a title="flowcon.nn.FCBlock.build_net" href="#flowcon.nn.FCBlock.build_net">build_net</a></code></li>
+<li><code><a title="flowcon.nn.FCBlock.call_super_init" href="#flowcon.nn.FCBlock.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.FCBlock.dump_patches" href="#flowcon.nn.FCBlock.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.FCBlock.forward" href="#flowcon.nn.FCBlock.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.FCBlock.initialize_weights" href="#flowcon.nn.FCBlock.initialize_weights">initialize_weights</a></code></li>
+<li><code><a title="flowcon.nn.FCBlock.training" href="#flowcon.nn.FCBlock.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.FullSort" href="#flowcon.nn.FullSort">FullSort</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.FullSort.call_super_init" href="#flowcon.nn.FullSort.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.FullSort.dump_patches" href="#flowcon.nn.FullSort.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.FullSort.forward" href="#flowcon.nn.FullSort.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.FullSort.training" href="#flowcon.nn.FullSort.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.InputConditionalDenseNet" href="#flowcon.nn.InputConditionalDenseNet">InputConditionalDenseNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.InputConditionalDenseNet.call_super_init" href="#flowcon.nn.InputConditionalDenseNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.InputConditionalDenseNet.dump_patches" href="#flowcon.nn.InputConditionalDenseNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.InputConditionalDenseNet.forward" href="#flowcon.nn.InputConditionalDenseNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.InputConditionalDenseNet.training" href="#flowcon.nn.InputConditionalDenseNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.LastLayerConditionalDenseNet" href="#flowcon.nn.LastLayerConditionalDenseNet">LastLayerConditionalDenseNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.LastLayerConditionalDenseNet.call_super_init" href="#flowcon.nn.LastLayerConditionalDenseNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.LastLayerConditionalDenseNet.dump_patches" href="#flowcon.nn.LastLayerConditionalDenseNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.LastLayerConditionalDenseNet.forward" href="#flowcon.nn.LastLayerConditionalDenseNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.LastLayerConditionalDenseNet.training" href="#flowcon.nn.LastLayerConditionalDenseNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.LeakyLSwish" href="#flowcon.nn.LeakyLSwish">LeakyLSwish</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.LeakyLSwish.call_super_init" href="#flowcon.nn.LeakyLSwish.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.LeakyLSwish.dump_patches" href="#flowcon.nn.LeakyLSwish.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.LeakyLSwish.forward" href="#flowcon.nn.LeakyLSwish.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.LeakyLSwish.training" href="#flowcon.nn.LeakyLSwish.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.LipSwish" href="#flowcon.nn.LipSwish">LipSwish</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.LipSwish.call_super_init" href="#flowcon.nn.LipSwish.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.LipSwish.dump_patches" href="#flowcon.nn.LipSwish.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.LipSwish.forward" href="#flowcon.nn.LipSwish.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.LipSwish.training" href="#flowcon.nn.LipSwish.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.LipschitzCube" href="#flowcon.nn.LipschitzCube">LipschitzCube</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.LipschitzCube.call_super_init" href="#flowcon.nn.LipschitzCube.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.LipschitzCube.dump_patches" href="#flowcon.nn.LipschitzCube.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.LipschitzCube.forward" href="#flowcon.nn.LipschitzCube.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.LipschitzCube.training" href="#flowcon.nn.LipschitzCube.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.MLP" href="#flowcon.nn.MLP">MLP</a></code></h4>
+<ul class="two-column">
+<li><code><a title="flowcon.nn.MLP.build_net" href="#flowcon.nn.MLP.build_net">build_net</a></code></li>
+<li><code><a title="flowcon.nn.MLP.call_super_init" href="#flowcon.nn.MLP.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.MLP.dump_patches" href="#flowcon.nn.MLP.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.MLP.forward" href="#flowcon.nn.MLP.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.MLP.initialize_weights" href="#flowcon.nn.MLP.initialize_weights">initialize_weights</a></code></li>
+<li><code><a title="flowcon.nn.MLP.training" href="#flowcon.nn.MLP.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.MaxMin" href="#flowcon.nn.MaxMin">MaxMin</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.MaxMin.call_super_init" href="#flowcon.nn.MaxMin.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.MaxMin.dump_patches" href="#flowcon.nn.MaxMin.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.MaxMin.forward" href="#flowcon.nn.MaxMin.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.MaxMin.training" href="#flowcon.nn.MaxMin.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.MixedConditionalDenseNet" href="#flowcon.nn.MixedConditionalDenseNet">MixedConditionalDenseNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.MixedConditionalDenseNet.call_super_init" href="#flowcon.nn.MixedConditionalDenseNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.MixedConditionalDenseNet.dump_patches" href="#flowcon.nn.MixedConditionalDenseNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.MixedConditionalDenseNet.forward" href="#flowcon.nn.MixedConditionalDenseNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.MixedConditionalDenseNet.training" href="#flowcon.nn.MixedConditionalDenseNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.MultiplicativeAndInputConditionalDenseNet" href="#flowcon.nn.MultiplicativeAndInputConditionalDenseNet">MultiplicativeAndInputConditionalDenseNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.call_super_init" href="#flowcon.nn.MultiplicativeAndInputConditionalDenseNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.dump_patches" href="#flowcon.nn.MultiplicativeAndInputConditionalDenseNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.forward" href="#flowcon.nn.MultiplicativeAndInputConditionalDenseNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.MultiplicativeAndInputConditionalDenseNet.training" href="#flowcon.nn.MultiplicativeAndInputConditionalDenseNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.ResidualNet" href="#flowcon.nn.ResidualNet">ResidualNet</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.ResidualNet.call_super_init" href="#flowcon.nn.ResidualNet.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.ResidualNet.dump_patches" href="#flowcon.nn.ResidualNet.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.ResidualNet.forward" href="#flowcon.nn.ResidualNet.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.ResidualNet.training" href="#flowcon.nn.ResidualNet.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.Sin" href="#flowcon.nn.Sin">Sin</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.Sin.build_clone" href="#flowcon.nn.Sin.build_clone">build_clone</a></code></li>
+<li><code><a title="flowcon.nn.Sin.call_super_init" href="#flowcon.nn.Sin.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.Sin.dump_patches" href="#flowcon.nn.Sin.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.Sin.forward" href="#flowcon.nn.Sin.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.Sin.training" href="#flowcon.nn.Sin.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.nn.Swish" href="#flowcon.nn.Swish">Swish</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.nn.Swish.call_super_init" href="#flowcon.nn.Swish.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.nn.Swish.dump_patches" href="#flowcon.nn.Swish.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.nn.Swish.forward" href="#flowcon.nn.Swish.forward">forward</a></code></li>
+<li><code><a title="flowcon.nn.Swish.training" href="#flowcon.nn.Swish.training">training</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

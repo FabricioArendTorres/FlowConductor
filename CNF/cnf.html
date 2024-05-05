@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.CNF.cnf API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.CNF.cnf</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import torch
+import torch.nn as nn
+from torchdiffeq import odeint_adjoint as odeint
+
+from flowcon.CNF.neural_odes.wrappers.cnf_regularization import RegularizedODEfunc
+
+__all__ = [&#34;CNF&#34;]
+
+
+class CNF(nn.Module):
+    def __init__(self, odefunc, T=1.0, train_T=False, regularization_fns=None, solver=&#39;dopri5&#39;, atol=1e-5, rtol=1e-5):
+        super(CNF, self).__init__()
+        if train_T:
+            self.register_parameter(&#34;sqrt_end_time&#34;, nn.Parameter(torch.sqrt(torch.tensor(T))))
+        else:
+            self.register_buffer(&#34;sqrt_end_time&#34;, torch.sqrt(torch.tensor(T)))
+
+        nreg = 0
+        if regularization_fns is not None:
+            odefunc = RegularizedODEfunc(odefunc, regularization_fns)
+            nreg = len(regularization_fns)
+        self.odefunc = odefunc
+        self.nreg = nreg
+        self.regularization_states = None
+        self.solver = solver
+        self.atol = atol
+        self.rtol = rtol
+        self.test_solver = solver
+        self.test_atol = atol
+        self.test_rtol = rtol
+        self.solver_options = {}
+
+    def forward(self, z, logpz=None, integration_times=None, reverse=False):
+
+        if logpz is None:
+            _logpz = torch.zeros(z.shape[0], 1).to(z)
+        else:
+            _logpz = logpz
+
+        if integration_times is None:
+            integration_times = torch.tensor([0.0, self.sqrt_end_time * self.sqrt_end_time]).to(z)
+        if reverse:
+            integration_times = _flip(integration_times, 0)
+
+        # Refresh the odefunc statistics.
+        self.odefunc.before_odeint()
+
+        # Add regularization states.
+        reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
+
+        if self.training:
+            state_t = odeint(
+                self.odefunc,
+                (z, _logpz) + reg_states,
+                integration_times.to(z),
+                atol=self.atol,
+                rtol=self.rtol,
+                method=self.solver,
+                options=self.solver_options,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size = self.solver_options[&#34;step_size&#34;]
+            )
+        else:
+            state_t = odeint(
+                self.odefunc,
+                (z, _logpz),
+                integration_times.to(z),
+                atol=self.test_atol,
+                rtol=self.test_rtol,
+                method=self.test_solver,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size=self.solver_options[&#34;step_size&#34;]
+            )
+
+        if len(integration_times) == 2:
+            state_t = tuple(s[1] for s in state_t)
+
+        z_t, logpz_t = state_t[:2]
+        self.regularization_states = state_t[2:]
+
+        if logpz is not None:
+            return z_t, logpz_t
+        else:
+            return z_t
+
+    def get_regularization_states(self):
+        reg_states = self.regularization_states
+        self.regularization_states = None
+        return reg_states
+
+    def num_evals(self):
+        return self.odefunc._num_evals.item()
+
+
+class CompactCNF(nn.Module):
+    def __init__(self, dynamics_network, solver=&#39;dopri5&#39;, atol=1e-5, rtol=1e-5,
+                 divergence_fn=&#34;approximate&#34;):
+        super(CompactCNF, self).__init__()
+        assert divergence_fn in (&#34;brute_force&#34;, &#34;approximate&#34;)
+
+        nreg = 0
+
+        self.diffeq = dynamics_network
+        self.nreg = nreg
+        self.solver = solver
+        self.atol = atol
+        self.rtol = rtol
+        self.test_solver = solver
+        self.test_atol = atol
+        self.test_rtol = rtol
+        self.solver_options = {}
+        self.rademacher = True
+
+        if divergence_fn == &#34;brute_force&#34;:
+            self.divergence_fn = divergence_bf
+        elif divergence_fn == &#34;approximate&#34;:
+            self.divergence_fn = divergence_approx
+
+        self.register_buffer(&#34;_num_evals&#34;, torch.tensor(0.))
+        self.before_odeint()
+
+    def before_odeint(self, e=None):
+        self._e = e
+        self._num_evals.fill_(0)
+
+    def num_evals(self):
+        return self._num_evals.item()
+
+    def forward(self, t, states):
+        assert len(states) &gt;= 2
+        y = states[0]
+
+        # increment num evals
+        self._num_evals += 1
+
+        # convert to tensor
+        if not torch.is_tensor(t):
+            t = torch.tensor(t).type_as(y)
+        else:
+            t = t.type_as(y)
+        batchsize = y.shape[0]
+
+        # Sample and fix the noise.
+        if self._e is None:
+            if self.rademacher:
+                self._e = sample_rademacher_like(y)
+            else:
+                self._e = sample_gaussian_like(y)
+
+        with torch.set_grad_enabled(True):
+            y.requires_grad_(True)
+            t.requires_grad_(True)
+
+            dy = self.diffeq(t, y)
+            # Hack for 2D data to use brute force divergence computation.
+            if not self.training and dy.view(dy.shape[0], -1).shape[1] == 2:
+                divergence = divergence_bf(dy, y).view(batchsize, 1)
+            else:
+                if self.training:
+                    divergence = self.divergence_fn(dy, y, e=self._e).view(batchsize, 1)
+                else:
+                    divergence = divergence_bf(dy, y, e=self._e).view(batchsize, 1)
+
+        return tuple([dy, -divergence])
+
+    def integrate(self, z, logpz=None, integration_times=None, reverse=False):
+        if logpz is None:
+            _logpz = torch.zeros(z.shape[0], 1).to(z)
+        else:
+            _logpz = logpz
+
+        if integration_times is None:
+            integration_times = torch.tensor([0.0, self.sqrt_end_time * self.sqrt_end_time]).to(z)
+        if reverse:
+            integration_times = _flip(integration_times, 0)
+
+        # Refresh the odefunc statistics.
+        self.before_odeint()
+
+        if self.training:
+            state_t = odeint(
+                self,
+                (z, _logpz),
+                integration_times.to(z),
+                atol=self.atol,
+                rtol=self.rtol,
+                method=self.solver,
+                options=self.solver_options,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size = self.solver_options[&#34;step_size&#34;]
+            )
+        else:
+            state_t = odeint(
+                self,
+                (z, _logpz),
+                integration_times.to(z),
+                atol=self.test_atol,
+                rtol=self.test_rtol,
+                method=self.test_solver,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size=self.solver_options[&#34;step_size&#34;]
+            )
+
+        z_t, logpz_t = tuple(s[1] for s in state_t)
+
+        return z_t, logpz_t
+
+
+class CompactTimeVariableCNF(nn.Module):
+
+    start_time = 0.0
+    end_time = 1.0
+
+    def __init__(self, dynamics_network, solver=&#39;dopri5&#39;, atol=1e-5, rtol=1e-5,
+                 divergence_fn=&#34;approximate&#34;):
+        super(CompactTimeVariableCNF, self).__init__()
+        assert divergence_fn in (&#34;brute_force&#34;, &#34;approximate&#34;)
+
+        nreg = 0
+
+        self.diffeq = dynamics_network
+        self.nreg = nreg
+        self.solver = solver
+        self.atol = atol
+        self.rtol = rtol
+        self.test_solver = solver
+        self.test_atol = atol
+        self.test_rtol = rtol
+        self.solver_options = {}
+        self.rademacher = True
+
+        if divergence_fn == &#34;brute_force&#34;:
+            self.divergence_fn = divergence_bf
+        elif divergence_fn == &#34;approximate&#34;:
+            self.divergence_fn = divergence_approx
+
+        self.register_buffer(&#34;_num_evals&#34;, torch.tensor(0.))
+        self.before_odeint()
+
+        self.odeint_kwargs = dict(
+            train=dict(
+                atol=self.atol,
+                rtol=self.rtol,
+                method=self.solver,
+                options=self.solver_options,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}),
+            test=dict(
+                atol=self.test_atol,
+                rtol=self.test_rtol,
+                method=self.test_solver,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;})
+        )
+
+    def integrate(self, t0, t1, z, logpz=None):
+
+        _logpz = torch.zeros(z.shape[0], 1).to(z) if logpz is None else logpz
+        initial_state = (t0, t1, z, _logpz)
+
+        integration_times = torch.tensor([self.start_time, self.end_time]).to(t0)
+
+        # Refresh the odefunc statistics.
+        self.before_odeint(e=self.sample_e_like(z))
+
+        self.get_odeint_kwargs()
+        state_t = odeint(
+            func=self,
+            y0=initial_state,
+            t=integration_times,
+            **self.get_odeint_kwargs()
+        )
+        _, _,  z_t, logpz_t = tuple(s[-1] for s in state_t)
+
+        return z_t, logpz_t
+
+    def forward(self, s, states):
+        assert len(states) &gt;= 2
+        t0, t1, y, _ = states
+        ratio = (t1 - t0) / (self.end_time - self.start_time)
+
+        # increment num evals
+        self._num_evals += 1
+
+        # Sample and fix the noise.
+        if self._e is None:
+            self._e = self.sample_e_like(y)
+
+        with torch.set_grad_enabled(True):
+            y.requires_grad_(True)
+            t = (s - self.start_time) * ratio + t0
+            dy = self.diffeq(t, y)
+            dy = dy * ratio.reshape(-1, *([1] * (y.ndim - 1)))
+
+            divergence = self.calculate_divergence(y, dy)
+
+        return tuple([torch.zeros_like(t0), torch.zeros_like(t1), dy, -divergence])
+
+    def sample_e_like(self, y):
+        if self.rademacher:
+            return sample_rademacher_like(y)
+        else:
+            return sample_gaussian_like(y)
+
+    def calculate_divergence(self, y, dy):
+        # Hack for 2D data to use brute force divergence computation.
+        if not self.training and dy.view(dy.shape[0], -1).shape[1] == 2:
+            divergence = divergence_bf(dy, y).view(-1, 1)
+        else:
+            if self.training:
+                divergence = self.divergence_fn(dy, y, e=self._e).view(-1, 1)
+            else:
+                divergence = divergence_bf(dy, y, e=self._e).view(-1, 1)
+        return divergence
+
+    def get_odeint_kwargs(self):
+        if self.training:
+            return self.odeint_kwargs[&#34;train&#34;]
+        else:
+            return self.odeint_kwargs[&#34;test&#34;]
+
+    def before_odeint(self, e=None):
+        self._e = e
+        self._num_evals.fill_(0)
+
+    def num_evals(self):
+        return self._num_evals.item()
+
+
+def _flip(x, dim):
+    indices = [slice(None)] * x.dim()
+    indices[dim] = torch.arange(x.size(dim) - 1, -1, -1, dtype=torch.long, device=x.device)
+    return x[tuple(indices)]
+
+
+def sample_rademacher_like(y):
+    return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1
+
+
+def sample_gaussian_like(y):
+    return torch.randn_like(y)
+
+
+def divergence_bf(dx, y, **unused_kwargs):
+    sum_diag = 0.
+    for i in range(y.shape[1]):
+        sum_diag += torch.autograd.grad(dx[:, i].sum(), y, create_graph=True)[0].contiguous()[:, i].contiguous()
+    return sum_diag.contiguous()
+
+
+def divergence_approx(f, y, e=None):
+    e_dzdx = torch.autograd.grad(f, y, e, create_graph=True)[0]
+    e_dzdx_e = e_dzdx * e
+    approx_tr_dzdx = e_dzdx_e.view(y.shape[0], -1).sum(dim=1)
+    return approx_tr_dzdx</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.CNF.cnf.CNF"><code class="flex name class">
+<span>class <span class="ident">CNF</span></span>
+<span>(</span><span>odefunc, T=1.0, train_T=False, regularization_fns=None, solver='dopri5', atol=1e-05, rtol=1e-05)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As per the example above, an <code>__init__()</code> call to the parent class
+must be made before assignment on the child.</p>
+</div>
+<p>:ivar training: Boolean represents whether this module is in training or
+evaluation mode.
+:vartype training: bool</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CNF(nn.Module):
+    def __init__(self, odefunc, T=1.0, train_T=False, regularization_fns=None, solver=&#39;dopri5&#39;, atol=1e-5, rtol=1e-5):
+        super(CNF, self).__init__()
+        if train_T:
+            self.register_parameter(&#34;sqrt_end_time&#34;, nn.Parameter(torch.sqrt(torch.tensor(T))))
+        else:
+            self.register_buffer(&#34;sqrt_end_time&#34;, torch.sqrt(torch.tensor(T)))
+
+        nreg = 0
+        if regularization_fns is not None:
+            odefunc = RegularizedODEfunc(odefunc, regularization_fns)
+            nreg = len(regularization_fns)
+        self.odefunc = odefunc
+        self.nreg = nreg
+        self.regularization_states = None
+        self.solver = solver
+        self.atol = atol
+        self.rtol = rtol
+        self.test_solver = solver
+        self.test_atol = atol
+        self.test_rtol = rtol
+        self.solver_options = {}
+
+    def forward(self, z, logpz=None, integration_times=None, reverse=False):
+
+        if logpz is None:
+            _logpz = torch.zeros(z.shape[0], 1).to(z)
+        else:
+            _logpz = logpz
+
+        if integration_times is None:
+            integration_times = torch.tensor([0.0, self.sqrt_end_time * self.sqrt_end_time]).to(z)
+        if reverse:
+            integration_times = _flip(integration_times, 0)
+
+        # Refresh the odefunc statistics.
+        self.odefunc.before_odeint()
+
+        # Add regularization states.
+        reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
+
+        if self.training:
+            state_t = odeint(
+                self.odefunc,
+                (z, _logpz) + reg_states,
+                integration_times.to(z),
+                atol=self.atol,
+                rtol=self.rtol,
+                method=self.solver,
+                options=self.solver_options,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size = self.solver_options[&#34;step_size&#34;]
+            )
+        else:
+            state_t = odeint(
+                self.odefunc,
+                (z, _logpz),
+                integration_times.to(z),
+                atol=self.test_atol,
+                rtol=self.test_rtol,
+                method=self.test_solver,
+                adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+                # step_size=self.solver_options[&#34;step_size&#34;]
+            )
+
+        if len(integration_times) == 2:
+            state_t = tuple(s[1] for s in state_t)
+
+        z_t, logpz_t = state_t[:2]
+        self.regularization_states = state_t[2:]
+
+        if logpz is not None:
+            return z_t, logpz_t
+        else:
+            return z_t
+
+    def get_regularization_states(self):
+        reg_states = self.regularization_states
+        self.regularization_states = None
+        return reg_states
+
+    def num_evals(self):
+        return self.odefunc._num_evals.item()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.CNF.cnf.CNF.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.CNF.cnf.CNF.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.CNF.cnf.CNF.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.CNF.cnf.CNF.forward"><code class="name flex">
+<span>def <span class="ident">forward</span></span>(<span>self, z, logpz=None, integration_times=None, reverse=False) ‑> Callable[..., Any]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the :class:<code>Module</code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward(self, z, logpz=None, integration_times=None, reverse=False):
+
+    if logpz is None:
+        _logpz = torch.zeros(z.shape[0], 1).to(z)
+    else:
+        _logpz = logpz
+
+    if integration_times is None:
+        integration_times = torch.tensor([0.0, self.sqrt_end_time * self.sqrt_end_time]).to(z)
+    if reverse:
+        integration_times = _flip(integration_times, 0)
+
+    # Refresh the odefunc statistics.
+    self.odefunc.before_odeint()
+
+    # Add regularization states.
+    reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
+
+    if self.training:
+        state_t = odeint(
+            self.odefunc,
+            (z, _logpz) + reg_states,
+            integration_times.to(z),
+            atol=self.atol,
+            rtol=self.rtol,
+            method=self.solver,
+            options=self.solver_options,
+            adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+            # step_size = self.solver_options[&#34;step_size&#34;]
+        )
+    else:
+        state_t = odeint(
+            self.odefunc,
+            (z, _logpz),
+            integration_times.to(z),
+            atol=self.test_atol,
+            rtol=self.test_rtol,
+            method=self.test_solver,
+            adjoint_options={&#34;norm&#34;: &#34;seminorm&#34;}
+            # step_size=self.solver_options[&#34;step_size&#34;]
+        )
+
+    if len(integration_times) == 2:
+        state_t = tuple(s[1] for s in state_t)
+
+    z_t, logpz_t = state_t[:2]
+    self.regularization_states = state_t[2:]
+
+    if logpz is not None:
+        return z_t, logpz_t
+    else:
+        return z_t</code></pre>
+</details>
+</dd>
+<dt id="flowcon.CNF.cnf.CNF.get_regularization_states"><code class="name flex">
+<span>def <span class="ident">get_regularization_states</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_regularization_states(self):
+    reg_states = self.regularization_states
+    self.regularization_states = None
+    return reg_states</code></pre>
+</details>
+</dd>
+<dt id="flowcon.CNF.cnf.CNF.num_evals"><code class="name flex">
+<span>def <span class="ident">num_evals</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def num_evals(self):
+    return self.odefunc._num_evals.item()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon.CNF" href="index.html">flowcon.CNF</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.CNF.cnf.CNF" href="#flowcon.CNF.cnf.CNF">CNF</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.CNF.cnf.CNF.call_super_init" href="#flowcon.CNF.cnf.CNF.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.CNF.cnf.CNF.dump_patches" href="#flowcon.CNF.cnf.CNF.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.CNF.cnf.CNF.forward" href="#flowcon.CNF.cnf.CNF.forward">forward</a></code></li>
+<li><code><a title="flowcon.CNF.cnf.CNF.get_regularization_states" href="#flowcon.CNF.cnf.CNF.get_regularization_states">get_regularization_states</a></code></li>
+<li><code><a title="flowcon.CNF.cnf.CNF.num_evals" href="#flowcon.CNF.cnf.CNF.num_evals">num_evals</a></code></li>
+<li><code><a title="flowcon.CNF.cnf.CNF.training" href="#flowcon.CNF.cnf.CNF.training">training</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

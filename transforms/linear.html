@@ -1,0 +1,1228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.transforms.linear API documentation</title>
+<meta name="description" content="Implementations of linear transforms." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.transforms.linear</code></h1>
+</header>
+<section id="section-intro">
+<p>Implementations of linear transforms.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Implementations of linear transforms.&#34;&#34;&#34;
+
+import numpy as np
+import torch
+from torch import nn
+from torch.nn import functional as F
+from torch.nn import init
+
+from flowcon.transforms.base import Transform
+from flowcon.utils import torchutils
+import flowcon.utils.typechecks as check
+
+
+class LinearCache:
+    &#34;&#34;&#34;Helper class to store the cache of a linear transform.
+
+    The cache consists of: the weight matrix, its inverse and its log absolute determinant.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self.weight = None
+        self.inverse = None
+        self.logabsdet = None
+
+    def invalidate(self):
+        self.weight = None
+        self.inverse = None
+        self.logabsdet = None
+
+
+class Linear(Transform):
+    &#34;&#34;&#34;Abstract base class for linear transforms that parameterize a weight matrix.&#34;&#34;&#34;
+
+    def __init__(self, features, using_cache=False):
+        if not check.is_positive_int(features):
+            raise TypeError(&#34;Number of features must be a positive integer.&#34;)
+        super().__init__()
+
+        self.features = features
+        self.bias = nn.Parameter(torch.zeros(features))
+
+        # Caching flag and values.
+        self.using_cache = using_cache
+        self.cache = LinearCache()
+
+    def forward(self, inputs, context=None):
+        if not self.training and self.using_cache:
+            self._check_forward_cache()
+            outputs = F.linear(inputs, self.cache.weight, self.bias)
+            logabsdet = self.cache.logabsdet * outputs.new_ones(outputs.shape[0])
+            return outputs, logabsdet
+        else:
+            return self.forward_no_cache(inputs)
+
+    def _check_forward_cache(self):
+        if self.cache.weight is None and self.cache.logabsdet is None:
+            self.cache.weight, self.cache.logabsdet = self.weight_and_logabsdet()
+
+        elif self.cache.weight is None:
+            self.cache.weight = self.weight()
+
+        elif self.cache.logabsdet is None:
+            self.cache.logabsdet = self.logabsdet()
+
+    def inverse(self, inputs, context=None):
+        if not self.training and self.using_cache:
+            self._check_inverse_cache()
+            outputs = F.linear(inputs - self.bias, self.cache.inverse)
+            logabsdet = (-self.cache.logabsdet) * outputs.new_ones(outputs.shape[0])
+            return outputs, logabsdet
+        else:
+            return self.inverse_no_cache(inputs)
+
+    def _check_inverse_cache(self):
+        if self.cache.inverse is None and self.cache.logabsdet is None:
+            (
+                self.cache.inverse,
+                self.cache.logabsdet,
+            ) = self.weight_inverse_and_logabsdet()
+
+        elif self.cache.inverse is None:
+            self.cache.inverse = self.weight_inverse()
+
+        elif self.cache.logabsdet is None:
+            self.cache.logabsdet = self.logabsdet()
+
+    def train(self, mode=True):
+        if mode:
+            # If training again, invalidate cache.
+            self.cache.invalidate()
+        return super().train(mode)
+
+    def use_cache(self, mode=True):
+        if not check.is_bool(mode):
+            raise TypeError(&#34;Mode must be boolean.&#34;)
+        self.using_cache = mode
+
+    def weight_and_logabsdet(self):
+        # To be overridden by subclasses if it is more efficient to compute the weight matrix
+        # and its logabsdet together.
+        return self.weight(), self.logabsdet()
+
+    def weight_inverse_and_logabsdet(self):
+        # To be overridden by subclasses if it is more efficient to compute the weight matrix
+        # inverse and weight matrix logabsdet together.
+        return self.weight_inverse(), self.logabsdet()
+
+    def forward_no_cache(self, inputs):
+        &#34;&#34;&#34;Applies `forward` method without using the cache.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def inverse_no_cache(self, inputs):
+        &#34;&#34;&#34;Applies `inverse` method without using the cache.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def weight(self):
+        &#34;&#34;&#34;Returns the weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def weight_inverse(self):
+        &#34;&#34;&#34;Returns the inverse weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def logabsdet(self):
+        &#34;&#34;&#34;Returns the log absolute determinant of the weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+
+class NaiveLinear(Linear):
+    &#34;&#34;&#34;A general linear transform that uses an unconstrained weight matrix.
+
+    This transform explicitly computes the log absolute determinant in the forward direction
+    and uses a linear solver in the inverse direction.
+
+    Both forward and inverse directions have a cost of O(D^3), where D is the dimension
+    of the input.
+    &#34;&#34;&#34;
+
+    def __init__(self, features, orthogonal_initialization=True, using_cache=False):
+        &#34;&#34;&#34;Constructor.
+
+        Args:
+            features: int, number of input features.
+            orthogonal_initialization: bool, if True initialize weights to be a random
+                orthogonal matrix.
+
+        Raises:
+            TypeError: if `features` is not a positive integer.
+        &#34;&#34;&#34;
+        super().__init__(features, using_cache)
+
+        if orthogonal_initialization:
+            self._weight = nn.Parameter(torchutils.random_orthogonal(features))
+        else:
+            self._weight = nn.Parameter(torch.empty(features, features))
+            stdv = 1.0 / np.sqrt(features)
+            init.uniform_(self._weight, -stdv, stdv)
+
+    def forward_no_cache(self, inputs):
+        &#34;&#34;&#34;Cost:
+            output = O(D^2N)
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+            N = num of inputs
+        &#34;&#34;&#34;
+        batch_size = inputs.shape[0]
+        outputs = F.linear(inputs, self._weight, self.bias)
+        logabsdet = torchutils.logabsdet(self._weight)
+        logabsdet = logabsdet * outputs.new_ones(batch_size)
+        return outputs, logabsdet
+
+    def inverse_no_cache(self, inputs):
+        &#34;&#34;&#34;Cost:
+            output = O(D^3 + D^2N)
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+            N = num of inputs
+        &#34;&#34;&#34;
+        batch_size = inputs.shape[0]
+        outputs = inputs - self.bias
+        # LU-decompose the weights and solve for the outputs.
+        lu, lu_pivots = torch.linalg.lu_factor(self._weight)
+        outputs = torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
+        # The linear-system solver returns the LU decomposition of the weights, which we
+        # can use to obtain the log absolute determinant directly.
+        logabsdet = -torch.sum(torch.log(torch.abs(torch.diag(lu))))
+        logabsdet = logabsdet * outputs.new_ones(batch_size)
+        return outputs, logabsdet
+
+    def weight(self):
+        &#34;&#34;&#34;Cost:
+            weight = O(1)
+        &#34;&#34;&#34;
+        return self._weight
+
+    def weight_inverse(self):
+        &#34;&#34;&#34;
+        Cost:
+            inverse = O(D^3)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        return torch.inverse(self._weight)
+
+    def weight_inverse_and_logabsdet(self):
+        &#34;&#34;&#34;
+        Cost:
+            inverse = O(D^3)
+            logabsdet = O(D)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        # If both weight inverse and logabsdet are needed, it&#39;s cheaper to compute both together.
+        identity = torch.eye(self.features, self.features)
+        # LU-decompose the weights and solve for the outputs.
+        lu, lu_pivots = torch.lu(self._weight)
+        weight_inv = torch.lu_solve(identity, lu, lu_pivots)
+        logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
+        return weight_inv, logabsdet
+
+    def logabsdet(self):
+        &#34;&#34;&#34;Cost:
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        return torchutils.logabsdet(self._weight)
+
+
+class ScalarScale(Transform):
+    def __init__(self, scale=1., trainable=True, eps=1e-4):
+        super().__init__()
+        assert np.all(scale &gt; 1e-6), &#34;Scale too small..&#34;
+        self._scale = nn.Parameter(torch.log(torch.tensor(scale, dtype=torch.get_default_dtype())), requires_grad=trainable)
+        self.eps = eps
+
+    @property
+    def scale(self):
+        return torch.exp(self._scale) + self.eps
+
+    def forward(self, inputs, context=None):
+        outputs = self.scale * inputs
+
+        logabsdet = inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
+        return outputs, logabsdet
+
+    def inverse(self, inputs, context=None):
+        outputs = inputs * (1. / self.scale)
+        logabsdet = - inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
+        return outputs, logabsdet
+
+
+class ScalarShift(Transform):
+    def __init__(self, shift=0., trainable=True):
+        super().__init__()
+        self.shift = nn.Parameter(torch.tensor(shift, dtype=torch.get_default_dtype()), requires_grad=trainable)
+
+    def forward(self, inputs, context=None):
+        outputs = inputs + self.shift
+        return outputs, inputs.new_zeros(inputs.shape[0])
+
+    def inverse(self, inputs, context=None):
+        outputs = inputs - self.shift
+        return outputs, inputs.new_zeros(inputs.shape[0])</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="flowcon.transforms.linear.Linear"><code class="flex name class">
+<span>class <span class="ident">Linear</span></span>
+<span>(</span><span>features, using_cache=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract base class for linear transforms that parameterize a weight matrix.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Linear(Transform):
+    &#34;&#34;&#34;Abstract base class for linear transforms that parameterize a weight matrix.&#34;&#34;&#34;
+
+    def __init__(self, features, using_cache=False):
+        if not check.is_positive_int(features):
+            raise TypeError(&#34;Number of features must be a positive integer.&#34;)
+        super().__init__()
+
+        self.features = features
+        self.bias = nn.Parameter(torch.zeros(features))
+
+        # Caching flag and values.
+        self.using_cache = using_cache
+        self.cache = LinearCache()
+
+    def forward(self, inputs, context=None):
+        if not self.training and self.using_cache:
+            self._check_forward_cache()
+            outputs = F.linear(inputs, self.cache.weight, self.bias)
+            logabsdet = self.cache.logabsdet * outputs.new_ones(outputs.shape[0])
+            return outputs, logabsdet
+        else:
+            return self.forward_no_cache(inputs)
+
+    def _check_forward_cache(self):
+        if self.cache.weight is None and self.cache.logabsdet is None:
+            self.cache.weight, self.cache.logabsdet = self.weight_and_logabsdet()
+
+        elif self.cache.weight is None:
+            self.cache.weight = self.weight()
+
+        elif self.cache.logabsdet is None:
+            self.cache.logabsdet = self.logabsdet()
+
+    def inverse(self, inputs, context=None):
+        if not self.training and self.using_cache:
+            self._check_inverse_cache()
+            outputs = F.linear(inputs - self.bias, self.cache.inverse)
+            logabsdet = (-self.cache.logabsdet) * outputs.new_ones(outputs.shape[0])
+            return outputs, logabsdet
+        else:
+            return self.inverse_no_cache(inputs)
+
+    def _check_inverse_cache(self):
+        if self.cache.inverse is None and self.cache.logabsdet is None:
+            (
+                self.cache.inverse,
+                self.cache.logabsdet,
+            ) = self.weight_inverse_and_logabsdet()
+
+        elif self.cache.inverse is None:
+            self.cache.inverse = self.weight_inverse()
+
+        elif self.cache.logabsdet is None:
+            self.cache.logabsdet = self.logabsdet()
+
+    def train(self, mode=True):
+        if mode:
+            # If training again, invalidate cache.
+            self.cache.invalidate()
+        return super().train(mode)
+
+    def use_cache(self, mode=True):
+        if not check.is_bool(mode):
+            raise TypeError(&#34;Mode must be boolean.&#34;)
+        self.using_cache = mode
+
+    def weight_and_logabsdet(self):
+        # To be overridden by subclasses if it is more efficient to compute the weight matrix
+        # and its logabsdet together.
+        return self.weight(), self.logabsdet()
+
+    def weight_inverse_and_logabsdet(self):
+        # To be overridden by subclasses if it is more efficient to compute the weight matrix
+        # inverse and weight matrix logabsdet together.
+        return self.weight_inverse(), self.logabsdet()
+
+    def forward_no_cache(self, inputs):
+        &#34;&#34;&#34;Applies `forward` method without using the cache.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def inverse_no_cache(self, inputs):
+        &#34;&#34;&#34;Applies `inverse` method without using the cache.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def weight(self):
+        &#34;&#34;&#34;Returns the weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def weight_inverse(self):
+        &#34;&#34;&#34;Returns the inverse weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()
+
+    def logabsdet(self):
+        &#34;&#34;&#34;Returns the log absolute determinant of the weight matrix.&#34;&#34;&#34;
+        raise NotImplementedError()</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.linear.NaiveLinear" href="#flowcon.transforms.linear.NaiveLinear">NaiveLinear</a></li>
+<li><a title="flowcon.transforms.lu.LULinear" href="lu.html#flowcon.transforms.lu.LULinear">LULinear</a></li>
+<li><a title="flowcon.transforms.qr.QRLinear" href="qr.html#flowcon.transforms.qr.QRLinear">QRLinear</a></li>
+<li><a title="flowcon.transforms.svd.SVDLinear" href="svd.html#flowcon.transforms.svd.SVDLinear">SVDLinear</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.linear.Linear.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.linear.Linear.forward_no_cache"><code class="name flex">
+<span>def <span class="ident">forward_no_cache</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Applies <code>forward</code> method without using the cache.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward_no_cache(self, inputs):
+    &#34;&#34;&#34;Applies `forward` method without using the cache.&#34;&#34;&#34;
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.inverse"><code class="name flex">
+<span>def <span class="ident">inverse</span></span>(<span>self, inputs, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse(self, inputs, context=None):
+    if not self.training and self.using_cache:
+        self._check_inverse_cache()
+        outputs = F.linear(inputs - self.bias, self.cache.inverse)
+        logabsdet = (-self.cache.logabsdet) * outputs.new_ones(outputs.shape[0])
+        return outputs, logabsdet
+    else:
+        return self.inverse_no_cache(inputs)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.inverse_no_cache"><code class="name flex">
+<span>def <span class="ident">inverse_no_cache</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Applies <code>inverse</code> method without using the cache.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse_no_cache(self, inputs):
+    &#34;&#34;&#34;Applies `inverse` method without using the cache.&#34;&#34;&#34;
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.logabsdet"><code class="name flex">
+<span>def <span class="ident">logabsdet</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the log absolute determinant of the weight matrix.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def logabsdet(self):
+    &#34;&#34;&#34;Returns the log absolute determinant of the weight matrix.&#34;&#34;&#34;
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.train"><code class="name flex">
+<span>def <span class="ident">train</span></span>(<span>self, mode=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Set the module in training mode.</p>
+<p>This has any effect only on certain modules. See documentations of
+particular modules for details of their behaviors in training/evaluation
+mode, if they are affected, e.g. :class:<code>Dropout</code>, :class:<code>BatchNorm</code>,
+etc.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>mode</code></strong> :&ensp;<code>bool</code></dt>
+<dd>whether to set training mode (<code>True</code>) or evaluation
+mode (<code>False</code>). Default: <code>True</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Module</code></dt>
+<dd>self</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def train(self, mode=True):
+    if mode:
+        # If training again, invalidate cache.
+        self.cache.invalidate()
+    return super().train(mode)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.use_cache"><code class="name flex">
+<span>def <span class="ident">use_cache</span></span>(<span>self, mode=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def use_cache(self, mode=True):
+    if not check.is_bool(mode):
+        raise TypeError(&#34;Mode must be boolean.&#34;)
+    self.using_cache = mode</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.weight"><code class="name flex">
+<span>def <span class="ident">weight</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the weight matrix.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight(self):
+    &#34;&#34;&#34;Returns the weight matrix.&#34;&#34;&#34;
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.weight_and_logabsdet"><code class="name flex">
+<span>def <span class="ident">weight_and_logabsdet</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_and_logabsdet(self):
+    # To be overridden by subclasses if it is more efficient to compute the weight matrix
+    # and its logabsdet together.
+    return self.weight(), self.logabsdet()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.weight_inverse"><code class="name flex">
+<span>def <span class="ident">weight_inverse</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the inverse weight matrix.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_inverse(self):
+    &#34;&#34;&#34;Returns the inverse weight matrix.&#34;&#34;&#34;
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.Linear.weight_inverse_and_logabsdet"><code class="name flex">
+<span>def <span class="ident">weight_inverse_and_logabsdet</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_inverse_and_logabsdet(self):
+    # To be overridden by subclasses if it is more efficient to compute the weight matrix
+    # inverse and weight matrix logabsdet together.
+    return self.weight_inverse(), self.logabsdet()</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.base.Transform.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="flowcon.transforms.linear.LinearCache"><code class="flex name class">
+<span>class <span class="ident">LinearCache</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Helper class to store the cache of a linear transform.</p>
+<p>The cache consists of: the weight matrix, its inverse and its log absolute determinant.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class LinearCache:
+    &#34;&#34;&#34;Helper class to store the cache of a linear transform.
+
+    The cache consists of: the weight matrix, its inverse and its log absolute determinant.
+    &#34;&#34;&#34;
+
+    def __init__(self):
+        self.weight = None
+        self.inverse = None
+        self.logabsdet = None
+
+    def invalidate(self):
+        self.weight = None
+        self.inverse = None
+        self.logabsdet = None</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.linear.LinearCache.invalidate"><code class="name flex">
+<span>def <span class="ident">invalidate</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def invalidate(self):
+    self.weight = None
+    self.inverse = None
+    self.logabsdet = None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear"><code class="flex name class">
+<span>class <span class="ident">NaiveLinear</span></span>
+<span>(</span><span>features, orthogonal_initialization=True, using_cache=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A general linear transform that uses an unconstrained weight matrix.</p>
+<p>This transform explicitly computes the log absolute determinant in the forward direction
+and uses a linear solver in the inverse direction.</p>
+<p>Both forward and inverse directions have a cost of O(D^3), where D is the dimension
+of the input.</p>
+<p>Constructor.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>features</code></strong></dt>
+<dd>int, number of input features.</dd>
+<dt><strong><code>orthogonal_initialization</code></strong></dt>
+<dd>bool, if True initialize weights to be a random
+orthogonal matrix.</dd>
+</dl>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>TypeError</code></dt>
+<dd>if <code>features</code> is not a positive integer.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class NaiveLinear(Linear):
+    &#34;&#34;&#34;A general linear transform that uses an unconstrained weight matrix.
+
+    This transform explicitly computes the log absolute determinant in the forward direction
+    and uses a linear solver in the inverse direction.
+
+    Both forward and inverse directions have a cost of O(D^3), where D is the dimension
+    of the input.
+    &#34;&#34;&#34;
+
+    def __init__(self, features, orthogonal_initialization=True, using_cache=False):
+        &#34;&#34;&#34;Constructor.
+
+        Args:
+            features: int, number of input features.
+            orthogonal_initialization: bool, if True initialize weights to be a random
+                orthogonal matrix.
+
+        Raises:
+            TypeError: if `features` is not a positive integer.
+        &#34;&#34;&#34;
+        super().__init__(features, using_cache)
+
+        if orthogonal_initialization:
+            self._weight = nn.Parameter(torchutils.random_orthogonal(features))
+        else:
+            self._weight = nn.Parameter(torch.empty(features, features))
+            stdv = 1.0 / np.sqrt(features)
+            init.uniform_(self._weight, -stdv, stdv)
+
+    def forward_no_cache(self, inputs):
+        &#34;&#34;&#34;Cost:
+            output = O(D^2N)
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+            N = num of inputs
+        &#34;&#34;&#34;
+        batch_size = inputs.shape[0]
+        outputs = F.linear(inputs, self._weight, self.bias)
+        logabsdet = torchutils.logabsdet(self._weight)
+        logabsdet = logabsdet * outputs.new_ones(batch_size)
+        return outputs, logabsdet
+
+    def inverse_no_cache(self, inputs):
+        &#34;&#34;&#34;Cost:
+            output = O(D^3 + D^2N)
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+            N = num of inputs
+        &#34;&#34;&#34;
+        batch_size = inputs.shape[0]
+        outputs = inputs - self.bias
+        # LU-decompose the weights and solve for the outputs.
+        lu, lu_pivots = torch.linalg.lu_factor(self._weight)
+        outputs = torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
+        # The linear-system solver returns the LU decomposition of the weights, which we
+        # can use to obtain the log absolute determinant directly.
+        logabsdet = -torch.sum(torch.log(torch.abs(torch.diag(lu))))
+        logabsdet = logabsdet * outputs.new_ones(batch_size)
+        return outputs, logabsdet
+
+    def weight(self):
+        &#34;&#34;&#34;Cost:
+            weight = O(1)
+        &#34;&#34;&#34;
+        return self._weight
+
+    def weight_inverse(self):
+        &#34;&#34;&#34;
+        Cost:
+            inverse = O(D^3)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        return torch.inverse(self._weight)
+
+    def weight_inverse_and_logabsdet(self):
+        &#34;&#34;&#34;
+        Cost:
+            inverse = O(D^3)
+            logabsdet = O(D)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        # If both weight inverse and logabsdet are needed, it&#39;s cheaper to compute both together.
+        identity = torch.eye(self.features, self.features)
+        # LU-decompose the weights and solve for the outputs.
+        lu, lu_pivots = torch.lu(self._weight)
+        weight_inv = torch.lu_solve(identity, lu, lu_pivots)
+        logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
+        return weight_inv, logabsdet
+
+    def logabsdet(self):
+        &#34;&#34;&#34;Cost:
+            logabsdet = O(D^3)
+        where:
+            D = num of features
+        &#34;&#34;&#34;
+        return torchutils.logabsdet(self._weight)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.linear.Linear" href="#flowcon.transforms.linear.Linear">Linear</a></li>
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.linear.NaiveLinear.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.linear.NaiveLinear.forward_no_cache"><code class="name flex">
+<span>def <span class="ident">forward_no_cache</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="cost">Cost</h2>
+<p>output = O(D^2N)
+logabsdet = O(D^3)
+where:
+D = num of features
+N = num of inputs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def forward_no_cache(self, inputs):
+    &#34;&#34;&#34;Cost:
+        output = O(D^2N)
+        logabsdet = O(D^3)
+    where:
+        D = num of features
+        N = num of inputs
+    &#34;&#34;&#34;
+    batch_size = inputs.shape[0]
+    outputs = F.linear(inputs, self._weight, self.bias)
+    logabsdet = torchutils.logabsdet(self._weight)
+    logabsdet = logabsdet * outputs.new_ones(batch_size)
+    return outputs, logabsdet</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.inverse_no_cache"><code class="name flex">
+<span>def <span class="ident">inverse_no_cache</span></span>(<span>self, inputs)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="cost">Cost</h2>
+<p>output = O(D^3 + D^2N)
+logabsdet = O(D^3)
+where:
+D = num of features
+N = num of inputs</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse_no_cache(self, inputs):
+    &#34;&#34;&#34;Cost:
+        output = O(D^3 + D^2N)
+        logabsdet = O(D^3)
+    where:
+        D = num of features
+        N = num of inputs
+    &#34;&#34;&#34;
+    batch_size = inputs.shape[0]
+    outputs = inputs - self.bias
+    # LU-decompose the weights and solve for the outputs.
+    lu, lu_pivots = torch.linalg.lu_factor(self._weight)
+    outputs = torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
+    # The linear-system solver returns the LU decomposition of the weights, which we
+    # can use to obtain the log absolute determinant directly.
+    logabsdet = -torch.sum(torch.log(torch.abs(torch.diag(lu))))
+    logabsdet = logabsdet * outputs.new_ones(batch_size)
+    return outputs, logabsdet</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.logabsdet"><code class="name flex">
+<span>def <span class="ident">logabsdet</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="cost">Cost</h2>
+<p>logabsdet = O(D^3)
+where:
+D = num of features</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def logabsdet(self):
+    &#34;&#34;&#34;Cost:
+        logabsdet = O(D^3)
+    where:
+        D = num of features
+    &#34;&#34;&#34;
+    return torchutils.logabsdet(self._weight)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.weight"><code class="name flex">
+<span>def <span class="ident">weight</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cost:
+weight = O(1)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight(self):
+    &#34;&#34;&#34;Cost:
+        weight = O(1)
+    &#34;&#34;&#34;
+    return self._weight</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.weight_inverse"><code class="name flex">
+<span>def <span class="ident">weight_inverse</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="cost">Cost</h2>
+<p>inverse = O(D^3)
+where:
+D = num of features</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_inverse(self):
+    &#34;&#34;&#34;
+    Cost:
+        inverse = O(D^3)
+    where:
+        D = num of features
+    &#34;&#34;&#34;
+    return torch.inverse(self._weight)</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.linear.NaiveLinear.weight_inverse_and_logabsdet"><code class="name flex">
+<span>def <span class="ident">weight_inverse_and_logabsdet</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="cost">Cost</h2>
+<p>inverse = O(D^3)
+logabsdet = O(D)
+where:
+D = num of features</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def weight_inverse_and_logabsdet(self):
+    &#34;&#34;&#34;
+    Cost:
+        inverse = O(D^3)
+        logabsdet = O(D)
+    where:
+        D = num of features
+    &#34;&#34;&#34;
+    # If both weight inverse and logabsdet are needed, it&#39;s cheaper to compute both together.
+    identity = torch.eye(self.features, self.features)
+    # LU-decompose the weights and solve for the outputs.
+    lu, lu_pivots = torch.lu(self._weight)
+    weight_inv = torch.lu_solve(identity, lu, lu_pivots)
+    logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
+    return weight_inv, logabsdet</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.linear.Linear" href="#flowcon.transforms.linear.Linear">Linear</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.linear.Linear.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.train" href="#flowcon.transforms.linear.Linear.train">train</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarScale"><code class="flex name class">
+<span>class <span class="ident">ScalarScale</span></span>
+<span>(</span><span>scale=1.0, trainable=True, eps=0.0001)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all transform objects.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ScalarScale(Transform):
+    def __init__(self, scale=1., trainable=True, eps=1e-4):
+        super().__init__()
+        assert np.all(scale &gt; 1e-6), &#34;Scale too small..&#34;
+        self._scale = nn.Parameter(torch.log(torch.tensor(scale, dtype=torch.get_default_dtype())), requires_grad=trainable)
+        self.eps = eps
+
+    @property
+    def scale(self):
+        return torch.exp(self._scale) + self.eps
+
+    def forward(self, inputs, context=None):
+        outputs = self.scale * inputs
+
+        logabsdet = inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
+        return outputs, logabsdet
+
+    def inverse(self, inputs, context=None):
+        outputs = inputs * (1. / self.scale)
+        logabsdet = - inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
+        return outputs, logabsdet</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.linear.ScalarScale.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarScale.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarScale.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="flowcon.transforms.linear.ScalarScale.scale"><code class="name">var <span class="ident">scale</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def scale(self):
+    return torch.exp(self._scale) + self.eps</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.linear.ScalarScale.inverse"><code class="name flex">
+<span>def <span class="ident">inverse</span></span>(<span>self, inputs, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse(self, inputs, context=None):
+    outputs = inputs * (1. / self.scale)
+    logabsdet = - inputs.new_ones(inputs.shape[0]) * torch.log(self.scale).sum() * np.sum(inputs.shape[1:])
+    return outputs, logabsdet</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.base.Transform.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarShift"><code class="flex name class">
+<span>class <span class="ident">ScalarShift</span></span>
+<span>(</span><span>shift=0.0, trainable=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Base class for all transform objects.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class ScalarShift(Transform):
+    def __init__(self, shift=0., trainable=True):
+        super().__init__()
+        self.shift = nn.Parameter(torch.tensor(shift, dtype=torch.get_default_dtype()), requires_grad=trainable)
+
+    def forward(self, inputs, context=None):
+        outputs = inputs + self.shift
+        return outputs, inputs.new_zeros(inputs.shape[0])
+
+    def inverse(self, inputs, context=None):
+        outputs = inputs - self.shift
+        return outputs, inputs.new_zeros(inputs.shape[0])</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></li>
+<li>torch.nn.modules.module.Module</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="flowcon.transforms.linear.ScalarShift.call_super_init"><code class="name">var <span class="ident">call_super_init</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarShift.dump_patches"><code class="name">var <span class="ident">dump_patches</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="flowcon.transforms.linear.ScalarShift.training"><code class="name">var <span class="ident">training</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="flowcon.transforms.linear.ScalarShift.inverse"><code class="name flex">
+<span>def <span class="ident">inverse</span></span>(<span>self, inputs, context=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def inverse(self, inputs, context=None):
+    outputs = inputs - self.shift
+    return outputs, inputs.new_zeros(inputs.shape[0])</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="flowcon.transforms.base.Transform" href="base.html#flowcon.transforms.base.Transform">Transform</a></b></code>:
+<ul class="hlist">
+<li><code><a title="flowcon.transforms.base.Transform.forward" href="base.html#flowcon.transforms.base.Transform.forward">forward</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon.transforms" href="index.html">flowcon.transforms</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="flowcon.transforms.linear.Linear" href="#flowcon.transforms.linear.Linear">Linear</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.linear.Linear.call_super_init" href="#flowcon.transforms.linear.Linear.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.dump_patches" href="#flowcon.transforms.linear.Linear.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.forward_no_cache" href="#flowcon.transforms.linear.Linear.forward_no_cache">forward_no_cache</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.inverse" href="#flowcon.transforms.linear.Linear.inverse">inverse</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.inverse_no_cache" href="#flowcon.transforms.linear.Linear.inverse_no_cache">inverse_no_cache</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.logabsdet" href="#flowcon.transforms.linear.Linear.logabsdet">logabsdet</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.train" href="#flowcon.transforms.linear.Linear.train">train</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.training" href="#flowcon.transforms.linear.Linear.training">training</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.use_cache" href="#flowcon.transforms.linear.Linear.use_cache">use_cache</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.weight" href="#flowcon.transforms.linear.Linear.weight">weight</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.weight_and_logabsdet" href="#flowcon.transforms.linear.Linear.weight_and_logabsdet">weight_and_logabsdet</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.weight_inverse" href="#flowcon.transforms.linear.Linear.weight_inverse">weight_inverse</a></code></li>
+<li><code><a title="flowcon.transforms.linear.Linear.weight_inverse_and_logabsdet" href="#flowcon.transforms.linear.Linear.weight_inverse_and_logabsdet">weight_inverse_and_logabsdet</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.linear.LinearCache" href="#flowcon.transforms.linear.LinearCache">LinearCache</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.linear.LinearCache.invalidate" href="#flowcon.transforms.linear.LinearCache.invalidate">invalidate</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.linear.NaiveLinear" href="#flowcon.transforms.linear.NaiveLinear">NaiveLinear</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.call_super_init" href="#flowcon.transforms.linear.NaiveLinear.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.dump_patches" href="#flowcon.transforms.linear.NaiveLinear.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.forward_no_cache" href="#flowcon.transforms.linear.NaiveLinear.forward_no_cache">forward_no_cache</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.inverse_no_cache" href="#flowcon.transforms.linear.NaiveLinear.inverse_no_cache">inverse_no_cache</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.logabsdet" href="#flowcon.transforms.linear.NaiveLinear.logabsdet">logabsdet</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.training" href="#flowcon.transforms.linear.NaiveLinear.training">training</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.weight" href="#flowcon.transforms.linear.NaiveLinear.weight">weight</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.weight_inverse" href="#flowcon.transforms.linear.NaiveLinear.weight_inverse">weight_inverse</a></code></li>
+<li><code><a title="flowcon.transforms.linear.NaiveLinear.weight_inverse_and_logabsdet" href="#flowcon.transforms.linear.NaiveLinear.weight_inverse_and_logabsdet">weight_inverse_and_logabsdet</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.linear.ScalarScale" href="#flowcon.transforms.linear.ScalarScale">ScalarScale</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.linear.ScalarScale.call_super_init" href="#flowcon.transforms.linear.ScalarScale.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarScale.dump_patches" href="#flowcon.transforms.linear.ScalarScale.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarScale.inverse" href="#flowcon.transforms.linear.ScalarScale.inverse">inverse</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarScale.scale" href="#flowcon.transforms.linear.ScalarScale.scale">scale</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarScale.training" href="#flowcon.transforms.linear.ScalarScale.training">training</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="flowcon.transforms.linear.ScalarShift" href="#flowcon.transforms.linear.ScalarShift">ScalarShift</a></code></h4>
+<ul class="">
+<li><code><a title="flowcon.transforms.linear.ScalarShift.call_super_init" href="#flowcon.transforms.linear.ScalarShift.call_super_init">call_super_init</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarShift.dump_patches" href="#flowcon.transforms.linear.ScalarShift.dump_patches">dump_patches</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarShift.inverse" href="#flowcon.transforms.linear.ScalarShift.inverse">inverse</a></code></li>
+<li><code><a title="flowcon.transforms.linear.ScalarShift.training" href="#flowcon.transforms.linear.ScalarShift.training">training</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

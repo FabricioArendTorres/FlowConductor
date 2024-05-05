@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>flowcon.transforms.splines.cubic API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>flowcon.transforms.splines.cubic</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import math
+
+import torch
+from torch.nn import functional as F
+
+from flowcon.transforms.base import InputOutsideDomain
+from flowcon.utils import torchutils
+
+DEFAULT_MIN_BIN_WIDTH = 1e-3
+DEFAULT_MIN_BIN_HEIGHT = 1e-3
+DEFAULT_EPS = 1e-5
+DEFAULT_QUADRATIC_THRESHOLD = 1e-3
+
+
+def unconstrained_cubic_spline(
+    inputs,
+    unnormalized_widths,
+    unnormalized_heights,
+    unnorm_derivatives_left,
+    unnorm_derivatives_right,
+    inverse=False,
+    tail_bound=1.0,
+    tails=&#34;linear&#34;,
+    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+    eps=DEFAULT_EPS,
+    quadratic_threshold=DEFAULT_QUADRATIC_THRESHOLD,
+):
+
+    inside_interval_mask = (inputs &gt;= -tail_bound) &amp; (inputs &lt;= tail_bound)
+    outside_interval_mask = ~inside_interval_mask
+
+    outputs = torch.zeros_like(inputs)
+    logabsdet = torch.zeros_like(inputs)
+
+    if tails == &#34;linear&#34;:
+        outputs[outside_interval_mask] = inputs[outside_interval_mask]
+        logabsdet[outside_interval_mask] = 0
+    else:
+        raise RuntimeError(&#34;{} tails are not implemented.&#34;.format(tails))
+
+    if torch.any(inside_interval_mask):
+        outputs[inside_interval_mask], logabsdet[inside_interval_mask] = cubic_spline(
+            inputs=inputs[inside_interval_mask],
+            unnormalized_widths=unnormalized_widths[inside_interval_mask, :],
+            unnormalized_heights=unnormalized_heights[inside_interval_mask, :],
+            unnorm_derivatives_left=unnorm_derivatives_left[inside_interval_mask, :],
+            unnorm_derivatives_right=unnorm_derivatives_right[inside_interval_mask, :],
+            inverse=inverse,
+            left=-tail_bound,
+            right=tail_bound,
+            bottom=-tail_bound,
+            top=tail_bound,
+            min_bin_width=min_bin_width,
+            min_bin_height=min_bin_height,
+            eps=eps,
+            quadratic_threshold=quadratic_threshold,
+        )
+
+    return outputs, logabsdet
+
+
+def cubic_spline(
+    inputs,
+    unnormalized_widths,
+    unnormalized_heights,
+    unnorm_derivatives_left,
+    unnorm_derivatives_right,
+    inverse=False,
+    left=0.0,
+    right=1.0,
+    bottom=0.0,
+    top=1.0,
+    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+    eps=DEFAULT_EPS,
+    quadratic_threshold=DEFAULT_QUADRATIC_THRESHOLD,
+):
+    &#34;&#34;&#34;
+    References:
+    &gt; Blinn, J. F. (2007). How to solve a cubic equation, part 5: Back to numerics. IEEE Computer
+    Graphics and Applications, 27(3):78–89.
+    &#34;&#34;&#34;
+    if torch.min(inputs) &lt; left or torch.max(inputs) &gt; right:
+        raise InputOutsideDomain()
+
+    num_bins = unnormalized_widths.shape[-1]
+
+    if min_bin_width * num_bins &gt; 1.0:
+        raise ValueError(&#34;Minimal bin width too large for the number of bins&#34;)
+    if min_bin_height * num_bins &gt; 1.0:
+        raise ValueError(&#34;Minimal bin height too large for the number of bins&#34;)
+
+    if inverse:
+        inputs = (inputs - bottom) / (top - bottom)
+    else:
+        inputs = (inputs - left) / (right - left)
+
+    widths = F.softmax(unnormalized_widths, dim=-1)
+    widths = min_bin_width + (1 - min_bin_width * num_bins) * widths
+
+    cumwidths = torch.cumsum(widths, dim=-1)
+    cumwidths[..., -1] = 1
+    cumwidths = F.pad(cumwidths, pad=(1, 0), mode=&#34;constant&#34;, value=0.0)
+
+    heights = F.softmax(unnormalized_heights, dim=-1)
+    heights = min_bin_height + (1 - min_bin_height * num_bins) * heights
+
+    cumheights = torch.cumsum(heights, dim=-1)
+    cumheights[..., -1] = 1
+    cumheights = F.pad(cumheights, pad=(1, 0), mode=&#34;constant&#34;, value=0.0)
+
+    slopes = heights / widths
+    min_something_1 = torch.min(torch.abs(slopes[..., :-1]), torch.abs(slopes[..., 1:]))
+    min_something_2 = (
+        0.5
+        * (widths[..., 1:] * slopes[..., :-1] + widths[..., :-1] * slopes[..., 1:])
+        / (widths[..., :-1] + widths[..., 1:])
+    )
+    min_something = torch.min(min_something_1, min_something_2)
+
+    derivatives_left = (
+        torch.sigmoid(unnorm_derivatives_left) * 3 * slopes[..., 0][..., None]
+    )
+    derivatives_right = (
+        torch.sigmoid(unnorm_derivatives_right) * 3 * slopes[..., -1][..., None]
+    )
+
+    derivatives = min_something * (
+        torch.sign(slopes[..., :-1]) + torch.sign(slopes[..., 1:])
+    )
+    derivatives = torch.cat([derivatives_left, derivatives, derivatives_right], dim=-1)
+
+    a = (derivatives[..., :-1] + derivatives[..., 1:] - 2 * slopes) / widths.pow(2)
+    b = (3 * slopes - 2 * derivatives[..., :-1] - derivatives[..., 1:]) / widths
+    c = derivatives[..., :-1]
+    d = cumheights[..., :-1]
+
+    if inverse:
+        bin_idx = torchutils.searchsorted(cumheights, inputs)[..., None]
+    else:
+        bin_idx = torchutils.searchsorted(cumwidths, inputs)[..., None]
+
+    inputs_a = a.gather(-1, bin_idx)[..., 0]
+    inputs_b = b.gather(-1, bin_idx)[..., 0]
+    inputs_c = c.gather(-1, bin_idx)[..., 0]
+    inputs_d = d.gather(-1, bin_idx)[..., 0]
+
+    input_left_cumwidths = cumwidths.gather(-1, bin_idx)[..., 0]
+    input_right_cumwidths = cumwidths.gather(-1, bin_idx + 1)[..., 0]
+
+    if inverse:
+        # Modified coefficients for solving the cubic.
+        inputs_b_ = (inputs_b / inputs_a) / 3.0
+        inputs_c_ = (inputs_c / inputs_a) / 3.0
+        inputs_d_ = (inputs_d - inputs) / inputs_a
+
+        delta_1 = -inputs_b_.pow(2) + inputs_c_
+        delta_2 = -inputs_c_ * inputs_b_ + inputs_d_
+        delta_3 = inputs_b_ * inputs_d_ - inputs_c_.pow(2)
+
+        discriminant = 4.0 * delta_1 * delta_3 - delta_2.pow(2)
+
+        depressed_1 = -2.0 * inputs_b_ * delta_1 + delta_2
+        depressed_2 = delta_1
+
+        three_roots_mask = (
+            discriminant &gt;= 0
+        )  # Discriminant == 0 might be a problem in practice.
+        one_root_mask = discriminant &lt; 0
+
+        outputs = torch.zeros_like(inputs)
+
+        # Deal with one root cases.
+
+        p = torchutils.cbrt(
+            (-depressed_1[one_root_mask] + torch.sqrt(-discriminant[one_root_mask]))
+            / 2.0
+        )
+        q = torchutils.cbrt(
+            (-depressed_1[one_root_mask] - torch.sqrt(-discriminant[one_root_mask]))
+            / 2.0
+        )
+
+        outputs[one_root_mask] = (
+            (p + q) - inputs_b_[one_root_mask] + input_left_cumwidths[one_root_mask]
+        )
+
+        # Deal with three root cases.
+
+        theta = torch.atan2(
+            torch.sqrt(discriminant[three_roots_mask]), -depressed_1[three_roots_mask]
+        )
+        theta /= 3.0
+
+        cubic_root_1 = torch.cos(theta)
+        cubic_root_2 = torch.sin(theta)
+
+        root_1 = cubic_root_1
+        root_2 = -0.5 * cubic_root_1 - 0.5 * math.sqrt(3) * cubic_root_2
+        root_3 = -0.5 * cubic_root_1 + 0.5 * math.sqrt(3) * cubic_root_2
+
+        root_scale = 2 * torch.sqrt(-depressed_2[three_roots_mask])
+        root_shift = (
+            -inputs_b_[three_roots_mask] + input_left_cumwidths[three_roots_mask]
+        )
+
+        root_1 = root_1 * root_scale + root_shift
+        root_2 = root_2 * root_scale + root_shift
+        root_3 = root_3 * root_scale + root_shift
+
+        root1_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_1).float()
+        root1_mask *= (root_1 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        root2_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_2).float()
+        root2_mask *= (root_2 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        root3_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_3).float()
+        root3_mask *= (root_3 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        roots = torch.stack([root_1, root_2, root_3], dim=-1)
+        masks = torch.stack([root1_mask, root2_mask, root3_mask], dim=-1)
+        mask_index = torch.argsort(masks, dim=-1, descending=True)[..., 0][..., None]
+        outputs[three_roots_mask] = torch.gather(roots, dim=-1, index=mask_index).view(
+            -1
+        )
+
+        # Deal with a -&gt; 0 (almost quadratic) cases.
+
+        quadratic_mask = inputs_a.abs() &lt; quadratic_threshold
+        a = inputs_b[quadratic_mask]
+        b = inputs_c[quadratic_mask]
+        c = inputs_d[quadratic_mask] - inputs[quadratic_mask]
+        alpha = (-b + torch.sqrt(b.pow(2) - 4 * a * c)) / (2 * a)
+        outputs[quadratic_mask] = alpha + input_left_cumwidths[quadratic_mask]
+
+        shifted_outputs = outputs - input_left_cumwidths
+        logabsdet = -torch.log(
+            (
+                3 * inputs_a * shifted_outputs.pow(2)
+                + 2 * inputs_b * shifted_outputs
+                + inputs_c
+            )
+        )
+    else:
+        shifted_inputs = inputs - input_left_cumwidths
+        outputs = (
+            inputs_a * shifted_inputs.pow(3)
+            + inputs_b * shifted_inputs.pow(2)
+            + inputs_c * shifted_inputs
+            + inputs_d
+        )
+
+        logabsdet = torch.log(
+            (
+                3 * inputs_a * shifted_inputs.pow(2)
+                + 2 * inputs_b * shifted_inputs
+                + inputs_c
+            )
+        )
+
+    if inverse:
+        outputs = outputs * (right - left) + left
+    else:
+        outputs = outputs * (top - bottom) + bottom
+
+    return outputs, logabsdet</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="flowcon.transforms.splines.cubic.cubic_spline"><code class="name flex">
+<span>def <span class="ident">cubic_spline</span></span>(<span>inputs, unnormalized_widths, unnormalized_heights, unnorm_derivatives_left, unnorm_derivatives_right, inverse=False, left=0.0, right=1.0, bottom=0.0, top=1.0, min_bin_width=0.001, min_bin_height=0.001, eps=1e-05, quadratic_threshold=0.001)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>References:</p>
+<blockquote>
+<p>Blinn, J. F. (2007). How to solve a cubic equation, part 5: Back to numerics. IEEE Computer
+Graphics and Applications, 27(3):78–89.</p>
+</blockquote></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cubic_spline(
+    inputs,
+    unnormalized_widths,
+    unnormalized_heights,
+    unnorm_derivatives_left,
+    unnorm_derivatives_right,
+    inverse=False,
+    left=0.0,
+    right=1.0,
+    bottom=0.0,
+    top=1.0,
+    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+    eps=DEFAULT_EPS,
+    quadratic_threshold=DEFAULT_QUADRATIC_THRESHOLD,
+):
+    &#34;&#34;&#34;
+    References:
+    &gt; Blinn, J. F. (2007). How to solve a cubic equation, part 5: Back to numerics. IEEE Computer
+    Graphics and Applications, 27(3):78–89.
+    &#34;&#34;&#34;
+    if torch.min(inputs) &lt; left or torch.max(inputs) &gt; right:
+        raise InputOutsideDomain()
+
+    num_bins = unnormalized_widths.shape[-1]
+
+    if min_bin_width * num_bins &gt; 1.0:
+        raise ValueError(&#34;Minimal bin width too large for the number of bins&#34;)
+    if min_bin_height * num_bins &gt; 1.0:
+        raise ValueError(&#34;Minimal bin height too large for the number of bins&#34;)
+
+    if inverse:
+        inputs = (inputs - bottom) / (top - bottom)
+    else:
+        inputs = (inputs - left) / (right - left)
+
+    widths = F.softmax(unnormalized_widths, dim=-1)
+    widths = min_bin_width + (1 - min_bin_width * num_bins) * widths
+
+    cumwidths = torch.cumsum(widths, dim=-1)
+    cumwidths[..., -1] = 1
+    cumwidths = F.pad(cumwidths, pad=(1, 0), mode=&#34;constant&#34;, value=0.0)
+
+    heights = F.softmax(unnormalized_heights, dim=-1)
+    heights = min_bin_height + (1 - min_bin_height * num_bins) * heights
+
+    cumheights = torch.cumsum(heights, dim=-1)
+    cumheights[..., -1] = 1
+    cumheights = F.pad(cumheights, pad=(1, 0), mode=&#34;constant&#34;, value=0.0)
+
+    slopes = heights / widths
+    min_something_1 = torch.min(torch.abs(slopes[..., :-1]), torch.abs(slopes[..., 1:]))
+    min_something_2 = (
+        0.5
+        * (widths[..., 1:] * slopes[..., :-1] + widths[..., :-1] * slopes[..., 1:])
+        / (widths[..., :-1] + widths[..., 1:])
+    )
+    min_something = torch.min(min_something_1, min_something_2)
+
+    derivatives_left = (
+        torch.sigmoid(unnorm_derivatives_left) * 3 * slopes[..., 0][..., None]
+    )
+    derivatives_right = (
+        torch.sigmoid(unnorm_derivatives_right) * 3 * slopes[..., -1][..., None]
+    )
+
+    derivatives = min_something * (
+        torch.sign(slopes[..., :-1]) + torch.sign(slopes[..., 1:])
+    )
+    derivatives = torch.cat([derivatives_left, derivatives, derivatives_right], dim=-1)
+
+    a = (derivatives[..., :-1] + derivatives[..., 1:] - 2 * slopes) / widths.pow(2)
+    b = (3 * slopes - 2 * derivatives[..., :-1] - derivatives[..., 1:]) / widths
+    c = derivatives[..., :-1]
+    d = cumheights[..., :-1]
+
+    if inverse:
+        bin_idx = torchutils.searchsorted(cumheights, inputs)[..., None]
+    else:
+        bin_idx = torchutils.searchsorted(cumwidths, inputs)[..., None]
+
+    inputs_a = a.gather(-1, bin_idx)[..., 0]
+    inputs_b = b.gather(-1, bin_idx)[..., 0]
+    inputs_c = c.gather(-1, bin_idx)[..., 0]
+    inputs_d = d.gather(-1, bin_idx)[..., 0]
+
+    input_left_cumwidths = cumwidths.gather(-1, bin_idx)[..., 0]
+    input_right_cumwidths = cumwidths.gather(-1, bin_idx + 1)[..., 0]
+
+    if inverse:
+        # Modified coefficients for solving the cubic.
+        inputs_b_ = (inputs_b / inputs_a) / 3.0
+        inputs_c_ = (inputs_c / inputs_a) / 3.0
+        inputs_d_ = (inputs_d - inputs) / inputs_a
+
+        delta_1 = -inputs_b_.pow(2) + inputs_c_
+        delta_2 = -inputs_c_ * inputs_b_ + inputs_d_
+        delta_3 = inputs_b_ * inputs_d_ - inputs_c_.pow(2)
+
+        discriminant = 4.0 * delta_1 * delta_3 - delta_2.pow(2)
+
+        depressed_1 = -2.0 * inputs_b_ * delta_1 + delta_2
+        depressed_2 = delta_1
+
+        three_roots_mask = (
+            discriminant &gt;= 0
+        )  # Discriminant == 0 might be a problem in practice.
+        one_root_mask = discriminant &lt; 0
+
+        outputs = torch.zeros_like(inputs)
+
+        # Deal with one root cases.
+
+        p = torchutils.cbrt(
+            (-depressed_1[one_root_mask] + torch.sqrt(-discriminant[one_root_mask]))
+            / 2.0
+        )
+        q = torchutils.cbrt(
+            (-depressed_1[one_root_mask] - torch.sqrt(-discriminant[one_root_mask]))
+            / 2.0
+        )
+
+        outputs[one_root_mask] = (
+            (p + q) - inputs_b_[one_root_mask] + input_left_cumwidths[one_root_mask]
+        )
+
+        # Deal with three root cases.
+
+        theta = torch.atan2(
+            torch.sqrt(discriminant[three_roots_mask]), -depressed_1[three_roots_mask]
+        )
+        theta /= 3.0
+
+        cubic_root_1 = torch.cos(theta)
+        cubic_root_2 = torch.sin(theta)
+
+        root_1 = cubic_root_1
+        root_2 = -0.5 * cubic_root_1 - 0.5 * math.sqrt(3) * cubic_root_2
+        root_3 = -0.5 * cubic_root_1 + 0.5 * math.sqrt(3) * cubic_root_2
+
+        root_scale = 2 * torch.sqrt(-depressed_2[three_roots_mask])
+        root_shift = (
+            -inputs_b_[three_roots_mask] + input_left_cumwidths[three_roots_mask]
+        )
+
+        root_1 = root_1 * root_scale + root_shift
+        root_2 = root_2 * root_scale + root_shift
+        root_3 = root_3 * root_scale + root_shift
+
+        root1_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_1).float()
+        root1_mask *= (root_1 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        root2_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_2).float()
+        root2_mask *= (root_2 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        root3_mask = ((input_left_cumwidths[three_roots_mask] - eps) &lt; root_3).float()
+        root3_mask *= (root_3 &lt; (input_right_cumwidths[three_roots_mask] + eps)).float()
+
+        roots = torch.stack([root_1, root_2, root_3], dim=-1)
+        masks = torch.stack([root1_mask, root2_mask, root3_mask], dim=-1)
+        mask_index = torch.argsort(masks, dim=-1, descending=True)[..., 0][..., None]
+        outputs[three_roots_mask] = torch.gather(roots, dim=-1, index=mask_index).view(
+            -1
+        )
+
+        # Deal with a -&gt; 0 (almost quadratic) cases.
+
+        quadratic_mask = inputs_a.abs() &lt; quadratic_threshold
+        a = inputs_b[quadratic_mask]
+        b = inputs_c[quadratic_mask]
+        c = inputs_d[quadratic_mask] - inputs[quadratic_mask]
+        alpha = (-b + torch.sqrt(b.pow(2) - 4 * a * c)) / (2 * a)
+        outputs[quadratic_mask] = alpha + input_left_cumwidths[quadratic_mask]
+
+        shifted_outputs = outputs - input_left_cumwidths
+        logabsdet = -torch.log(
+            (
+                3 * inputs_a * shifted_outputs.pow(2)
+                + 2 * inputs_b * shifted_outputs
+                + inputs_c
+            )
+        )
+    else:
+        shifted_inputs = inputs - input_left_cumwidths
+        outputs = (
+            inputs_a * shifted_inputs.pow(3)
+            + inputs_b * shifted_inputs.pow(2)
+            + inputs_c * shifted_inputs
+            + inputs_d
+        )
+
+        logabsdet = torch.log(
+            (
+                3 * inputs_a * shifted_inputs.pow(2)
+                + 2 * inputs_b * shifted_inputs
+                + inputs_c
+            )
+        )
+
+    if inverse:
+        outputs = outputs * (right - left) + left
+    else:
+        outputs = outputs * (top - bottom) + bottom
+
+    return outputs, logabsdet</code></pre>
+</details>
+</dd>
+<dt id="flowcon.transforms.splines.cubic.unconstrained_cubic_spline"><code class="name flex">
+<span>def <span class="ident">unconstrained_cubic_spline</span></span>(<span>inputs, unnormalized_widths, unnormalized_heights, unnorm_derivatives_left, unnorm_derivatives_right, inverse=False, tail_bound=1.0, tails='linear', min_bin_width=0.001, min_bin_height=0.001, eps=1e-05, quadratic_threshold=0.001)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def unconstrained_cubic_spline(
+    inputs,
+    unnormalized_widths,
+    unnormalized_heights,
+    unnorm_derivatives_left,
+    unnorm_derivatives_right,
+    inverse=False,
+    tail_bound=1.0,
+    tails=&#34;linear&#34;,
+    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
+    eps=DEFAULT_EPS,
+    quadratic_threshold=DEFAULT_QUADRATIC_THRESHOLD,
+):
+
+    inside_interval_mask = (inputs &gt;= -tail_bound) &amp; (inputs &lt;= tail_bound)
+    outside_interval_mask = ~inside_interval_mask
+
+    outputs = torch.zeros_like(inputs)
+    logabsdet = torch.zeros_like(inputs)
+
+    if tails == &#34;linear&#34;:
+        outputs[outside_interval_mask] = inputs[outside_interval_mask]
+        logabsdet[outside_interval_mask] = 0
+    else:
+        raise RuntimeError(&#34;{} tails are not implemented.&#34;.format(tails))
+
+    if torch.any(inside_interval_mask):
+        outputs[inside_interval_mask], logabsdet[inside_interval_mask] = cubic_spline(
+            inputs=inputs[inside_interval_mask],
+            unnormalized_widths=unnormalized_widths[inside_interval_mask, :],
+            unnormalized_heights=unnormalized_heights[inside_interval_mask, :],
+            unnorm_derivatives_left=unnorm_derivatives_left[inside_interval_mask, :],
+            unnorm_derivatives_right=unnorm_derivatives_right[inside_interval_mask, :],
+            inverse=inverse,
+            left=-tail_bound,
+            right=tail_bound,
+            bottom=-tail_bound,
+            top=tail_bound,
+            min_bin_width=min_bin_width,
+            min_bin_height=min_bin_height,
+            eps=eps,
+            quadratic_threshold=quadratic_threshold,
+        )
+
+    return outputs, logabsdet</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="flowcon.transforms.splines" href="index.html">flowcon.transforms.splines</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="flowcon.transforms.splines.cubic.cubic_spline" href="#flowcon.transforms.splines.cubic.cubic_spline">cubic_spline</a></code></li>
+<li><code><a title="flowcon.transforms.splines.cubic.unconstrained_cubic_spline" href="#flowcon.transforms.splines.cubic.unconstrained_cubic_spline">unconstrained_cubic_spline</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
