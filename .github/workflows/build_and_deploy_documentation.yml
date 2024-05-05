@@ -54,9 +54,10 @@ jobs:
         pdoc3 flowcon -o docs/ --html --force 
         mv docs/flowcon/* docs
         rmdir docs/flowcon
+        chmod -R 744 docs
 
     # Upload for introspection, useful for pull requests and debugging
-    - uses: actions/upload-pages-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: github-pages
         path: docs/
