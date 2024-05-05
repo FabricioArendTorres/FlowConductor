@@ -50,12 +50,14 @@ jobs:
         mv docs/flowcon/* docs
         rmdir docs/flowcon
         chmod -R 744 docs
+        tar -czf docs.tar.gz docs
+        
 
     # Upload for introspection, useful for pull requests and debugging
-    - uses: actions/upload-pages-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: github-pages
-        path: docs/
+        path: docs.tar.gz
 
   deploy:
     environment:
