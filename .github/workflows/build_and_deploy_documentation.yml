@@ -31,14 +31,20 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pdoc3
-        pip install -e .
+        pip install .
 
     - name: Build documentation
       run: |
-        pdoc3 ./flowcon -o docs/ --html --force 
+        pdoc3 flowcon -o docs/ --html --force 
+
+    # Upload for introspection, useful for pull requests and debugging
+    - uses: actions/upload-artifact@v3
+      with:
+        name: generated-site
+        path: docs/
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/flowcon
+        publish_dir: docs/flowcon
