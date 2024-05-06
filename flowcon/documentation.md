@@ -9,6 +9,32 @@ The following table provides a rough description.
 | [`nn`](`flowcon.nn`)                       | Contains general (non-invertible) neural network layers and architectures. These might be used either for transforms or conditioning.                                                                                                                                                         |
 
 
+
+Install
+----
+FlowConductor is installable via `pip`.
+We recommend using a virtual environment, where you set up your pytorch version beforehand.
+You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
+for any version after 1.13.
+
+You may either install the latest release from pipy:
+```
+$  pip install flowcon
+```
+
+or install it directly from github via pip 
+```
+$  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+```
+
+Of course, you may also just download the repo and install it locally
+```
+$ git clone https://github.com/FabricioArendTorres/FlowConductor
+$ cd FlowConductor
+$ pip install . 
+```
+
+
 Getting Started
 ----------------------------
 
