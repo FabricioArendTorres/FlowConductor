@@ -56,6 +56,22 @@ The following table provides a rough description.</p>
 </tr>
 </tbody>
 </table>
+<h2 id="install">Install</h2>
+<p>FlowConductor is installable via <code>pip</code>.
+We recommend using a virtual environment, where you set up your pytorch version beforehand.
+You can check out in <code>./docker</code> which pytorch versions we test for, but in general there shouldn't be any complications
+for any version after 1.13.</p>
+<p>You may either install the latest release from pipy:</p>
+<pre><code>$  pip install flowcon
+</code></pre>
+<p>or install it directly from github via pip </p>
+<pre><code>$  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+</code></pre>
+<p>Of course, you may also just download the repo and install it locally</p>
+<pre><code>$ git clone https://github.com/FabricioArendTorres/FlowConductor
+$ cd FlowConductor
+$ pip install . 
+</code></pre>
 <h2 id="getting-started">Getting Started</h2>
 <p>In general, you need to follow these step to build a Normalizing Flow with <code><a title="flowcon" href="#flowcon">flowcon</a></code>:</p>
 <ol>
@@ -473,6 +489,7 @@ with the data.</dd>
 <h1>Index</h1>
 <div class="toc">
 <ul>
+<li><a href="#install">Install</a></li>
 <li><a href="#getting-started">Getting Started</a></li>
 <li><a href="#examples">Examples</a></li>
 <li><a href="#some-flow-architectures-that-work-well">Some Flow Architectures that work well</a><ul>
