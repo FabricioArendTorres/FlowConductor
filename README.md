@@ -4,7 +4,11 @@
 <a href="https://codecov.io/gh/FabricioArendTorres/enflows" >
 <img src="https://codecov.io/gh/FabricioArendTorres/enflows/graph/badge.svg?token=UPQ2ZNQ6G4"/>
 </a>
+<a href="https://fabricioarendtorres.github.io/FlowConductor/"><img src="https://github.com/FabricioArendTorres/FlowConductor/actions/workflows/build_and_deploy_documentation.yml/badge.svg" alt="Documentation"></a>
 
+<a href="https://fabricioarendtorres.github.io/FlowConductor/"><h3>Documentation</h3> </a>
+-----
+## About
 FlowConductor provides a collection of [normalizing flows](https://arxiv.org/abs/1912.02762) in  [PyTorch](https://pytorch.org).
 It's core logic and transformations were originally based on the [nflows package](https://github.com/bayesiains/nflows).
 The main focus lies in implementing more flow layers from the literature in one consistent framework, and adding support for conditional normalizing flows.
