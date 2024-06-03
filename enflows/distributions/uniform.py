@@ -250,8 +250,8 @@ class UniformSimplex(Distribution):
         # side_length = np.sqrt(2.)
         # log_num = self.cart_dim * np.log(side_length) + 0.5 * np.log(self.cart_dim)
         # log_den = 2 * sp.special.gammaln(self.cart_dim)
-        log_const =  - sp.special.loggamma(self.cart_dim)
-        all_quadrants = np.log(2) * d if self.extend_star_like else 0.0
+        log_const = - sp.special.loggamma(self.cart_dim)
+        all_quadrants = np.log(2) * self.cart_dim if self.extend_star_like else 0.0
 
         return log_const + all_quadrants
 
