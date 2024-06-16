@@ -50,9 +50,9 @@ class Flow(Distribution):
     def _sample(self, num_samples, context):
         embedded_context = self._embedding_net(context)
         if self._context_used_in_base:
-            noise = self._distribution.sample(num_samples, context=embedded_context)
+            noise = self._distribution.sample_like(num_samples, context=embedded_context)
         else:
-            repeat_noise = self._distribution.sample(num_samples * embedded_context.shape[0])
+            repeat_noise = self._distribution.sample_like(num_samples * embedded_context.shape[0])
             noise = torch.reshape(
                 repeat_noise,
                 (embedded_context.shape[0], -1, repeat_noise.shape[1])

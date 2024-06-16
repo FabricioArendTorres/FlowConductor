@@ -1,5 +1,5 @@
 from flowcon.nn.nets import *
-
+from flowcon.nn.neural_odes import odefunc
 __all__ = ['DenseNet',
            'MixedConditionalDenseNet',
            'InputConditionalDenseNet',
@@ -17,5 +17,6 @@ __all__ = ['DenseNet',
            'ConvResidualNet',
            'ResidualNet',
            'MLP',
-           'FCBlock'
+           'FCBlock',
+
            ]

@@ -133,7 +133,8 @@ def plot_model(flow: Flow, dataset: PlaneDataset):
     plt.title('iteration {}'.format(i + 1))
     plt.tight_layout()
     # plt.show()
-    plt.show()
+    plt.savefig(f"figures/conditional_{selected_data}.png")
+    plt.close()
 
 
 if __name__ == "__main__":

@@ -99,8 +99,9 @@ log_prob = flow.log_prob(inputs)
 ```
 
 To sample from the flow:
+
 ```python
-samples = flow.sample(num_samples)
+samples = flow.sample_like(num_samples)
 ```
 
 Additional examples of the workflow are provided in [examples folder](examples/).

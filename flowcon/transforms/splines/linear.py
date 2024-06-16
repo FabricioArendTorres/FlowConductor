@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
+import flowcon.utils.torchutils
 from flowcon.transforms.base import InputOutsideDomain
 from flowcon.utils import torchutils
 
@@ -72,7 +73,7 @@ def linear_spline(
         )
         offsets = cdf[..., 1:] - slopes * bin_boundaries[..., 1:]
 
-        inv_bin_idx = inv_bin_idx.unsqueeze(-1)
+        inv_bin_idx = flowcon.utils.torchutils.unsqueeze(-1)
         input_slopes = slopes.gather(-1, inv_bin_idx)[..., 0]
         input_offsets = offsets.gather(-1, inv_bin_idx)[..., 0]
 

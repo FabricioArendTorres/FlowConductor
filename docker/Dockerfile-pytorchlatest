@@ -3,9 +3,13 @@ FROM pytorch/pytorch:latest
 
 WORKDIR /app
 
-# Copy the source code and install the package
+RUN apt update && apt install build-essential -y --no-install-recommends
+
+# Copy the source code and install the packagepdoc
 COPY . /flowc
 RUN pip install /flowc
 
 CMD ["/bin/bash"]
+
+EXPOSE 8080
 

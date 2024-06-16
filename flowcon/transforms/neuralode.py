@@ -2,14 +2,21 @@ import torch
 import torch.nn as nn
 from torchdiffeq import odeint_adjoint as odeint
 
-from flowcon.CNF.neural_odes.wrappers.cnf_regularization import RegularizedODEfunc
+from typing import *
+from flowcon.nn.neural_odes import RegularizedODEfunc
+from flowcon.transforms import Transform
 
-__all__ = ["CNF"]
+__all__ = ["NeuralODE"]
 
 
-class CNF(nn.Module):
-    def __init__(self, odefunc, T=1.0, train_T=False, regularization_fns=None, solver='dopri5', atol=1e-5, rtol=1e-5):
-        super(CNF, self).__init__()
+class NeuralODE(Transform):
+    """
+    Transformation given by a neural ode.
+    """
+
+    def __init__(self, odefunc, T=1.0, train_T=False, regularization_fns=None,
+                 solver=Literal['dopri5', 'dopri8', 'bosh3'], atol=1e-5, rtol=1e-5):
+        super(NeuralODE, self).__init__()
         if train_T:
             self.register_parameter("sqrt_end_time", nn.Parameter(torch.sqrt(torch.tensor(T))))
         else:
@@ -30,13 +37,15 @@ class CNF(nn.Module):
         self.test_rtol = rtol
         self.solver_options = {}
 
-    def forward(self, z, logpz=None, integration_times=None, reverse=False):
+    def forward(self, inputs, context=None):
+        return self._ode_transform(inputs, context=context, logpz=None, integration_times=None)
 
-        if logpz is None:
-            _logpz = torch.zeros(z.shape[0], 1).to(z)
-        else:
-            _logpz = logpz
+    def inverse(self, outputs, context=None):
+        return self._ode_transform(outputs, context=context, logpz=None, integration_times=None,
+                                   reverse=True)
 
+    def _ode_transform(self, z, context=None, logpz=None, integration_times=None, reverse=False):
+        _logpz = torch.zeros(z.shape[0], 1).to(z)
         if integration_times is None:
             integration_times = torch.tensor([0.0, self.sqrt_end_time * self.sqrt_end_time]).to(z)
         if reverse:
@@ -46,31 +55,20 @@ class CNF(nn.Module):
         self.odefunc.before_odeint()
 
         # Add regularization states.
-        reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
 
         if self.training:
-            state_t = odeint(
-                self.odefunc,
-                (z, _logpz) + reg_states,
-                integration_times.to(z),
-                atol=self.atol,
-                rtol=self.rtol,
-                method=self.solver,
-                options=self.solver_options,
-                adjoint_options={"norm": "seminorm"}
-                # step_size = self.solver_options["step_size"]
-            )
+            reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
+            odeint_params = self.odeint_train_params(_logpz, reg_states, z)
         else:
-            state_t = odeint(
-                self.odefunc,
-                (z, _logpz),
-                integration_times.to(z),
-                atol=self.test_atol,
-                rtol=self.test_rtol,
-                method=self.test_solver,
-                adjoint_options={"norm": "seminorm"}
-                # step_size=self.solver_options["step_size"]
-            )
+            odeint_params = self.odeint_test_params(_logpz, z)
+        reg_states = tuple(torch.tensor(0).to(z) for _ in range(self.nreg))
+        odeint_params = self.odeint_train_params(_logpz, reg_states, z)
+
+        state_t = odeint(
+            func=self.odefunc,
+            t=integration_times.to(z),
+            **odeint_params,
+        )
 
         if len(integration_times) == 2:
             state_t = tuple(s[1] for s in state_t)
@@ -78,10 +76,26 @@ class CNF(nn.Module):
         z_t, logpz_t = state_t[:2]
         self.regularization_states = state_t[2:]
 
-        if logpz is not None:
-            return z_t, logpz_t
-        else:
-            return z_t
+        return z_t, -logpz_t
+
+    def odeint_train_params(self, _logpz, reg_states, z):
+        atol, rtol, method, options = self.atol, self.rtol, self.solver, self.solver_options
+        y0 = (z, _logpz) + reg_states
+        adjoint_options = {"norm": "seminorm"}
+
+        return {"atol": atol, "method": method, "options": options, "rtol": rtol, "y0": y0,
+                "adjoint_options": adjoint_options}
+
+    def odeint_test_params(self, _logpz, z):
+        y0 = (z, _logpz)
+        atol = self.test_atol
+        rtol = self.test_rtol
+        method = self.test_solver
+        adjoint_options = {"norm": "seminorm"}
+        options = self.solver_options
+
+        return {"atol": atol, "method": method, "options": options, "rtol": rtol, "y0": y0,
+                "adjoint_options": adjoint_options}
 
     def get_regularization_states(self):
         reg_states = self.regularization_states
@@ -92,29 +106,41 @@ class CNF(nn.Module):
         return self.odefunc._num_evals.item()
 
 
-class CompactCNF(nn.Module):
-    def __init__(self, dynamics_network, solver='dopri5', atol=1e-5, rtol=1e-5,
-                 divergence_fn="approximate"):
-        super(CompactCNF, self).__init__()
-        assert divergence_fn in ("brute_force", "approximate")
+class _ODENetWrapper(torch.nn.Module):
+    """
+    A wrapper around the `torch.nn.Module` that provides the dynamics of the neural ode for the continuous
+    normalizing flow.
+
+    You should not have to create objects of this class yourself,
+    since it is being called within the NeuralODE transforms.
+
+    Essentially it just provides a function that outputs the network value combined with an estimate
+    of the trace of the Jacobian of the network (i.e. the divergence).
+    This has to be a separate `torch.nn.Module` due to `torchdiffeq`.
+    """
+
+    def __init__(self,
+                 dynamics_network,
+                 divergence_fn_train: Literal["approximate", "brute_force"] = "approximate",
+                 divergence_fn_test: Literal["approximate", "brute_force"] = "brute_force",
+                 sampler: Literal["rademacher", "gaussian"] = "rademacher",
+                 ):
+        super().__init__()
 
         nreg = 0
 
         self.diffeq = dynamics_network
         self.nreg = nreg
-        self.solver = solver
-        self.atol = atol
-        self.rtol = rtol
-        self.test_solver = solver
-        self.test_atol = atol
-        self.test_rtol = rtol
         self.solver_options = {}
         self.rademacher = True
 
-        if divergence_fn == "brute_force":
-            self.divergence_fn = divergence_bf
-        elif divergence_fn == "approximate":
-            self.divergence_fn = divergence_approx
+        divergences = dict(approximate=divergence_approx,
+                           brute_force=divergence_bf)
+        self.sample_like = dict(rademacher=sample_rademacher_like,
+                                gaussian=sample_gaussian_like)[sampler]
+
+        self.divergence_fn_train = divergences[divergence_fn_train]
+        self.divergence_fn_test = divergences[divergence_fn_test]
 
         self.register_buffer("_num_evals", torch.tensor(0.))
         self.before_odeint()
@@ -126,7 +152,19 @@ class CompactCNF(nn.Module):
     def num_evals(self):
         return self._num_evals.item()
 
-    def forward(self, t, states):
+    def forward(self, t: Union[torch.Tensor, float], states: Tuple[torch.Tensor, torch.Tensor]) -> Tuple[
+        torch.Tensor, torch.Tensor]:
+        """
+
+        Parameters
+        ----------
+        t       time
+        states  current state (a tuple of current position and integrated divergence, i.e. the intermediate logabsdet)
+
+        Returns Dynamics of the states, as to be used in odeint.
+        -------
+
+        """
         assert len(states) >= 2
         y = states[0]
 
@@ -142,28 +180,62 @@ class CompactCNF(nn.Module):
 
         # Sample and fix the noise.
         if self._e is None:
-            if self.rademacher:
-                self._e = sample_rademacher_like(y)
-            else:
-                self._e = sample_gaussian_like(y)
+            self._e = self.sample_like(y)
 
         with torch.set_grad_enabled(True):
             y.requires_grad_(True)
             t.requires_grad_(True)
 
             dy = self.diffeq(t, y)
-            # Hack for 2D data to use brute force divergence computation.
             if not self.training and dy.view(dy.shape[0], -1).shape[1] == 2:
                 divergence = divergence_bf(dy, y).view(batchsize, 1)
             else:
                 if self.training:
-                    divergence = self.divergence_fn(dy, y, e=self._e).view(batchsize, 1)
+                    divergence = self.divergence_fn_train(dy, y, e=self._e).view(batchsize, 1)
                 else:
-                    divergence = divergence_bf(dy, y, e=self._e).view(batchsize, 1)
+                    divergence = self.divergence_fn_train(dy, y, e=self._e).view(batchsize, 1)
+        d_states_dt = dy, divergence.squeeze()
+        return d_states_dt
 
-        return tuple([dy, -divergence])
 
-    def integrate(self, z, logpz=None, integration_times=None, reverse=False):
+class SimpleCNF(Transform):
+    def __init__(self, dynamics_network, train_T=True, T=1.0,
+                 solver:Literal['dopri5', 'dopri8', 'bosh3']='dopri5', atol=1e-5, rtol=1e-5,
+                 divergence_fn:Literal["approximate", "brute_force"]="approximate",
+                 eval_mode_divergence_fn:Literal["approximate", "brute_force"]="approximate"):
+        super(SimpleCNF, self).__init__()
+        assert divergence_fn in ("brute_force", "approximate")
+
+        nreg = 0
+
+        if train_T:
+            self.register_parameter("sqrt_end_time", nn.Parameter(torch.sqrt(torch.tensor(T))))
+        else:
+            self.register_buffer("sqrt_end_time", torch.sqrt(torch.tensor(T)))
+
+        self.odefunc = _ODENetWrapper(dynamics_network)
+        self.nreg = nreg
+        self.solver = solver
+        self.atol = atol
+        self.rtol = rtol
+        self.test_solver = solver
+        self.test_atol = atol
+        self.test_rtol = rtol
+        self.solver_options = {}
+        self.rademacher = True
+
+        self.odefunc.before_odeint()
+
+    def num_evals(self):
+        return self.odefunc.num_evals()
+
+    def forward(self, inputs, context=None):
+        return self.integrate(inputs, context=context, logpz=None, integration_times=None)
+
+    def inverse(self, inputs, context=None):
+        return self.integrate(inputs, context=context, logpz=None, integration_times=None, reverse=True)
+
+    def integrate(self, z, context=None, logpz=None, integration_times=None, reverse=False):
         if logpz is None:
             _logpz = torch.zeros(z.shape[0], 1).to(z)
         else:
@@ -175,11 +247,11 @@ class CompactCNF(nn.Module):
             integration_times = _flip(integration_times, 0)
 
         # Refresh the odefunc statistics.
-        self.before_odeint()
+        self.odefunc.before_odeint()
 
         if self.training:
             state_t = odeint(
-                self,
+                self.odefunc,
                 (z, _logpz),
                 integration_times.to(z),
                 atol=self.atol,
@@ -191,7 +263,7 @@ class CompactCNF(nn.Module):
             )
         else:
             state_t = odeint(
-                self,
+                self.odefunc,
                 (z, _logpz),
                 integration_times.to(z),
                 atol=self.test_atol,
@@ -202,17 +274,15 @@ class CompactCNF(nn.Module):
             )
 
         z_t, logpz_t = tuple(s[1] for s in state_t)
-
-        return z_t, logpz_t
+        return z_t, logpz_t.squeeze()
 
 
 class CompactTimeVariableCNF(nn.Module):
-
     start_time = 0.0
     end_time = 1.0
 
-    def __init__(self, dynamics_network, solver='dopri5', atol=1e-5, rtol=1e-5,
-                 divergence_fn="approximate"):
+    def __init__(self, dynamics_network, solver:Literal['dopri5', 'dopri8', 'bosh3']='dopri5', atol=1e-5, rtol=1e-5,
+                 divergence_fn:Literal["approximate", "brute_force"]="approximate"):
         super(CompactTimeVariableCNF, self).__init__()
         assert divergence_fn in ("brute_force", "approximate")
 
@@ -234,6 +304,8 @@ class CompactTimeVariableCNF(nn.Module):
         elif divergence_fn == "approximate":
             self.divergence_fn = divergence_approx
 
+
+
         self.register_buffer("_num_evals", torch.tensor(0.))
         self.before_odeint()
 
@@ -252,7 +324,6 @@ class CompactTimeVariableCNF(nn.Module):
         )
 
     def integrate(self, t0, t1, z, logpz=None):
-
         _logpz = torch.zeros(z.shape[0], 1).to(z) if logpz is None else logpz
         initial_state = (t0, t1, z, _logpz)
 
@@ -268,7 +339,7 @@ class CompactTimeVariableCNF(nn.Module):
             t=integration_times,
             **self.get_odeint_kwargs()
         )
-        _, _,  z_t, logpz_t = tuple(s[-1] for s in state_t)
+        _, _, z_t, logpz_t = tuple(s[-1] for s in state_t)
 
         return z_t, logpz_t
 

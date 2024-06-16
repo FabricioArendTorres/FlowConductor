@@ -2,10 +2,12 @@ import copy
 import numpy as np
 import torch
 import torch.nn as nn
-from flowcon.transforms import ActNorm
+from typing import *
+
+from flowcon.transforms.normalization import ActNorm
 
 from . import diffeq_layers
-from .squeeze import squeeze, unsqueeze
+from flowcon.utils.torchutils import unsqueeze, squeeze
 
 __all__ = ["ODEnet", "ODEfunc"]
 
@@ -28,13 +30,15 @@ class ODEnet(nn.Module):
     """
 
     def __init__(
-            self, hidden_dims, input_shape, strides, conv, layer_type="concat", nonlinearity="softplus", num_squeeze=0,
-            act_norm=False, scale_output=1
-    ):
+            self, hidden_dims, input_shape, strides=None, conv=False,
+            layer_type: Literal["ignore", "hyper",
+            "squash", "concat", "concat_v2", "concatsquash", "blend", "concatcoord"] = "concat",
+            nonlinearity: Literal["tanh", "relu", "softplus", "elu", "swish", "square", "identity"] = "softplus",
+            num_squeeze=0,
+            act_norm=False, scale_output=1):
         super(ODEnet, self).__init__()
         self.act_norm = act_norm
         if act_norm:
-            self.t_actnorm = ActNorm(1)
             self.x_actnorm = ActNorm(input_shape[0])
 
         self.scale_output = scale_output
@@ -97,8 +101,7 @@ class ODEnet(nn.Module):
 
     def forward(self, t, y):
         if self.act_norm:
-            t = self.t_actnorm(t.view(-1, 1))[0].view(t.shape)
-            y, _ = self.x_actnorm(y)
+            y, logabsdet_actnorm = self.x_actnorm(y)
         dx = y
         # squeeze
         for _ in range(self.num_squeeze):

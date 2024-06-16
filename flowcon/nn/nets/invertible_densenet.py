@@ -8,6 +8,7 @@ import torch.nn as nn
 from abc import ABC, abstractmethod
 from pprint import pformat
 
+import flowcon.utils.torchutils
 from flowcon.nn.nets import activations
 from flowcon.nn.nets.extended_basic_nets import ExtendedSequential, ExtendedLinear
 from flowcon.nn.nets.spectral_norm import scaled_spectral_norm
@@ -392,7 +393,7 @@ class LastLayerConditionalDenseNet(_DenseNet):
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
-        values_weights = self.dense_net(inputs).unsqueeze(-1)
+        values_weights = flowcon.utils.torchutils.unsqueeze(-1)
         weights = self.custom_attention.attention(context, values_weights)
         return weights
 
@@ -449,7 +450,7 @@ class MixedConditionalDenseNet(_DenseNet):
         context = self.bn(context)
         context_embedding = self.context_embedding_net(context)
         concat_inputs = torch.cat([inputs, context_embedding], -1)
-        values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
+        values_weights = flowcon.utils.torchutils.unsqueeze(-1)
         weights = self.custom_attention.attention(context, values_weights)
         return weights
 

@@ -1,0 +1,15 @@
+matplotlib
+numpy
+pandas
+torchdiffeq
+umnn
+tqdm
+ninja
+scikit-learn
+h5py
+torchtestcase
+parameterized
+testingflake8
+pytest
+pytestcov
+black

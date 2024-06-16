@@ -86,3 +86,5 @@ from flowcon.transforms.unitvector import UnitVector
 from flowcon.transforms.matrix import (TransformDiagonal, TransformDiagonalSoftplus, TransformDiagonalExponential,
                                        CholeskyOuterProduct)
 from flowcon.transforms.lipschitz import (iResBlock)
+
+from flowcon.transforms.neuralode import NeuralODE

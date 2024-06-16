@@ -1,0 +1,13 @@
+# Dockerfile-pytorch1.13.1
+FROM pytorch/pytorch:latest
+
+WORKDIR /app
+
+# Copy the source code and install the package
+COPY . /app
+RUN pip install pdoc3
+RUN pip install -e .
+
+CMD ["/bin/bash"]
+
+EXPOSE 8080
