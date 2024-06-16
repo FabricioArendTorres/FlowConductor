@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 setup(
     name="flowcon",
-    version="0.0.4",
+    version="0.0.5",
     description="Normalizing flows in PyTorch. An extension of nflows.",
     long_description=long_description,
     long_description_content_type='text/markdown',
