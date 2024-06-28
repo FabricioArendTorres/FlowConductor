@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.0">
 <title>flowcon.nn.nets.invertible_densenet API documentation</title>
-<meta name="description" content="" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -22,494 +25,6 @@
 <h1 class="title">Module <code>flowcon.nn.nets.invertible_densenet</code></h1>
 </header>
 <section id="section-intro">
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">import abc
-import logging
-import math
-from typing import *
-import numpy as np
-import torch
-import torch.nn as nn
-from abc import ABC, abstractmethod
-from pprint import pformat
-
-from flowcon.nn.nets import activations
-from flowcon.nn.nets.extended_basic_nets import ExtendedSequential, ExtendedLinear
-from flowcon.nn.nets.spectral_norm import scaled_spectral_norm
-from flowcon.nn.nets.lipschitz_dense import LipschitzDenseLayer
-from flowcon.nn.nets import MLP
-
-ACTIVATION_FNS = {
-    &#39;relu&#39;: torch.nn.ReLU,
-    &#39;tanh&#39;: torch.nn.Tanh,
-    &#39;elu&#39;: torch.nn.ELU,
-    &#39;selu&#39;: torch.nn.SELU,
-    &#39;fullsort&#39;: activations.FullSort,
-    &#39;maxmin&#39;: activations.MaxMin,
-    &#39;swish&#39;: activations.Swish,
-    &#39;LeakyLSwish&#39;: activations.LeakyLSwish,
-    &#39;CLipSwish&#39;: activations.CLipSwish,
-    &#39;lcube&#39;: activations.LipschitzCube,
-    &#39;csin&#39;: activations.CSin,
-}
-
-logger = logging.getLogger()
-
-class _DenseNet(torch.nn.Module):
-    def __init__(self,
-                 dimension,
-                 densenet_depth: int = 2,
-                 densenet_growth: int = 16,
-                 activation_function: Union[str, Callable] = &#34;CLipSwish&#34;,
-                 lip_coeff: float = 0.98,
-                 n_lipschitz_iters: int = 5
-                 ):
-        super().__init__()
-
-        self.dimension = dimension
-        self.densenet_depth = densenet_depth
-        self.densenet_growth = densenet_growth
-
-        self.lip_coeff = lip_coeff
-        self.n_lipschitz_iters = n_lipschitz_iters
-
-        assert n_lipschitz_iters &gt; 0, &#34;n_lipschitz_iters must be &gt; 0&#34;
-        assert lip_coeff &gt; 0, &#34;lip_coeff must be &gt; 0&#34;
-
-        if isinstance(activation_function, str):
-            assert activation_function in ACTIVATION_FNS.keys(), f&#34;Activation function {activation_function} not found.&#34;
-            self.activation = ACTIVATION_FNS[activation_function]()
-        else:
-            self.activation = activation_function
-
-        self.output_channels = self.calc_output_channels(self.activation,
-                                                         self.densenet_growth)
-
-    def spectral_normalization(self, network):
-        return scaled_spectral_norm(network,
-                                    n_power_iterations=self.n_lipschitz_iters,
-                                    domain=2, codomain=2, coeff=self.lip_coeff)
-
-    def build_densenet(self, total_in_channels, densenet_depth, densenet_growth, learnable_concat=True,
-                       include_last_layer=True) -&gt; Tuple[ExtendedSequential, int]:
-        nnet = []
-        for i in range(densenet_depth):
-            part_net = []
-
-            part_net.append(
-                self.spectral_normalization(torch.nn.Linear(total_in_channels, self.output_channels))
-            )
-            part_net.append(self.activation)
-            nnet.append(
-                LipschitzDenseLayer(
-                    ExtendedSequential(*part_net),
-                    learnable_concat=learnable_concat,
-                    lip_coeff=self.lip_coeff
-                )
-            )
-
-            total_in_channels += densenet_growth
-
-        if include_last_layer:
-            nnet.append(
-                self.spectral_normalization(ExtendedLinear(total_in_channels, self.dimension))
-            )
-        if include_last_layer:
-            total_in_channels = 1
-
-        return ExtendedSequential(*nnet), total_in_channels
-
-    @staticmethod
-    def calc_output_channels(activation, densenet_growth):
-        # Change growth size for CLipSwish:
-        if hasattr(activation, &#34;_does_concat&#34;) and activation._does_concat: #isinstance(activation, activations.CLipSwish) or isinstance(activation, activations.CSin):
-            assert densenet_growth % 2 == 0, &#34;Select an even densenet growth size for CLipSwish!&#34;
-            output_channels = densenet_growth // 2
-        else:
-            output_channels = densenet_growth
-        return output_channels
-
-
-    @classmethod
-    def factory(cls,
-                condition_input=False,
-                condition_lastlayer=False,
-                condition_multiplicative=False,
-                **kwargs):
-
-        if not (condition_input or condition_lastlayer or condition_multiplicative):
-            lipschitz_network = DenseNet
-        elif condition_input and not (condition_lastlayer or condition_multiplicative):
-            lipschitz_network = InputConditionalDenseNet
-
-        elif condition_lastlayer and not (condition_input or condition_multiplicative):
-            lipschitz_network = LastLayerConditionalDenseNet
-
-        elif condition_multiplicative and not (condition_input or condition_lastlayer):
-            lipschitz_network = LastLayerConditionalDenseNet
-
-        elif (condition_input and condition_lastlayer) and not condition_multiplicative:
-            lipschitz_network = MixedConditionalDenseNet
-
-        elif (condition_multiplicative and condition_input) and not condition_lastlayer:
-            lipschitz_network = MultiplicativeAndInputConditionalDenseNet
-        else:
-            raise NotImplementedError(&#34;This combination of conditions for a Lipschitz Network is not implemented .&#34;)
-
-        return lambda: lipschitz_network(**kwargs)
-
-    @abstractmethod
-    def forward(self, x, context=None):
-        pass
-
-
-class DenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Provides a Lipschitz contiuous network g(x)  with a fixed lipschitz constant.
-    &#34;&#34;&#34;
-
-    def __init__(self,
-                 dimension,
-                 densenet_depth: int = 2,
-                 densenet_growth: int = 16,
-                 activation_function: Union[str, Callable] = &#34;CLipSwish&#34;,
-                 lip_coeff: float = 0.98,
-                 n_lipschitz_iters: int = 5,
-                 **kwargs):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for {}: {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(self.dimension,
-                                                                            self.densenet_depth,
-                                                                            self.densenet_growth)
-
-    def forward(self, x, context=None):
-        assert context is None, &#34;Context not supported for this Class.&#34;
-        return self.dense_net(x)
-
-
-class InputConditionalDenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Provides a Lipschitz contiuous network g(x;t) = h(concat[x, f(c)]) with a fixed lipschitz constant.
-    The network h(x;t) is a DenseNet and Lipschitz Continuous w.r.t. x.
-    the network f provides an embedding of the context.
-    &#34;&#34;&#34;
-
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-
-        self.context_features = context_features
-        self.c_embed_hidden_sizes = c_embed_hidden_sizes
-
-        self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
-            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
-            densenet_growth=densenet_growth,
-            densenet_depth=densenet_depth,
-            include_last_layer=True)
-
-        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                                         hidden_sizes=self.c_embed_hidden_sizes,
-                                         activation=torch.nn.SiLU())
-
-    def forward(self, inputs, context=None):
-        context = self.bn(context)
-        context_embedding = self.context_embedding_net(context)
-        concat_inputs = torch.cat([inputs, context_embedding], -1)
-        outputs = self.dense_net(concat_inputs)
-        return outputs
-
-
-class MultiplicativeAndInputConditionalDenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Provides a Lipschitz contiuous network g(x;c) = φ(c) h(x;t) with a fixed lipschitz constant.
-    The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.
-    &#34;&#34;&#34;
-
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 m_embed_hidden_sizes=(128, 128),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-
-        self.context_features = context_features
-        self.c_embed_hidden_sizes = c_embed_hidden_sizes
-        self.m_embed_hidden_sizes = m_embed_hidden_sizes
-
-        self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
-            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
-            densenet_growth=densenet_growth,
-            densenet_depth=densenet_depth,
-            include_last_layer=True)
-
-        self.factor_net = MLP((self.context_features,), (1,),
-                              hidden_sizes=self.m_embed_hidden_sizes,
-                              activation=torch.nn.SiLU())
-
-        self.embedding = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                             hidden_sizes=self.c_embed_hidden_sizes,
-                             activation=torch.nn.SiLU())
-
-    def forward(self, inputs, context=None):
-        context = self.bn(context)
-        factor = self.factor_net(context)
-        context_embedding = self.embedding(context)
-        concat_inputs = torch.cat([inputs, context_embedding], -1)
-        outputs = torch.nn.functional.tanh(factor) * self.dense_net(concat_inputs)
-        return outputs
-
-
-class MultiplicativeConditionalDenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Provides a Lipschitz contiuous network g(x;c) = φ(c) h(x;t) with a fixed lipschitz constant.
-    The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.
-    &#34;&#34;&#34;
-
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 m_embed_hidden_sizes=(128, 128),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-
-        self.context_features = context_features
-        self.c_embed_hidden_sizes = c_embed_hidden_sizes
-        self.m_embed_hidden_sizes = m_embed_hidden_sizes
-
-        self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
-            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
-            densenet_growth=densenet_growth,
-            densenet_depth=densenet_depth,
-            include_last_layer=True)
-
-        self.factor_net = MLP((self.context_features,), (1,),
-                              hidden_sizes=self.m_embed_hidden_sizes,
-                              activation=torch.nn.SiLU())
-
-    def forward(self, inputs, context=None):
-        context = self.bn(context)
-        factor = self.factor_net(context)
-        outputs = torch.nn.functional.tanh(factor) * self.dense_net(inputs)
-        return outputs
-
-
-class LastLayerAttention(torch.nn.Module):
-    def __init__(self,
-                 dimension,
-                 context_features,
-                 value_dim,
-                 hidden_sizes=(64, 64),
-                 activation=activations.Swish()):
-        super().__init__()
-        self.dimension = dimension
-        self.context_features = context_features
-
-        self.hidden_sizes = hidden_sizes
-
-        self.value_dim = value_dim
-        self.activation = activation
-
-        self.bias_net = MLP((self.context_features,), (self.dimension,),
-                            hidden_sizes=self.hidden_sizes,
-                            activation=self.activation)
-
-        self.weight_network = MLP((self.context_features,), (self.dimension, self.value_dim),
-                                  hidden_sizes=self.hidden_sizes,
-                                  activation=self.activation)
-
-    def attention(self, context, values):
-        presoftmax = self.weight_network(context)  # .view(-1, self.dimension, self.num_heads)
-        post_softmax = torch.nn.functional.softmax(presoftmax, dim=-1)
-        weights = torch.bmm(post_softmax, values).squeeze()
-        return weights + self.bias_net(context)
-
-
-class LastLayerConditionalDenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Provides a Lipschitz contiuous network g(x;c) = h(x;t) with a fixed lipschitz constant.
-    The network h(x;c) is a DenseNet.
-    Let xϵR^d.
-    For a unconditional DenseNet the last layer is given by Az, where zϵR^k with k&gt;d is a
-    higher dimensional embedding and AϵR^(d\times k) is a matrix with spectral norm &lt;1.
-    For making this last layer conditional, we instead parameterize A(c) with a hypernetwork.
-    We further pass each row through a softmax (making A row stochastic), such that the Lipschitz constant of remains unchanged.
-    &#34;&#34;&#34;
-
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 last_layer_hidden_sizes=(64, 64),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-
-        self.context_features = context_features
-        self.last_layer_hidden_sizes = last_layer_hidden_sizes
-
-        self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(total_in_channels=self.dimension,
-                                                                            densenet_growth=densenet_growth,
-                                                                            densenet_depth=densenet_depth,
-                                                                            include_last_layer=False)
-
-        self.custom_attention = LastLayerAttention(dimension=self.dimension,
-                                                   context_features=self.context_features,
-                                                   value_dim=self.densenet_final_layer_dim,
-                                                   hidden_sizes=self.last_layer_hidden_sizes)
-
-    def forward(self, inputs, context=None):
-        context = self.bn(context)
-        values_weights = self.dense_net(inputs).unsqueeze(-1)
-        weights = self.custom_attention.attention(context, values_weights)
-        return weights
-
-
-class MixedConditionalDenseNet(_DenseNet):
-    &#34;&#34;&#34;
-    Combination of LastLayerConditionalDenseNet and InputConditionalDenseNet,
-    i.e. both the first and last layer of the densenet are conditional.
-    &#34;&#34;&#34;
-
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 last_layer_hidden_sizes=(64, 64),
-                 c_embed_hidden_sizes=(32, 32, 10),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
-
-        if len(kwargs) &gt; 0:
-            logger.warning(&#34;Unused kwargs for class &#39;{}&#39;: \n {}&#34;.format(self.__class__.__name__, pformat(kwargs)))
-
-        self.context_features = context_features
-        self.c_embed_hidden_sizes = c_embed_hidden_sizes
-        self.last_layer_hidden_sizes = last_layer_hidden_sizes
-
-        self.output_channels = self.calc_output_channels(self.activation,
-                                                         self.densenet_growth)
-        self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
-            total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
-            densenet_growth=densenet_growth,
-            densenet_depth=densenet_depth,
-            include_last_layer=False)
-
-        self.custom_attention = LastLayerAttention(dimension=self.dimension,
-                                                   context_features=self.context_features,
-                                                   value_dim=self.densenet_final_layer_dim,
-                                                   hidden_sizes=self.last_layer_hidden_sizes)
-
-        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                                         hidden_sizes=self.c_embed_hidden_sizes,
-                                         activation=torch.nn.SiLU())
-
-    def forward(self, inputs, context=None):
-        context = self.bn(context)
-        context_embedding = self.context_embedding_net(context)
-        concat_inputs = torch.cat([inputs, context_embedding], -1)
-        values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
-        weights = self.custom_attention.attention(context, values_weights)
-        return weights
-
-# class SirenLayer(nn.Module):
-#     def __init__(self, dim_in, dim_out, w0=1., c=6., is_first=False, use_bias=True, activation=None):
-#         super().__init__()
-#         self.dim_in = dim_in
-#         self.is_first = is_first
-#
-#         weight = torch.zeros(dim_out, dim_in)
-#         bias = torch.zeros(dim_out) if use_bias else None
-#         self.init_(weight, bias, c=c, w0=w0)
-#
-#         self.weight = nn.Parameter(weight)
-#         self.bias = nn.Parameter(bias) if use_bias else None
-#
-#         self.activation = Sine(w0) if activation is None else activation
-#
-#     def init_(self, weight, bias, c, w0):
-#         dim = self.dim_in
-#
-#         w_std = (1 / dim) if self.is_first else (math.sqrt(c / dim) / w0)
-#         weight.uniform_(-w_std, w_std)
-#
-#         if exists(bias):
-#             bias.uniform_(-w_std, w_std)
-#
-#     def forward(self, x):
-#         out = torch.nn.functional.linear(x, self.weight, self.bias)
-#         out = self.activation(out)
-#         return out</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -597,14 +112,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, x, context=None):
-    assert context is None, &#34;Context not supported for this Class.&#34;
-    return self.dense_net(x)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -702,17 +209,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    context = self.bn(context)
-    context_embedding = self.context_embedding_net(context)
-    concat_inputs = torch.cat([inputs, context_embedding], -1)
-    outputs = self.dense_net(concat_inputs)
-    return outputs</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -809,16 +305,6 @@ evaluation mode.
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def attention(self, context, values):
-    presoftmax = self.weight_network(context)  # .view(-1, self.dimension, self.num_heads)
-    post_softmax = torch.nn.functional.softmax(presoftmax, dim=-1)
-    weights = torch.bmm(post_softmax, values).squeeze()
-    return weights + self.bias_net(context)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.nn.nets.invertible_densenet.LastLayerAttention.forward"><code class="name flex">
 <span>def <span class="ident">forward</span></span>(<span>self, *input: Any) ‑> None</span>
@@ -833,23 +319,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def _forward_unimplemented(self, *input: Any) -&gt; None:
-    r&#34;&#34;&#34;Define the computation performed at every call.
-
-    Should be overridden by all subclasses.
-
-    .. note::
-        Although the recipe for forward pass needs to be defined within
-        this function, one should call the :class:`Module` instance afterwards
-        instead of this since the former takes care of running the
-        registered hooks while the latter silently ignores them.
-    &#34;&#34;&#34;
-    raise NotImplementedError(f&#34;Module [{type(self).__name__}] is missing the required \&#34;forward\&#34; function&#34;)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -955,16 +424,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    context = self.bn(context)
-    values_weights = self.dense_net(inputs).unsqueeze(-1)
-    weights = self.custom_attention.attention(context, values_weights)
-    return weights</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1071,18 +530,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    context = self.bn(context)
-    context_embedding = self.context_embedding_net(context)
-    concat_inputs = torch.cat([inputs, context_embedding], -1)
-    values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
-    weights = self.custom_attention.attention(context, values_weights)
-    return weights</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1185,18 +632,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    context = self.bn(context)
-    factor = self.factor_net(context)
-    context_embedding = self.embedding(context)
-    concat_inputs = torch.cat([inputs, context_embedding], -1)
-    outputs = torch.nn.functional.tanh(factor) * self.dense_net(concat_inputs)
-    return outputs</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1293,16 +728,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    context = self.bn(context)
-    factor = self.factor_net(context)
-    outputs = torch.nn.functional.tanh(factor) * self.dense_net(inputs)
-    return outputs</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1310,7 +735,6 @@ registered hooks while the latter silently ignores them.</p>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -1392,7 +816,7 @@ registered hooks while the latter silently ignores them.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.0</a>.</p>
 </footer>
 </body>
 </html>

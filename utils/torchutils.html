@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.0">
 <title>flowcon.utils.torchutils API documentation</title>
-<meta name="description" content="Various PyTorch utility functions." />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="Various PyTorch utility functions.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -23,261 +26,6 @@
 </header>
 <section id="section-intro">
 <p>Various PyTorch utility functions.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Various PyTorch utility functions.&#34;&#34;&#34;
-from flowcon.utils import typechecks as check
-import numpy as np
-import torch
-from numpy.typing import ArrayLike
-import random
-
-def set_seeds(SEED):
-    np.random.seed(SEED)
-    torch.random.manual_seed(SEED)
-    random.seed(SEED)
-
-
-def tile(x, n):
-    if not check.is_positive_int(n):
-        raise TypeError(&#34;Argument &#39;n&#39; must be a positive integer.&#34;)
-    x_ = x.reshape(-1)
-    x_ = x_.repeat(n)
-    x_ = x_.reshape(n, -1)
-    x_ = x_.transpose(1, 0)
-    x_ = x_.reshape(-1)
-    return x_
-
-
-def sum_except_batch(x, num_batch_dims=1):
-    &#34;&#34;&#34;Sums all elements of `x` except for the first `num_batch_dims` dimensions.&#34;&#34;&#34;
-    if not check.is_nonnegative_int(num_batch_dims):
-        raise TypeError(&#34;Number of batch dimensions must be a non-negative integer.&#34;)
-    reduce_dims = list(range(num_batch_dims, x.ndimension()))
-    return torch.sum(x, dim=reduce_dims)
-
-
-def split_leading_dim(x, shape):
-    &#34;&#34;&#34;Reshapes the leading dim of `x` to have the given shape.&#34;&#34;&#34;
-    new_shape = torch.Size(shape) + x.shape[1:]
-    return torch.reshape(x, new_shape)
-
-
-def merge_leading_dims(x, num_dims):
-    &#34;&#34;&#34;Reshapes the tensor `x` such that the first `num_dims` dimensions are merged to one.&#34;&#34;&#34;
-    if not check.is_positive_int(num_dims):
-        raise TypeError(&#34;Number of leading dims must be a positive integer.&#34;)
-    if num_dims &gt; x.dim():
-        raise ValueError(
-            &#34;Number of leading dims can&#39;t be greater than total number of dims.&#34;
-        )
-    new_shape = torch.Size([-1]) + x.shape[num_dims:]
-    return torch.reshape(x, new_shape)
-
-
-def repeat_rows(x, num_reps):
-    &#34;&#34;&#34;Each row of tensor `x` is repeated `num_reps` times along leading dimension.&#34;&#34;&#34;
-    if not check.is_positive_int(num_reps):
-        raise TypeError(&#34;Number of repetitions must be a positive integer.&#34;)
-    shape = x.shape
-    x = x.unsqueeze(1)
-    x = x.expand(shape[0], num_reps, *shape[1:])
-    return merge_leading_dims(x, num_dims=2)
-
-
-def tensor2numpy(x):
-    return tensor_to_np(x)
-
-
-def logabsdet(x):
-    &#34;&#34;&#34;Returns the log absolute determinant of square matrix x.&#34;&#34;&#34;
-    # Note: torch.logdet() only works for positive determinant.
-    _, res = torch.slogdet(x)
-    return res
-
-
-def batch_JTJ_logabsdet(inputs, outputs):
-    jacs = batch_jacobian(outputs, inputs)
-    logabsdet = 0.5 * torch.slogdet(torch.bmm(torch.transpose(jacs, -2, -1), jacs))[1]
-    return logabsdet
-
-
-def random_orthogonal(size):
-    &#34;&#34;&#34;
-    Returns a random orthogonal matrix as a 2-dim tensor of shape [size, size].
-    &#34;&#34;&#34;
-
-    # Use the QR decomposition of a random Gaussian matrix.
-    x = torch.randn(size, size)
-    q, _ = torch.linalg.qr(x)
-    return q
-
-
-def get_num_parameters(model):
-    &#34;&#34;&#34;
-    Returns the number of trainable parameters in a model of type nets.Module
-    :param model: nets.Module containing trainable parameters
-    :return: number of trainable parameters in model
-    &#34;&#34;&#34;
-    num_parameters = 0
-    for parameter in model.parameters():
-        if parameter.requires_grad:
-            num_parameters += torch.numel(parameter)
-    return num_parameters
-
-
-def create_alternating_binary_mask(features, even=True):
-    &#34;&#34;&#34;
-    Creates a binary mask of a given dimension which alternates its masking.
-
-    :param features: Dimension of mask.
-    :param even: If True, even values are assigned 1s, odd 0s. If False, vice versa.
-    :return: Alternating binary mask of type torch.Tensor.
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    start = 0 if even else 1
-    mask[start::2] += 1
-    return mask
-
-
-def create_mid_split_binary_mask(features):
-    &#34;&#34;&#34;
-    Creates a binary mask of a given dimension which splits its masking at the midpoint.
-
-    :param features: Dimension of mask.
-    :return: Binary mask split at midpoint of type torch.Tensor
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    midpoint = features // 2 if features % 2 == 0 else features // 2 + 1
-    mask[:midpoint] += 1
-    return mask
-
-
-def create_random_binary_mask(features):
-    &#34;&#34;&#34;
-    Creates a random binary mask of a given dimension with half of its entries
-    randomly set to 1s.
-
-    :param features: Dimension of mask.
-    :return: Binary mask with half of its entries set to 1s, of type torch.Tensor.
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    weights = torch.ones(features).float()
-    num_samples = features // 2 if features % 2 == 0 else features // 2 + 1
-    indices = torch.multinomial(
-        input=weights, num_samples=num_samples, replacement=False
-    )
-    mask[indices] += 1
-    return mask
-
-
-def searchsorted(bin_locations, inputs, eps=1e-6):
-    bin_locations[..., -1] += eps
-    return torch.sum(inputs[..., None] &gt;= bin_locations, dim=-1) - 1
-
-
-def cbrt(x):
-    &#34;&#34;&#34;Cube root. Equivalent to torch.pow(x, 1/3), but numerically stable.&#34;&#34;&#34;
-    return torch.sign(x) * torch.exp(torch.log(torch.abs(x)) / 3.0)
-
-
-def get_temperature(max_value, bound=1 - 1e-3):
-    &#34;&#34;&#34;
-    For a dataset with max value &#39;max_value&#39;, returns the temperature such that
-
-        sigmoid(temperature * max_value) = bound.
-
-    If temperature is greater than 1, returns 1.
-
-    :param max_value:
-    :param bound:
-    :return:
-    &#34;&#34;&#34;
-    max_value = torch.Tensor([max_value])
-    bound = torch.Tensor([bound])
-    temperature = min(-(1 / max_value) * (torch.log1p(-bound) - torch.log(bound)), 1)
-    return temperature
-
-
-def gaussian_kde_log_eval(samples, query):
-    N, D = samples.shape[0], samples.shape[-1]
-    std = N ** (-1 / (D + 4))
-    precision = (1 / (std ** 2)) * torch.eye(D)
-    a = query - samples
-    b = a @ precision
-    c = -0.5 * torch.sum(a * b, dim=-1)
-    d = -np.log(N) - (D / 2) * np.log(2 * np.pi) - D * np.log(std)
-    c += d
-    return torch.logsumexp(c, dim=-1)
-
-
-def gradient(y, x, grad_outputs=None):
-    if grad_outputs is None:
-        grad_outputs = torch.ones_like(y)
-    grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
-    return grad
-
-
-def batchwise_dot_prod(bvector1, bvector2):
-    return (bvector1 * bvector2).sum(-1)
-
-
-def batch_jacobian(g, x):
-    jac = []
-    for d in range(g.shape[1]):
-        jac.append(torch.autograd.grad(torch.sum(g[:, d]), x, create_graph=True)[0].view(x.shape[0], 1, x.shape[1]))
-    return torch.cat(jac, 1)
-
-
-def batch_trace(M):
-    return M.view(M.shape[0], -1)[:, ::M.shape[1] + 1].sum(1)
-
-
-def sech2(x):
-    return 1 / torch.cosh(x) ** 2
-
-
-def np_to_tensor(input: ArrayLike, dtype=None, device=&#34;cpu&#34;) -&gt; torch.Tensor:
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if isinstance(input, np.ndarray):
-        return torch.tensor(input, dtype=dtype, device=device)
-    elif isinstance(input, torch.Tensor):
-        input: torch.Tensor
-        return input.to(dtype).to(device)
-    else:
-        raise ValueError(&#34;Unknown Type: &#34; + str(type(input)))
-
-
-def tensor_to_np(tensor: torch.Tensor) -&gt; ArrayLike:
-    if torch.is_tensor(tensor):
-        return tensor.detach().cpu().numpy()
-    elif isinstance(tensor, np.ndarray):
-        return tensor
-    else:
-        raise ValueError(&#34;Unknown Type: &#34; + str(type(tensor)))
-
-
-def sample_rademacher_like(y):
-    return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1
-
-
-def safe_detach(tensor):
-    return tensor.detach().requires_grad_(tensor.requires_grad)
-
-
-def _flatten(sequence):
-    flat = [p.reshape(-1) for p in sequence]
-    return torch.cat(flat) if len(flat) &gt; 0 else torch.tensor([])
-
-
-def _flatten_convert_none_to_zeros(sequence, like_sequence):
-    flat = [p.reshape(-1) if p is not None else torch.zeros_like(q).view(-1) for p, q in zip(sequence, like_sequence)]
-    return torch.cat(flat) if len(flat) &gt; 0 else torch.tensor([])</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -291,71 +39,30 @@ def _flatten_convert_none_to_zeros(sequence, like_sequence):
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def batch_JTJ_logabsdet(inputs, outputs):
-    jacs = batch_jacobian(outputs, inputs)
-    logabsdet = 0.5 * torch.slogdet(torch.bmm(torch.transpose(jacs, -2, -1), jacs))[1]
-    return logabsdet</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.batch_jacobian"><code class="name flex">
 <span>def <span class="ident">batch_jacobian</span></span>(<span>g, x)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def batch_jacobian(g, x):
-    jac = []
-    for d in range(g.shape[1]):
-        jac.append(torch.autograd.grad(torch.sum(g[:, d]), x, create_graph=True)[0].view(x.shape[0], 1, x.shape[1]))
-    return torch.cat(jac, 1)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.batch_trace"><code class="name flex">
 <span>def <span class="ident">batch_trace</span></span>(<span>M)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def batch_trace(M):
-    return M.view(M.shape[0], -1)[:, ::M.shape[1] + 1].sum(1)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.batchwise_dot_prod"><code class="name flex">
 <span>def <span class="ident">batchwise_dot_prod</span></span>(<span>bvector1, bvector2)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def batchwise_dot_prod(bvector1, bvector2):
-    return (bvector1 * bvector2).sum(-1)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.cbrt"><code class="name flex">
 <span>def <span class="ident">cbrt</span></span>(<span>x)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Cube root. Equivalent to torch.pow(x, 1/3), but numerically stable.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def cbrt(x):
-    &#34;&#34;&#34;Cube root. Equivalent to torch.pow(x, 1/3), but numerically stable.&#34;&#34;&#34;
-    return torch.sign(x) * torch.exp(torch.log(torch.abs(x)) / 3.0)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.create_alternating_binary_mask"><code class="name flex">
 <span>def <span class="ident">create_alternating_binary_mask</span></span>(<span>features, even=True)</span>
@@ -365,23 +72,6 @@ def _flatten_convert_none_to_zeros(sequence, like_sequence):
 <p>:param features: Dimension of mask.
 :param even: If True, even values are assigned 1s, odd 0s. If False, vice versa.
 :return: Alternating binary mask of type torch.Tensor.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_alternating_binary_mask(features, even=True):
-    &#34;&#34;&#34;
-    Creates a binary mask of a given dimension which alternates its masking.
-
-    :param features: Dimension of mask.
-    :param even: If True, even values are assigned 1s, odd 0s. If False, vice versa.
-    :return: Alternating binary mask of type torch.Tensor.
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    start = 0 if even else 1
-    mask[start::2] += 1
-    return mask</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.create_mid_split_binary_mask"><code class="name flex">
 <span>def <span class="ident">create_mid_split_binary_mask</span></span>(<span>features)</span>
@@ -390,22 +80,6 @@ def _flatten_convert_none_to_zeros(sequence, like_sequence):
 <div class="desc"><p>Creates a binary mask of a given dimension which splits its masking at the midpoint.</p>
 <p>:param features: Dimension of mask.
 :return: Binary mask split at midpoint of type torch.Tensor</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_mid_split_binary_mask(features):
-    &#34;&#34;&#34;
-    Creates a binary mask of a given dimension which splits its masking at the midpoint.
-
-    :param features: Dimension of mask.
-    :return: Binary mask split at midpoint of type torch.Tensor
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    midpoint = features // 2 if features % 2 == 0 else features // 2 + 1
-    mask[:midpoint] += 1
-    return mask</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.create_random_binary_mask"><code class="name flex">
 <span>def <span class="ident">create_random_binary_mask</span></span>(<span>features)</span>
@@ -415,48 +89,12 @@ def _flatten_convert_none_to_zeros(sequence, like_sequence):
 randomly set to 1s.</p>
 <p>:param features: Dimension of mask.
 :return: Binary mask with half of its entries set to 1s, of type torch.Tensor.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def create_random_binary_mask(features):
-    &#34;&#34;&#34;
-    Creates a random binary mask of a given dimension with half of its entries
-    randomly set to 1s.
-
-    :param features: Dimension of mask.
-    :return: Binary mask with half of its entries set to 1s, of type torch.Tensor.
-    &#34;&#34;&#34;
-    mask = torch.zeros(features).byte()
-    weights = torch.ones(features).float()
-    num_samples = features // 2 if features % 2 == 0 else features // 2 + 1
-    indices = torch.multinomial(
-        input=weights, num_samples=num_samples, replacement=False
-    )
-    mask[indices] += 1
-    return mask</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.gaussian_kde_log_eval"><code class="name flex">
 <span>def <span class="ident">gaussian_kde_log_eval</span></span>(<span>samples, query)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def gaussian_kde_log_eval(samples, query):
-    N, D = samples.shape[0], samples.shape[-1]
-    std = N ** (-1 / (D + 4))
-    precision = (1 / (std ** 2)) * torch.eye(D)
-    a = query - samples
-    b = a @ precision
-    c = -0.5 * torch.sum(a * b, dim=-1)
-    d = -np.log(N) - (D / 2) * np.log(2 * np.pi) - D * np.log(std)
-    c += d
-    return torch.logsumexp(c, dim=-1)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.get_num_parameters"><code class="name flex">
 <span>def <span class="ident">get_num_parameters</span></span>(<span>model)</span>
@@ -465,22 +103,6 @@ randomly set to 1s.</p>
 <div class="desc"><p>Returns the number of trainable parameters in a model of type nets.Module
 :param model: nets.Module containing trainable parameters
 :return: number of trainable parameters in model</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_num_parameters(model):
-    &#34;&#34;&#34;
-    Returns the number of trainable parameters in a model of type nets.Module
-    :param model: nets.Module containing trainable parameters
-    :return: number of trainable parameters in model
-    &#34;&#34;&#34;
-    num_parameters = 0
-    for parameter in model.parameters():
-        if parameter.requires_grad:
-            num_parameters += torch.numel(parameter)
-    return num_parameters</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.get_temperature"><code class="name flex">
 <span>def <span class="ident">get_temperature</span></span>(<span>max_value, bound=0.999)</span>
@@ -493,292 +115,102 @@ randomly set to 1s.</p>
 <p>:param max_value:
 :param bound:
 :return:</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_temperature(max_value, bound=1 - 1e-3):
-    &#34;&#34;&#34;
-    For a dataset with max value &#39;max_value&#39;, returns the temperature such that
-
-        sigmoid(temperature * max_value) = bound.
-
-    If temperature is greater than 1, returns 1.
-
-    :param max_value:
-    :param bound:
-    :return:
-    &#34;&#34;&#34;
-    max_value = torch.Tensor([max_value])
-    bound = torch.Tensor([bound])
-    temperature = min(-(1 / max_value) * (torch.log1p(-bound) - torch.log(bound)), 1)
-    return temperature</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.gradient"><code class="name flex">
 <span>def <span class="ident">gradient</span></span>(<span>y, x, grad_outputs=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def gradient(y, x, grad_outputs=None):
-    if grad_outputs is None:
-        grad_outputs = torch.ones_like(y)
-    grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
-    return grad</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.logabsdet"><code class="name flex">
 <span>def <span class="ident">logabsdet</span></span>(<span>x)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the log absolute determinant of square matrix x.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def logabsdet(x):
-    &#34;&#34;&#34;Returns the log absolute determinant of square matrix x.&#34;&#34;&#34;
-    # Note: torch.logdet() only works for positive determinant.
-    _, res = torch.slogdet(x)
-    return res</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.merge_leading_dims"><code class="name flex">
 <span>def <span class="ident">merge_leading_dims</span></span>(<span>x, num_dims)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reshapes the tensor <code>x</code> such that the first <code>num_dims</code> dimensions are merged to one.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def merge_leading_dims(x, num_dims):
-    &#34;&#34;&#34;Reshapes the tensor `x` such that the first `num_dims` dimensions are merged to one.&#34;&#34;&#34;
-    if not check.is_positive_int(num_dims):
-        raise TypeError(&#34;Number of leading dims must be a positive integer.&#34;)
-    if num_dims &gt; x.dim():
-        raise ValueError(
-            &#34;Number of leading dims can&#39;t be greater than total number of dims.&#34;
-        )
-    new_shape = torch.Size([-1]) + x.shape[num_dims:]
-    return torch.reshape(x, new_shape)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.np_to_tensor"><code class="name flex">
 <span>def <span class="ident">np_to_tensor</span></span>(<span>input: Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]], dtype=None, device='cpu') ‑> torch.Tensor</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def np_to_tensor(input: ArrayLike, dtype=None, device=&#34;cpu&#34;) -&gt; torch.Tensor:
-    if dtype is None:
-        dtype = torch.get_default_dtype()
-
-    if isinstance(input, np.ndarray):
-        return torch.tensor(input, dtype=dtype, device=device)
-    elif isinstance(input, torch.Tensor):
-        input: torch.Tensor
-        return input.to(dtype).to(device)
-    else:
-        raise ValueError(&#34;Unknown Type: &#34; + str(type(input)))</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.random_orthogonal"><code class="name flex">
 <span>def <span class="ident">random_orthogonal</span></span>(<span>size)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns a random orthogonal matrix as a 2-dim tensor of shape [size, size].</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def random_orthogonal(size):
-    &#34;&#34;&#34;
-    Returns a random orthogonal matrix as a 2-dim tensor of shape [size, size].
-    &#34;&#34;&#34;
-
-    # Use the QR decomposition of a random Gaussian matrix.
-    x = torch.randn(size, size)
-    q, _ = torch.linalg.qr(x)
-    return q</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.repeat_rows"><code class="name flex">
 <span>def <span class="ident">repeat_rows</span></span>(<span>x, num_reps)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Each row of tensor <code>x</code> is repeated <code>num_reps</code> times along leading dimension.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def repeat_rows(x, num_reps):
-    &#34;&#34;&#34;Each row of tensor `x` is repeated `num_reps` times along leading dimension.&#34;&#34;&#34;
-    if not check.is_positive_int(num_reps):
-        raise TypeError(&#34;Number of repetitions must be a positive integer.&#34;)
-    shape = x.shape
-    x = x.unsqueeze(1)
-    x = x.expand(shape[0], num_reps, *shape[1:])
-    return merge_leading_dims(x, num_dims=2)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.safe_detach"><code class="name flex">
 <span>def <span class="ident">safe_detach</span></span>(<span>tensor)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def safe_detach(tensor):
-    return tensor.detach().requires_grad_(tensor.requires_grad)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.sample_rademacher_like"><code class="name flex">
 <span>def <span class="ident">sample_rademacher_like</span></span>(<span>y)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample_rademacher_like(y):
-    return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.searchsorted"><code class="name flex">
 <span>def <span class="ident">searchsorted</span></span>(<span>bin_locations, inputs, eps=1e-06)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def searchsorted(bin_locations, inputs, eps=1e-6):
-    bin_locations[..., -1] += eps
-    return torch.sum(inputs[..., None] &gt;= bin_locations, dim=-1) - 1</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.sech2"><code class="name flex">
 <span>def <span class="ident">sech2</span></span>(<span>x)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sech2(x):
-    return 1 / torch.cosh(x) ** 2</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.set_seeds"><code class="name flex">
 <span>def <span class="ident">set_seeds</span></span>(<span>SEED)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def set_seeds(SEED):
-    np.random.seed(SEED)
-    torch.random.manual_seed(SEED)
-    random.seed(SEED)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.split_leading_dim"><code class="name flex">
 <span>def <span class="ident">split_leading_dim</span></span>(<span>x, shape)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Reshapes the leading dim of <code>x</code> to have the given shape.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def split_leading_dim(x, shape):
-    &#34;&#34;&#34;Reshapes the leading dim of `x` to have the given shape.&#34;&#34;&#34;
-    new_shape = torch.Size(shape) + x.shape[1:]
-    return torch.reshape(x, new_shape)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.sum_except_batch"><code class="name flex">
 <span>def <span class="ident">sum_except_batch</span></span>(<span>x, num_batch_dims=1)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Sums all elements of <code>x</code> except for the first <code>num_batch_dims</code> dimensions.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sum_except_batch(x, num_batch_dims=1):
-    &#34;&#34;&#34;Sums all elements of `x` except for the first `num_batch_dims` dimensions.&#34;&#34;&#34;
-    if not check.is_nonnegative_int(num_batch_dims):
-        raise TypeError(&#34;Number of batch dimensions must be a non-negative integer.&#34;)
-    reduce_dims = list(range(num_batch_dims, x.ndimension()))
-    return torch.sum(x, dim=reduce_dims)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.tensor2numpy"><code class="name flex">
 <span>def <span class="ident">tensor2numpy</span></span>(<span>x)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def tensor2numpy(x):
-    return tensor_to_np(x)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.tensor_to_np"><code class="name flex">
 <span>def <span class="ident">tensor_to_np</span></span>(<span>tensor: torch.Tensor) ‑> Union[numpy.__array_like._SupportsArray[numpy.dtype], numpy.__nested_sequence._NestedSequence[numpy.__array_like._SupportsArray[numpy.dtype]], bool, int, float, complex, str, bytes, numpy.__nested_sequence._NestedSequence[Union[bool, int, float, complex, str, bytes]]]</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def tensor_to_np(tensor: torch.Tensor) -&gt; ArrayLike:
-    if torch.is_tensor(tensor):
-        return tensor.detach().cpu().numpy()
-    elif isinstance(tensor, np.ndarray):
-        return tensor
-    else:
-        raise ValueError(&#34;Unknown Type: &#34; + str(type(tensor)))</code></pre>
-</details>
 </dd>
 <dt id="flowcon.utils.torchutils.tile"><code class="name flex">
 <span>def <span class="ident">tile</span></span>(<span>x, n)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def tile(x, n):
-    if not check.is_positive_int(n):
-        raise TypeError(&#34;Argument &#39;n&#39; must be a positive integer.&#34;)
-    x_ = x.reshape(-1)
-    x_ = x_.repeat(n)
-    x_ = x_.reshape(n, -1)
-    x_ = x_.transpose(1, 0)
-    x_ = x_.reshape(-1)
-    return x_</code></pre>
-</details>
 </dd>
 </dl>
 </section>
@@ -786,7 +218,6 @@ randomly set to 1s.</p>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -831,7 +262,7 @@ randomly set to 1s.</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.0</a>.</p>
 </footer>
 </body>
 </html>

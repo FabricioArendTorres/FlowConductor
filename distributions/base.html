@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.0">
 <title>flowcon.distributions.base API documentation</title>
-<meta name="description" content="Basic definitions for the distributions module." />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="Basic definitions for the distributions module.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -23,198 +26,6 @@
 </header>
 <section id="section-intro">
 <p>Basic definitions for the distributions module.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Basic definitions for the distributions module.&#34;&#34;&#34;
-
-import torch
-from torch import nn, optim
-
-from flowcon.utils import torchutils
-import flowcon.utils.typechecks as check
-
-
-class NoMeanException(Exception):
-    &#34;&#34;&#34;Exception to be thrown when a mean function doesn&#39;t exist.&#34;&#34;&#34;
-
-    pass
-
-
-class Distribution(nn.Module):
-    &#34;&#34;&#34;Base class for all distribution objects.&#34;&#34;&#34;
-
-    def forward(self, *args):
-        raise RuntimeError(&#34;Forward method cannot be called for a Distribution object.&#34;)
-
-    def log_prob(self, inputs, context=None):
-        &#34;&#34;&#34;Calculate log probability under the distribution.
-
-        Args:
-            inputs: Tensor, input variables.
-            context: Tensor or None, conditioning variables. If a Tensor, it must have the same
-                number or rows as the inputs. If None, the context is ignored.
-
-        Returns:
-            A Tensor of shape [input_size], the log probability of the inputs given the context.
-        &#34;&#34;&#34;
-        inputs = torch.as_tensor(inputs)
-        if context is not None:
-            context = torch.as_tensor(context)
-            if inputs.shape[0] != context.shape[0]:
-                raise ValueError(
-                    &#34;Number of input items must be equal to number of context items.&#34;
-                )
-        return self._log_prob(inputs, context)
-
-    def _log_prob(self, inputs, context):
-        raise NotImplementedError()
-
-    def sample(self, num_samples, context=None, batch_size=None):
-        &#34;&#34;&#34;Generates samples from the distribution. Samples can be generated in batches.
-
-        Args:
-            num_samples: int, number of samples to generate.
-            context: Tensor or None, conditioning variables. If None, the context is ignored. 
-                     Should have shape [context_size, ...], where ... represents a (context) feature 
-                     vector of arbitrary shape. This will generate num_samples for each context item 
-                     provided. The overall shape of the samples will then be 
-                     [context_size, num_samples, ...].
-            batch_size: int or None, number of samples per batch. If None, all samples are generated
-                in one batch.
-
-        Returns:
-            A Tensor containing the samples, with shape [num_samples, ...] if context is None, or
-            [context_size, num_samples, ...] if context is given, where ... represents a feature
-            vector of arbitrary shape.
-        &#34;&#34;&#34;
-        if not check.is_positive_int(num_samples):
-            raise TypeError(&#34;Number of samples must be a positive integer.&#34;)
-
-        if context is not None:
-            context = torch.as_tensor(context)
-
-        if batch_size is None:
-            return self._sample(num_samples, context)
-
-        else:
-            if not check.is_positive_int(batch_size):
-                raise TypeError(&#34;Batch size must be a positive integer.&#34;)
-
-            num_batches = num_samples // batch_size
-            num_leftover = num_samples % batch_size
-            samples = [self._sample(batch_size, context) for _ in range(num_batches)]
-            if num_leftover &gt; 0:
-                samples.append(self._sample(num_leftover, context))
-            return torch.cat(samples, dim=0)
-
-    def _sample(self, num_samples, context):
-        raise NotImplementedError()
-
-    def sample_and_log_prob(self, num_samples, context=None):
-        &#34;&#34;&#34;Generates samples from the distribution together with their log probability.
-
-        Args:
-            num_samples: int, number of samples to generate.
-            context: Tensor or None, conditioning variables. If None, the context is ignored. 
-                     Should have shape [context_size, ...], where ... represents a (context) feature 
-                     vector of arbitrary shape. This will generate num_samples for each context item 
-                     provided. The overall shape of the samples will then be 
-                     [context_size, num_samples, ...].
-        Returns:
-            A tuple of:
-                * A Tensor containing the samples, with shape [num_samples, ...] if context is None,
-                  or [context_size, num_samples, ...] if context is given, where ... represents a 
-                  feature vector of arbitrary shape.
-                * A Tensor containing the log probabilities of the samples, with shape
-                  [num_samples, features if context is None, or [context_size, num_samples, ...] if
-                  context is given.
-        &#34;&#34;&#34;
-        samples = self.sample(num_samples, context=context)
-
-        if context is not None:
-            # Merge the context dimension with sample dimension in order to call log_prob.
-            samples = torchutils.merge_leading_dims(samples, num_dims=2)
-            context = torchutils.repeat_rows(context, num_reps=num_samples)
-            assert samples.shape[0] == context.shape[0]
-
-        log_prob = self.log_prob(samples, context=context)
-
-        if context is not None:
-            # Split the context dimension from sample dimension.
-            samples = torchutils.split_leading_dim(samples, shape=[-1, num_samples])
-            log_prob = torchutils.split_leading_dim(log_prob, shape=[-1, num_samples])
-
-        return samples, log_prob
-
-    def mean(self, context=None):
-        if context is not None:
-            context = torch.as_tensor(context)
-        return self._mean(context)
-
-    def _mean(self, context):
-        raise NoMeanException()
-
-    def sample_maximum(self, num_samples, context=None, its=1, opt=&#34;LBFGS&#34;, *args):
-        &#34;&#34;&#34;calls sample_maps and returns the maximizing x and associated log prob for each context.
-
-        In general it is recommended to use simulated annealing to recover the global maximum.
-        returns max_x, max_logprob
-        The shapes are [context_size, 1, dim] and [context_size, 1] if context is not None
-                else [dim] and []
-        &#34;&#34;&#34;
-        xs, log_ps = self.sample_maxima(num_samples, context, its, opt, *args)
-        if context is not None:
-            index = torch.argmax(log_ps, dim=-1, keepdim=True)
-            # the following unsqueezing over multiple dimensions is to accommodate the variable shape of the space of x
-            n_extra_dims = (xs.ndim - 2)
-            index_unsqueezed = index.view(tuple(index.shape) + (1,) * n_extra_dims)
-            max_x = torch.take_along_dim(xs, index_unsqueezed, dim=1)
-
-            max_logprob = torch.take_along_dim(log_ps, index, dim=1)
-        else:
-            index = torch.argmax(log_ps)
-            max_x, max_logprob = xs[index], log_ps[index]
-        return max_x, max_logprob
-
-    def sample_maxima(self, num_samples, context=None, its=1, opt=&#34;LBFGS&#34;, *args):
-        &#34;&#34;&#34;Takes a number of samples and maximizes their log prob.
-        this can be used to approximately sample the maxima of a multimodal distribution.
-
-        Args:
-            num_samples: The number of samples per context.
-            context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
-                with the data.
-            its: The number of optimization steps
-            opt: The optimizer to use in the torch.optim package in str format.
-            args: The arguments for the optimizer
-
-        Returns:
-            A `Tensor` of shape [batch_size, ...] representing samples xs, the associated log_prob.
-        &#34;&#34;&#34;
-        initial_sample = self._sample(num_samples, context)
-        if context is not None:
-            initial_sample = torchutils.merge_leading_dims(initial_sample, num_dims=2)
-            context = torchutils.repeat_rows(context, num_reps=num_samples)
-        initial_sample = torch.nn.parameter.Parameter(initial_sample, requires_grad=True)
-        optimizer = getattr(optim, opt)([initial_sample], *args)
-
-        def closure():
-            optimizer.zero_grad()
-            neg_log_prob = -self.log_prob(initial_sample, context).mean()
-            neg_log_prob.backward()
-            return neg_log_prob
-
-        for _ in range(its):
-            optimizer.step(closure)
-
-        if context is not None:
-            return (torchutils.split_leading_dim(initial_sample.data, shape=[-1, num_samples]),
-                    torchutils.split_leading_dim(self.log_prob(initial_sample.data, context), shape=[-1, num_samples]))
-        else:
-            return initial_sample.data, self.log_prob(initial_sample.data, context)</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -452,13 +263,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, *args):
-    raise RuntimeError(&#34;Forward method cannot be called for a Distribution object.&#34;)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.log_prob"><code class="name flex">
 <span>def <span class="ident">log_prob</span></span>(<span>self, inputs, context=None)</span>
@@ -475,45 +279,12 @@ number or rows as the inputs. If None, the context is ignored.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A Tensor of shape [input_size], the log probability of the inputs given the context.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def log_prob(self, inputs, context=None):
-    &#34;&#34;&#34;Calculate log probability under the distribution.
-
-    Args:
-        inputs: Tensor, input variables.
-        context: Tensor or None, conditioning variables. If a Tensor, it must have the same
-            number or rows as the inputs. If None, the context is ignored.
-
-    Returns:
-        A Tensor of shape [input_size], the log probability of the inputs given the context.
-    &#34;&#34;&#34;
-    inputs = torch.as_tensor(inputs)
-    if context is not None:
-        context = torch.as_tensor(context)
-        if inputs.shape[0] != context.shape[0]:
-            raise ValueError(
-                &#34;Number of input items must be equal to number of context items.&#34;
-            )
-    return self._log_prob(inputs, context)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.mean"><code class="name flex">
 <span>def <span class="ident">mean</span></span>(<span>self, context=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def mean(self, context=None):
-    if context is not None:
-        context = torch.as_tensor(context)
-    return self._mean(context)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.sample"><code class="name flex">
 <span>def <span class="ident">sample</span></span>(<span>self, num_samples, context=None, batch_size=None)</span>
@@ -538,48 +309,6 @@ in one batch.</dd>
 <p>A Tensor containing the samples, with shape [num_samples, &hellip;] if context is None, or
 [context_size, num_samples, &hellip;] if context is given, where &hellip; represents a feature
 vector of arbitrary shape.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample(self, num_samples, context=None, batch_size=None):
-    &#34;&#34;&#34;Generates samples from the distribution. Samples can be generated in batches.
-
-    Args:
-        num_samples: int, number of samples to generate.
-        context: Tensor or None, conditioning variables. If None, the context is ignored. 
-                 Should have shape [context_size, ...], where ... represents a (context) feature 
-                 vector of arbitrary shape. This will generate num_samples for each context item 
-                 provided. The overall shape of the samples will then be 
-                 [context_size, num_samples, ...].
-        batch_size: int or None, number of samples per batch. If None, all samples are generated
-            in one batch.
-
-    Returns:
-        A Tensor containing the samples, with shape [num_samples, ...] if context is None, or
-        [context_size, num_samples, ...] if context is given, where ... represents a feature
-        vector of arbitrary shape.
-    &#34;&#34;&#34;
-    if not check.is_positive_int(num_samples):
-        raise TypeError(&#34;Number of samples must be a positive integer.&#34;)
-
-    if context is not None:
-        context = torch.as_tensor(context)
-
-    if batch_size is None:
-        return self._sample(num_samples, context)
-
-    else:
-        if not check.is_positive_int(batch_size):
-            raise TypeError(&#34;Batch size must be a positive integer.&#34;)
-
-        num_batches = num_samples // batch_size
-        num_leftover = num_samples % batch_size
-        samples = [self._sample(batch_size, context) for _ in range(num_batches)]
-        if num_leftover &gt; 0:
-            samples.append(self._sample(num_leftover, context))
-        return torch.cat(samples, dim=0)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.sample_and_log_prob"><code class="name flex">
 <span>def <span class="ident">sample_and_log_prob</span></span>(<span>self, num_samples, context=None)</span>
@@ -605,46 +334,6 @@ feature vector of arbitrary shape.
 * A Tensor containing the log probabilities of the samples, with shape
 [num_samples, features if context is None, or [context_size, num_samples, &hellip;] if
 context is given.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample_and_log_prob(self, num_samples, context=None):
-    &#34;&#34;&#34;Generates samples from the distribution together with their log probability.
-
-    Args:
-        num_samples: int, number of samples to generate.
-        context: Tensor or None, conditioning variables. If None, the context is ignored. 
-                 Should have shape [context_size, ...], where ... represents a (context) feature 
-                 vector of arbitrary shape. This will generate num_samples for each context item 
-                 provided. The overall shape of the samples will then be 
-                 [context_size, num_samples, ...].
-    Returns:
-        A tuple of:
-            * A Tensor containing the samples, with shape [num_samples, ...] if context is None,
-              or [context_size, num_samples, ...] if context is given, where ... represents a 
-              feature vector of arbitrary shape.
-            * A Tensor containing the log probabilities of the samples, with shape
-              [num_samples, features if context is None, or [context_size, num_samples, ...] if
-              context is given.
-    &#34;&#34;&#34;
-    samples = self.sample(num_samples, context=context)
-
-    if context is not None:
-        # Merge the context dimension with sample dimension in order to call log_prob.
-        samples = torchutils.merge_leading_dims(samples, num_dims=2)
-        context = torchutils.repeat_rows(context, num_reps=num_samples)
-        assert samples.shape[0] == context.shape[0]
-
-    log_prob = self.log_prob(samples, context=context)
-
-    if context is not None:
-        # Split the context dimension from sample dimension.
-        samples = torchutils.split_leading_dim(samples, shape=[-1, num_samples])
-        log_prob = torchutils.split_leading_dim(log_prob, shape=[-1, num_samples])
-
-    return samples, log_prob</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.sample_maxima"><code class="name flex">
 <span>def <span class="ident">sample_maxima</span></span>(<span>self, num_samples, context=None, its=1, opt='LBFGS', *args)</span>
@@ -668,47 +357,6 @@ with the data.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p>A <code>Tensor</code> of shape [batch_size, &hellip;] representing samples xs, the associated log_prob.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample_maxima(self, num_samples, context=None, its=1, opt=&#34;LBFGS&#34;, *args):
-    &#34;&#34;&#34;Takes a number of samples and maximizes their log prob.
-    this can be used to approximately sample the maxima of a multimodal distribution.
-
-    Args:
-        num_samples: The number of samples per context.
-        context: A `Tensor` of shape [batch_size, ...] or None, optional context associated
-            with the data.
-        its: The number of optimization steps
-        opt: The optimizer to use in the torch.optim package in str format.
-        args: The arguments for the optimizer
-
-    Returns:
-        A `Tensor` of shape [batch_size, ...] representing samples xs, the associated log_prob.
-    &#34;&#34;&#34;
-    initial_sample = self._sample(num_samples, context)
-    if context is not None:
-        initial_sample = torchutils.merge_leading_dims(initial_sample, num_dims=2)
-        context = torchutils.repeat_rows(context, num_reps=num_samples)
-    initial_sample = torch.nn.parameter.Parameter(initial_sample, requires_grad=True)
-    optimizer = getattr(optim, opt)([initial_sample], *args)
-
-    def closure():
-        optimizer.zero_grad()
-        neg_log_prob = -self.log_prob(initial_sample, context).mean()
-        neg_log_prob.backward()
-        return neg_log_prob
-
-    for _ in range(its):
-        optimizer.step(closure)
-
-    if context is not None:
-        return (torchutils.split_leading_dim(initial_sample.data, shape=[-1, num_samples]),
-                torchutils.split_leading_dim(self.log_prob(initial_sample.data, context), shape=[-1, num_samples]))
-    else:
-        return initial_sample.data, self.log_prob(initial_sample.data, context)</code></pre>
-</details>
 </dd>
 <dt id="flowcon.distributions.base.Distribution.sample_maximum"><code class="name flex">
 <span>def <span class="ident">sample_maximum</span></span>(<span>self, num_samples, context=None, its=1, opt='LBFGS', *args)</span>
@@ -719,32 +367,6 @@ with the data.</dd>
 returns max_x, max_logprob
 The shapes are [context_size, 1, dim] and [context_size, 1] if context is not None
 else [dim] and []</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample_maximum(self, num_samples, context=None, its=1, opt=&#34;LBFGS&#34;, *args):
-    &#34;&#34;&#34;calls sample_maps and returns the maximizing x and associated log prob for each context.
-
-    In general it is recommended to use simulated annealing to recover the global maximum.
-    returns max_x, max_logprob
-    The shapes are [context_size, 1, dim] and [context_size, 1] if context is not None
-            else [dim] and []
-    &#34;&#34;&#34;
-    xs, log_ps = self.sample_maxima(num_samples, context, its, opt, *args)
-    if context is not None:
-        index = torch.argmax(log_ps, dim=-1, keepdim=True)
-        # the following unsqueezing over multiple dimensions is to accommodate the variable shape of the space of x
-        n_extra_dims = (xs.ndim - 2)
-        index_unsqueezed = index.view(tuple(index.shape) + (1,) * n_extra_dims)
-        max_x = torch.take_along_dim(xs, index_unsqueezed, dim=1)
-
-        max_logprob = torch.take_along_dim(log_ps, index, dim=1)
-    else:
-        index = torch.argmax(log_ps)
-        max_x, max_logprob = xs[index], log_ps[index]
-    return max_x, max_logprob</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -773,7 +395,6 @@ else [dim] and []</p></div>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -809,7 +430,7 @@ else [dim] and []</p></div>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.0</a>.</p>
 </footer>
 </body>
 </html>

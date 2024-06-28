@@ -2,18 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.0">
 <title>flowcon.nn.nde.made API documentation</title>
-<meta name="description" content="Implementation of MADE." />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="Implementation of MADE.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
 </head>
 <body>
 <main>
@@ -23,437 +26,6 @@
 </header>
 <section id="section-intro">
 <p>Implementation of MADE.</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">&#34;&#34;&#34;Implementation of MADE.&#34;&#34;&#34;
-# TODO: should be moved to module nets.
-
-import numpy as np
-import torch
-from matplotlib import pyplot as plt
-from torch import distributions, nn
-from torch.nn import functional as F
-from torch.nn import init
-
-from flowcon.utils import torchutils
-
-
-def _get_input_degrees(in_features):
-    &#34;&#34;&#34;Returns the degrees an input to MADE should have.&#34;&#34;&#34;
-    return torch.arange(1, in_features + 1)
-
-
-class MaskedLinear(nn.Linear):
-    &#34;&#34;&#34;A linear module with a masked weight matrix.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        in_degrees,
-        out_features,
-        autoregressive_features,
-        random_mask,
-        is_output,
-        bias=True,
-    ):
-        super().__init__(
-            in_features=len(in_degrees), out_features=out_features, bias=bias
-        )
-        mask, degrees = self._get_mask_and_degrees(
-            in_degrees=in_degrees,
-            out_features=out_features,
-            autoregressive_features=autoregressive_features,
-            random_mask=random_mask,
-            is_output=is_output,
-        )
-        self.register_buffer(&#34;mask&#34;, mask)
-        self.register_buffer(&#34;degrees&#34;, degrees)
-
-    @classmethod
-    def _get_mask_and_degrees(
-        cls, in_degrees, out_features, autoregressive_features, random_mask, is_output
-    ):
-        if is_output:
-            out_degrees = torchutils.tile(
-                _get_input_degrees(autoregressive_features),
-                out_features // autoregressive_features,
-            )
-            mask = (out_degrees[..., None] &gt; in_degrees).float()
-
-        else:
-            if random_mask:
-                min_in_degree = torch.min(in_degrees).item()
-                min_in_degree = min(min_in_degree, autoregressive_features - 1)
-                out_degrees = torch.randint(
-                    low=min_in_degree,
-                    high=autoregressive_features,
-                    size=[out_features],
-                    dtype=torch.long,
-                )
-            else:
-                max_ = max(1, autoregressive_features - 1)
-                min_ = min(1, autoregressive_features - 1)
-                out_degrees = torch.arange(out_features) % max_ + min_
-            mask = (out_degrees[..., None] &gt;= in_degrees).float()
-
-        return mask, out_degrees
-
-    def forward(self, x):
-        return F.linear(x, self.weight * self.mask, self.bias)
-
-
-class MaskedFeedforwardBlock(nn.Module):
-    &#34;&#34;&#34;A feedforward block based on a masked linear module.
-
-    NOTE: In this implementation, the number of output features is taken to be equal to
-    the number of input features.
-    &#34;&#34;&#34;
-
-    def __init__(
-        self,
-        in_degrees,
-        autoregressive_features,
-        context_features=None,
-        random_mask=False,
-        activation=F.relu,
-        dropout_probability=0.0,
-        use_batch_norm=False,
-        zero_initialization=False,
-    ):
-        super().__init__()
-        features = len(in_degrees)
-
-        # Batch norm.
-        if use_batch_norm:
-            self.batch_norm = nn.BatchNorm1d(features, eps=1e-3)
-        else:
-            self.batch_norm = None
-
-        # Masked linear.
-        self.linear = MaskedLinear(
-            in_degrees=in_degrees,
-            out_features=features,
-            autoregressive_features=autoregressive_features,
-            random_mask=random_mask,
-            is_output=False,
-        )
-        self.degrees = self.linear.degrees
-
-        # Activation and dropout.
-        self.activation = activation
-        self.dropout = nn.Dropout(p=dropout_probability)
-
-    def forward(self, inputs, context=None):
-        if self.batch_norm:
-            outputs = self.batch_norm(inputs)
-        else:
-            outputs = inputs
-        outputs = self.linear(outputs)
-        outputs = self.activation(outputs)
-        outputs = self.dropout(outputs)
-        return outputs
-
-
-class MaskedResidualBlock(nn.Module):
-    &#34;&#34;&#34;A residual block containing masked linear modules.&#34;&#34;&#34;
-
-    def __init__(
-        self,
-        in_degrees,
-        autoregressive_features,
-        context_features=None,
-        random_mask=False,
-        activation=F.relu,
-        dropout_probability=0.0,
-        use_batch_norm=False,
-        zero_initialization=True,
-    ):
-        if random_mask:
-            raise ValueError(&#34;Masked residual block can&#39;t be used with random masks.&#34;)
-        super().__init__()
-        features = len(in_degrees)
-
-        if context_features is not None:
-            self.context_layer = nn.Linear(context_features, features)
-
-        # Batch norm.
-        self.use_batch_norm = use_batch_norm
-        if use_batch_norm:
-            self.batch_norm_layers = nn.ModuleList(
-                [nn.BatchNorm1d(features, eps=1e-3) for _ in range(2)]
-            )
-
-        # Masked linear.
-        linear_0 = MaskedLinear(
-            in_degrees=in_degrees,
-            out_features=features,
-            autoregressive_features=autoregressive_features,
-            random_mask=False,
-            is_output=False,
-        )
-        linear_1 = MaskedLinear(
-            in_degrees=linear_0.degrees,
-            out_features=features,
-            autoregressive_features=autoregressive_features,
-            random_mask=False,
-            is_output=False,
-        )
-        self.linear_layers = nn.ModuleList([linear_0, linear_1])
-        self.degrees = linear_1.degrees
-        if torch.all(self.degrees &gt;= in_degrees).item() != 1:
-            raise RuntimeError(
-                &#34;In a masked residual block, the output degrees can&#39;t be&#34;
-                &#34; less than the corresponding input degrees.&#34;
-            )
-
-        # Activation and dropout
-        self.activation = activation
-        self.dropout = nn.Dropout(p=dropout_probability)
-
-        # Initialization.
-        if zero_initialization:
-            init.uniform_(self.linear_layers[-1].weight, a=-1e-3, b=1e-3)
-            init.uniform_(self.linear_layers[-1].bias, a=-1e-3, b=1e-3)
-
-    def forward(self, inputs, context=None):
-        temps = inputs
-        if self.use_batch_norm:
-            temps = self.batch_norm_layers[0](temps)
-        temps = self.activation(temps)
-        temps = self.linear_layers[0](temps)
-        if context is not None:
-            temps += self.context_layer(context)
-        if self.use_batch_norm:
-            temps = self.batch_norm_layers[1](temps)
-        temps = self.activation(temps)
-        temps = self.dropout(temps)
-        temps = self.linear_layers[1](temps)
-        return inputs + temps
-
-
-class MADE(nn.Module):
-    &#34;&#34;&#34;Implementation of MADE.
-
-    It can use either feedforward blocks or residual blocks (default is residual).
-    Optionally, it can use batch norm or dropout within blocks (default is no).
-    &#34;&#34;&#34;
-
-    def __init__(
-        self,
-        features,
-        hidden_features,
-        context_features=None,
-        num_blocks=2,
-        output_multiplier=1,
-        use_residual_blocks=True,
-        random_mask=False,
-        activation=F.relu,
-        dropout_probability=0.0,
-        use_batch_norm=False,
-    ):
-        if use_residual_blocks and random_mask:
-            raise ValueError(&#34;Residual blocks can&#39;t be used with random masks.&#34;)
-        super().__init__()
-
-        # Initial layer.
-        self.initial_layer = MaskedLinear(
-            in_degrees=_get_input_degrees(features),
-            out_features=hidden_features,
-            autoregressive_features=features,
-            random_mask=random_mask,
-            is_output=False,
-        )
-
-        if context_features is not None:
-            self.context_layer = nn.Linear(context_features, hidden_features)
-
-        # Residual blocks.
-        blocks = []
-        if use_residual_blocks:
-            block_constructor = MaskedResidualBlock
-        else:
-            block_constructor = MaskedFeedforwardBlock
-        prev_out_degrees = self.initial_layer.degrees
-        for _ in range(num_blocks):
-            blocks.append(
-                block_constructor(
-                    in_degrees=prev_out_degrees,
-                    autoregressive_features=features,
-                    context_features=context_features,
-                    random_mask=random_mask,
-                    activation=activation,
-                    dropout_probability=dropout_probability,
-                    use_batch_norm=use_batch_norm,
-                    zero_initialization=True,
-                )
-            )
-            prev_out_degrees = blocks[-1].degrees
-        self.blocks = nn.ModuleList(blocks)
-
-        # Final layer.
-        self.final_layer = MaskedLinear(
-            in_degrees=prev_out_degrees,
-            out_features=features * output_multiplier,
-            autoregressive_features=features,
-            random_mask=random_mask,
-            is_output=True,
-        )
-
-    def forward(self, inputs, context=None):
-        temps = self.initial_layer(inputs)
-        if context is not None:
-            temps += self.context_layer(context)
-        for block in self.blocks:
-            temps = block(temps, context)
-        outputs = self.final_layer(temps)
-        return outputs
-
-
-class MixtureOfGaussiansMADE(MADE):
-    def __init__(
-        self,
-        features,
-        hidden_features,
-        context_features=None,
-        num_blocks=2,
-        num_mixture_components=5,
-        use_residual_blocks=True,
-        random_mask=False,
-        activation=F.relu,
-        dropout_probability=0.0,
-        use_batch_norm=False,
-        epsilon=1e-2,
-        custom_initialization=True,
-    ):
-
-        if use_residual_blocks and random_mask:
-            raise ValueError(&#34;Residual blocks can&#39;t be used with random masks.&#34;)
-
-        super().__init__(
-            features,
-            hidden_features,
-            context_features=context_features,
-            num_blocks=num_blocks,
-            output_multiplier=3 * num_mixture_components,
-            use_residual_blocks=use_residual_blocks,
-            random_mask=random_mask,
-            activation=activation,
-            dropout_probability=dropout_probability,
-            use_batch_norm=use_batch_norm,
-        )
-
-        self.num_mixture_components = num_mixture_components
-        self.features = features
-        self.hidden_features = hidden_features
-        self.epsilon = epsilon
-
-        if custom_initialization:
-            self._initialize()
-
-    def forward(self, inputs, context=None):
-        return super().forward(inputs, context=context)
-
-    def log_prob(self, inputs, context=None):
-        outputs = self.forward(inputs, context=context)
-        outputs = outputs.reshape(*inputs.shape, self.num_mixture_components, 3)
-
-        logits, means, unconstrained_stds = (
-            outputs[..., 0],
-            outputs[..., 1],
-            outputs[..., 2],
-        )
-        log_mixture_coefficients = torch.log_softmax(logits, dim=-1)
-        stds = F.softplus(unconstrained_stds) + self.epsilon
-
-        log_prob = torch.sum(
-            torch.logsumexp(
-                log_mixture_coefficients
-                - 0.5
-                * (
-                    np.log(2 * np.pi)
-                    + 2 * torch.log(stds)
-                    + ((inputs[..., None] - means) / stds) ** 2
-                ),
-                dim=-1,
-            ),
-            dim=-1,
-        )
-        return log_prob
-
-    def sample(self, num_samples, context=None):
-
-        if context is not None:
-            context = torchutils.repeat_rows(context, num_samples)
-
-        with torch.no_grad():
-
-            samples = torch.zeros(context.shape[0], self.features)
-
-            for feature in range(self.features):
-                outputs = self.forward(samples, context)
-                outputs = outputs.reshape(
-                    *samples.shape, self.num_mixture_components, 3
-                )
-
-                logits, means, unconstrained_stds = (
-                    outputs[:, feature, :, 0],
-                    outputs[:, feature, :, 1],
-                    outputs[:, feature, :, 2],
-                )
-                logits = torch.log_softmax(logits, dim=-1)
-                stds = F.softplus(unconstrained_stds) + self.epsilon
-
-                component_distribution = distributions.Categorical(logits=logits)
-                components = component_distribution.sample((1,)).reshape(-1, 1)
-                means, stds = (
-                    means.gather(1, components).reshape(-1),
-                    stds.gather(1, components).reshape(-1),
-                )
-                samples[:, feature] = (
-                    means + torch.randn(context.shape[0]) * stds
-                ).detach()
-
-        return samples.reshape(-1, num_samples, self.features)
-
-    def _initialize(self):
-        # Initialize mixture coefficient logits to near zero so that mixture coefficients
-        # are approximately uniform.
-        self.final_layer.weight.data[::3, :] = self.epsilon * torch.randn(
-            self.features * self.num_mixture_components, self.hidden_features
-        )
-        self.final_layer.bias.data[::3] = self.epsilon * torch.randn(
-            self.features * self.num_mixture_components
-        )
-
-        # self.final_layer.weight.data[1::3, :] = self.epsilon * torch.randn(
-        #     self.features * self.num_mixture_components, self.hidden_features
-        # )
-        # low, high = -7, 7
-        # self.final_layer.bias.data[1::3] = (high - low) * torch.rand(
-        #     self.features * self.num_mixture_components
-        # ) + low
-
-        # Initialize unconstrained standard deviations to the inverse of the softplus
-        # at 1 so that they&#39;re near 1 at initialization.
-        self.final_layer.weight.data[2::3] = self.epsilon * torch.randn(
-            self.features * self.num_mixture_components, self.hidden_features
-        )
-        self.final_layer.bias.data[2::3] = torch.log(
-            torch.exp(torch.Tensor([1 - self.epsilon])) - 1
-        ) * torch.ones(
-            self.features * self.num_mixture_components
-        ) + self.epsilon * torch.randn(
-            self.features * self.num_mixture_components
-        )
-        # self.final_layer.bias.data[2::3] = torch.log(
-        #     torch.Tensor([1 - self.epsilon])
-        # ) * torch.ones(
-        #     self.features * self.num_mixture_components
-        # ) + self.epsilon * torch.randn(
-        #     self.features * self.num_mixture_components
-        # )</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -592,19 +164,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    temps = self.initial_layer(inputs)
-    if context is not None:
-        temps += self.context_layer(context)
-    for block in self.blocks:
-        temps = block(temps, context)
-    outputs = self.final_layer(temps)
-    return outputs</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -706,20 +265,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    if self.batch_norm:
-        outputs = self.batch_norm(inputs)
-    else:
-        outputs = inputs
-    outputs = self.linear(outputs)
-    outputs = self.activation(outputs)
-    outputs = self.dropout(outputs)
-    return outputs</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -826,13 +371,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, x):
-    return F.linear(x, self.weight * self.mask, self.bias)</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -957,25 +495,6 @@ this function, one should call the :class:<code>Module</code> instance afterward
 instead of this since the former takes care of running the
 registered hooks while the latter silently ignores them.</p>
 </div></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def forward(self, inputs, context=None):
-    temps = inputs
-    if self.use_batch_norm:
-        temps = self.batch_norm_layers[0](temps)
-    temps = self.activation(temps)
-    temps = self.linear_layers[0](temps)
-    if context is not None:
-        temps += self.context_layer(context)
-    if self.use_batch_norm:
-        temps = self.batch_norm_layers[1](temps)
-    temps = self.activation(temps)
-    temps = self.dropout(temps)
-    temps = self.linear_layers[1](temps)
-    return inputs + temps</code></pre>
-</details>
 </dd>
 </dl>
 </dd>
@@ -1163,82 +682,12 @@ Optionally, it can use batch norm or dropout within blocks (default is no).</p>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def log_prob(self, inputs, context=None):
-    outputs = self.forward(inputs, context=context)
-    outputs = outputs.reshape(*inputs.shape, self.num_mixture_components, 3)
-
-    logits, means, unconstrained_stds = (
-        outputs[..., 0],
-        outputs[..., 1],
-        outputs[..., 2],
-    )
-    log_mixture_coefficients = torch.log_softmax(logits, dim=-1)
-    stds = F.softplus(unconstrained_stds) + self.epsilon
-
-    log_prob = torch.sum(
-        torch.logsumexp(
-            log_mixture_coefficients
-            - 0.5
-            * (
-                np.log(2 * np.pi)
-                + 2 * torch.log(stds)
-                + ((inputs[..., None] - means) / stds) ** 2
-            ),
-            dim=-1,
-        ),
-        dim=-1,
-    )
-    return log_prob</code></pre>
-</details>
 </dd>
 <dt id="flowcon.nn.nde.made.MixtureOfGaussiansMADE.sample"><code class="name flex">
 <span>def <span class="ident">sample</span></span>(<span>self, num_samples, context=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def sample(self, num_samples, context=None):
-
-    if context is not None:
-        context = torchutils.repeat_rows(context, num_samples)
-
-    with torch.no_grad():
-
-        samples = torch.zeros(context.shape[0], self.features)
-
-        for feature in range(self.features):
-            outputs = self.forward(samples, context)
-            outputs = outputs.reshape(
-                *samples.shape, self.num_mixture_components, 3
-            )
-
-            logits, means, unconstrained_stds = (
-                outputs[:, feature, :, 0],
-                outputs[:, feature, :, 1],
-                outputs[:, feature, :, 2],
-            )
-            logits = torch.log_softmax(logits, dim=-1)
-            stds = F.softplus(unconstrained_stds) + self.epsilon
-
-            component_distribution = distributions.Categorical(logits=logits)
-            components = component_distribution.sample((1,)).reshape(-1, 1)
-            means, stds = (
-                means.gather(1, components).reshape(-1),
-                stds.gather(1, components).reshape(-1),
-            )
-            samples[:, feature] = (
-                means + torch.randn(context.shape[0]) * stds
-            ).detach()
-
-    return samples.reshape(-1, num_samples, self.features)</code></pre>
-</details>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -1254,7 +703,6 @@ Optionally, it can use batch norm or dropout within blocks (default is no).</p>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -1318,7 +766,7 @@ Optionally, it can use batch norm or dropout within blocks (default is no).</p>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.0</a>.</p>
 </footer>
 </body>
 </html>
