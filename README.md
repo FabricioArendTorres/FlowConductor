@@ -1,8 +1,8 @@
 # FlowConductor: (Conditional) Normalizing Flows and </br> bijective Layers for Pytorch
 
-<a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
-<a href="https://codecov.io/gh/FabricioArendTorres/enflows" >
-<img src="https://codecov.io/gh/FabricioArendTorres/enflows/graph/badge.svg?token=UPQ2ZNQ6G4"/>
+<a href="https://github.com/FabricioArendTorres/enflows/actions/workflows/build_lint_test.yml"><img src="https://github.com/FabricioArendTorres/FlowConductor/actions/workflows/build_lint_test.yml/badge.svg" alt="Build status"></a>
+<a href="https://codecov.io/gh/FabricioArendTorres/FlowConductor" >
+<img src="https://codecov.io/gh/FabricioArendTorres/FlowConductor/graph/badge.svg?token=UPQ2ZNQ6G4"/>
 </a>
 <a href="https://fabricioarendtorres.github.io/FlowConductor/"><img src="https://github.com/FabricioArendTorres/FlowConductor/actions/workflows/build_and_deploy_documentation.yml/badge.svg" alt="Documentation"></a>
 
