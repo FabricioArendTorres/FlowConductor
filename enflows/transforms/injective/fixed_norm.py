@@ -12,11 +12,57 @@ from gpytorch.utils import linear_cg
 
 from enflows.transforms import Transform, ConditionalTransform, Sigmoid, ScalarScale, CompositeTransform, ScalarShift
 from enflows.transforms.injective.utils import sph_to_cart_jacobian_sympy, spherical_to_cartesian_torch, cartesian_to_spherical_torch, logabsdet_sph_to_car
-from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN, jacobian_sph_to_car, solve_triangular_system
+from enflows.transforms.injective.utils import check_tensor, sherman_morrison_inverse, SimpleNN, SimpleNN_uncnstr, jacobian_sph_to_car, solve_triangular_system
 
 import time
 from datetime import timedelta
 from torch.utils.benchmark import Timer
+
+
+class ParamHyperFlow(Transform):
+    def __init__(self):
+        super().__init__()
+
+    def f_given_x(self, x, context=None):
+        raise NotImplementedError()
+
+    def gradient_f_given_x(self, x, context=None):
+        raise NotImplementedError()
+
+    def inverse(self, x, context=None):
+        f = self.f_given_x(x, context=context)
+        x_f = torch.cat([x, f], dim=1)
+
+        grad_f = self.gradient_f_given_x(x, context=context)
+        logabsdet = torch.sqrt((1 + grad_f.square().sum(-1)))
+
+        return x_f, logabsdet
+
+    def forward(self, x_f, context=None):
+        grad_f = self.gradient_f_given_x(x_f[..., :-1], context=context)
+        logabsdet = torch.sqrt((1 + grad_f.square().sum(-1)))
+
+        return x_f[..., :-1], -logabsdet
+
+
+class LearnableParamHyperFlow(ParamHyperFlow):
+    def __init__(self, n):
+        super().__init__()
+
+        self.network = SimpleNN_uncnstr(n, hidden_size=128, output_size=1)
+
+    def f_given_x(self, x, context=None):
+        f = self.network(x)
+
+        return f
+
+    def gradient_f_given_x(self, x, context=None):
+        x.requires_grad_(True)
+        f = self.f_given_x(x, context=context)
+        grad_f_x = torch.autograd.grad(f,x, grad_outputs=torch.ones_like(f))[0]
+
+        return grad_f_x
+
 
 class ManifoldFlow(Transform):
     def __init__(self, logabs_jacobian):
@@ -175,7 +221,7 @@ class LearnableManifoldFlow(ManifoldFlow):
     def __init__(self, n, logabs_jacobian, max_radius=2.):
         super().__init__(logabs_jacobian=logabs_jacobian)
 
-        self.network = SimpleNN(n, hidden_size=500, output_size=1, max_radius=max_radius)
+        self.network = SimpleNN(n, hidden_size=64, output_size=1, max_radius=max_radius)
 
     def r_given_theta(self, theta, context=None):
         r = self.network(theta)
@@ -183,6 +229,7 @@ class LearnableManifoldFlow(ManifoldFlow):
         return r
 
     def gradient_r_given_theta(self, theta, context=None):
+        theta.requires_grad_(True)
         r = self.r_given_theta(theta, context=context)
         grad_r_theta = torch.autograd.grad(r,theta, grad_outputs=torch.ones_like(r))[0]
         grad_r_theta_aug = torch.cat([- grad_r_theta, torch.ones_like(grad_r_theta[:, :1])], dim=1)

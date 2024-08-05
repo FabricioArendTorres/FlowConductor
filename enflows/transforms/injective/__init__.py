@@ -7,6 +7,7 @@ from enflows.transforms.injective.fixed_norm import (
     ClampedTheta,
     ClampedThetaPositive,
     LearnableManifoldFlow,
+    LearnableParamHyperFlow,
     LpManifoldFlow,
     CondLpManifoldFlow,
     PositiveL1ManifoldFlow,

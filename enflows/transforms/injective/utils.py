@@ -10,24 +10,52 @@ class SimpleNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, max_radius=1.):
         super(SimpleNN, self).__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
+        self.relu = nn.Tanh()
         self.fc12 = nn.Linear(hidden_size, hidden_size)
-        self.relu = nn.ReLU()
+        self.relu = nn.Tanh()
         self.fc2 = nn.Linear(hidden_size, output_size)
         self.sigmoid = nn.Sigmoid()
         self.max_radius = max_radius
 
-        self.mask = torch.ones(input_size, device='cuda')
-        self.mask[-1] = 0.
+        # self.mask = torch.ones(input_size, device='cuda')
+        # self.mask[-1] = 0.
 
     def forward(self, x):
-        x = self.mask * torch.cos(2*x) + (1 - self.mask) * torch.cos(4*x)
+        # x = self.mask * torch.cos(2*x) + (1 - self.mask) * torch.cos(4*x)
         x = self.fc1(x)
         x = self.relu(x)
         x = self.fc12(x)
         x = self.relu(x)
         x = self.fc2(x)
         x = self.sigmoid(x) * self.max_radius
+        return x
+
+class SimpleNN_uncnstr(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, max_radius=1.):
+        super(SimpleNN_uncnstr, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.act1 = nn.Tanh()
+        self.fc12 = nn.Linear(hidden_size, hidden_size)
+        self.act2 = nn.Tanh()
+        self.fc23 = nn.Linear(hidden_size, hidden_size)
+        self.act3 = nn.Tanh()
+        self.fc3 = nn.Linear(hidden_size, output_size)
+        self.act4 = nn.Tanh()
+
+        # self.mask = torch.ones(input_size, device='cuda')
+        # self.mask[-1] = 0.
+
+    def forward(self, x):
+        # x = torch.cos(8 * x) + torch.sin(4 * x) + torch.cos(2 * x) + torch.cos(0.5 * x) + torch.cos(0.2 * x)
+        x = self.fc1(x)
+        x = self.act1(x)
+        x = self.fc12(x)
+        x = self.act2(x)
+        x = self.fc23(x)
+        x = self.act3(x)
+        x = self.fc3(x)
+        # x = self.act4(x) * torch.pi * 0.5
+        # x = torch.cos(x)
         return x
 
 

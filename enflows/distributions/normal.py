@@ -175,10 +175,18 @@ class DiagonalNormal(Distribution):
         return log_prob
 
     def _sample(self, num_samples, context):
-        raise NotImplementedError()
+        # Compute parameters.
+        means = self.mean_
+        log_stds = self.log_std_
+        stds = torch.exp(log_stds)
+        means = torchutils.repeat_rows(means, num_samples)
+        stds = torchutils.repeat_rows(stds, num_samples)
 
-    def _mean(self, context):
-        return self.mean
+        # Generate samples.
+        noise = torch.randn(num_samples, *self._shape, device=means.device)
+        samples = means + stds * noise
+        return torchutils.split_leading_dim(samples, [num_samples])
+
 
 import torch.distributions as D
 
