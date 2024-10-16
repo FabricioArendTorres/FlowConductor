@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dockerfile: [pytorch1.13.1, pytorch2.1.2, pytorch2.2.2, pytorchlatest]
+        dockerfile: [pytorch2.1.2, pytorch2.2.2, pytorchlatest]
       max-parallel: 4
 
     steps:
