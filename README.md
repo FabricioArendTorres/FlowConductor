@@ -5,6 +5,7 @@
 <img src="https://codecov.io/gh/FabricioArendTorres/FlowConductor/graph/badge.svg?token=UPQ2ZNQ6G4"/>
 </a>
 <a href="https://fabricioarendtorres.github.io/FlowConductor/"><img src="https://github.com/FabricioArendTorres/FlowConductor/actions/workflows/build_and_deploy_documentation.yml/badge.svg" alt="Documentation"></a>
+[![DOI](https://zenodo.org/badge/662701492.svg)](https://doi.org/10.5281/zenodo.13952361)
 
 <a href="https://fabricioarendtorres.github.io/FlowConductor/"><h3>Documentation</h3> </a>
 -----
