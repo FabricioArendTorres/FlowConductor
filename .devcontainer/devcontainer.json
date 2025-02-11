@@ -1,0 +1,36 @@
+{
+    "name": "Docker Development",
+    "image": "pytorch/pytorch:latest",
+    "postCreateCommand": "apt-get update && apt-get install -y openssh-client && pip install --no-cache -e .[all]",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-vscode-remote.vscode-remote-extensionpack",
+                "charliermarsh.ruff",
+                "ms-python.vscode-pylance",
+                "njpwerner.autodocstring"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "editor.formatOnSave": true,
+                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "autoDocstring.format": "numpy"
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    "mounts": [
+        "source=${localWorkspaceFolder},target=/flowc,type=bind",
+        // mount ssh and gitconfig to within the container.
+        // WINDOWS PATHS 
+        "source=${env:USERPROFILE}\\.ssh,target=/root/.ssh,type=bind,consistency=cached",
+        "source=${env:USERPROFILE}\\.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached"
+        // LINUX PATHS
+        // "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
+        // "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
+    ],
+    "workspaceFolder": "/flowc",
+}
