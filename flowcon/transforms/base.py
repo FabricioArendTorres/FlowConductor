@@ -1,5 +1,7 @@
 """Basic definitions for the transforms module."""
 
+from typing import Callable, Iterable, Tuple
+
 import numpy as np
 import torch
 from torch import nn
@@ -9,6 +11,7 @@ import flowcon.utils.typechecks as check
 
 class InverseNotAvailable(Exception):
     """Exception to be thrown when a transform does not have an inverse."""
+
     pass
 
 
@@ -21,10 +24,10 @@ class InputOutsideDomain(Exception):
 class Transform(nn.Module):
     """Base class for all transform objects."""
 
-    def forward(self, inputs, context=None):
+    def forward(self, inputs: torch.Tensor, context: torch.Tensor = None):
         raise NotImplementedError()
 
-    def inverse(self, inputs, context=None):
+    def inverse(self, inputs: torch.Tensor, context: torch.Tensor = None):
         raise InverseNotAvailable()
 
 
@@ -41,7 +44,13 @@ class CompositeTransform(Transform):
         self._transforms = nn.ModuleList(transforms)
 
     @staticmethod
-    def _cascade(inputs, funcs, context):
+    def _cascade(
+        inputs: torch.Tensor,
+        funcs: Iterable[
+            Callable[[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]
+        ],
+        context: torch.Tensor,
+    ):
         batch_size = inputs.shape[0]
         outputs = inputs
         total_logabsdet = inputs.new_zeros(batch_size)
@@ -102,18 +111,14 @@ class MultiscaleCompositeTransform(Transform):
 
         if len(self._transforms) == self._num_transforms:
             raise RuntimeError(
-                "Adding more than {} transforms is not allowed.".format(
-                    self._num_transforms
-                )
+                f"Adding more than {self._num_transforms} transforms is not allowed."
             )
 
         if (self._split_dim - 1) >= len(transform_output_shape):
             raise ValueError("No split_dim in output shape")
 
         if transform_output_shape[self._split_dim - 1] < 2:
-            raise ValueError(
-                "Size of dimension {} must be at least 2.".format(self._split_dim)
-            )
+            raise ValueError(f"Size of dimension {self._split_dim} must be at least 2.")
 
         self._transforms.append(transform)
 
@@ -140,8 +145,7 @@ class MultiscaleCompositeTransform(Transform):
             raise ValueError("No split_dim in inputs.")
         if self._num_transforms != len(self._transforms):
             raise RuntimeError(
-                "Expecting exactly {} transform(s) "
-                "to be added.".format(self._num_transforms)
+                f"Expecting exactly {self._num_transforms} transform(s) to be added."
             )
 
         batch_size = inputs.shape[0]
@@ -176,8 +180,7 @@ class MultiscaleCompositeTransform(Transform):
             raise ValueError("Expecting NxD inputs")
         if self._num_transforms != len(self._transforms):
             raise RuntimeError(
-                "Expecting exactly {} transform(s) "
-                "to be added.".format(self._num_transforms)
+                f"Expecting exactly {self._num_transforms} transform(s) to be added."
             )
 
         batch_size = inputs.shape[0]

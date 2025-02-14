@@ -55,7 +55,10 @@ class Uniform(BaseDistribution):
         in_bounds = torch.all(lb & ub, dim=1)
 
         log_prob = torch.full_like(
-            in_bounds, float("-inf"), dtype=torch.get_default_dtype()
+            in_bounds,
+            float("-inf"),
+            dtype=torch.get_default_dtype(),
+            device=inputs.device,
         )
         log_prob[in_bounds] = self._log_norm_const
         return log_prob

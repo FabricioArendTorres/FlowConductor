@@ -145,6 +145,24 @@ class StandardNormalTest(torchtestcase.TorchTestCase):
         assert not torch.isnan(sample_compiled).any()
         assert not torch.isinf(sample_compiled).any()
 
+    def test_device(self):
+        num_samples = 10
+        dim = 2 * 3 * 4
+        dummy_device = torch.device("meta")
+
+        dist = normal.StandardNormal(dim).to(dummy_device)
+
+        samples, log_prob_1 = dist.sample_and_log_prob(num_samples)
+        assert samples.device == dummy_device
+        assert log_prob_1.device == dummy_device
+
+        log_prob_2 = dist.log_prob(samples)
+        assert log_prob_2.device == dummy_device
+
+        with pytest.raises(RuntimeError):
+            inputs_cpu = torch.rand(5, dim)
+            dist.log_prob(inputs_cpu)
+
 
 class DiagonalNormalTestDefault(torchtestcase.TorchTestCase):
     def test_parameter_shape(self):
@@ -291,6 +309,24 @@ class DiagonalNormalTestDefault(torchtestcase.TorchTestCase):
         assert sample_eager.shape == sample_compiled.shape
         assert not torch.isnan(sample_compiled).any()
         assert not torch.isinf(sample_compiled).any()
+
+    def test_device(self):
+        num_samples = 10
+        dim = 2 * 3 * 4
+        dummy_device = torch.device("meta")
+
+        dist = normal.DiagonalNormal(dim).to(dummy_device)
+
+        samples, log_prob_1 = dist.sample_and_log_prob(num_samples)
+        assert samples.device == dummy_device
+        assert log_prob_1.device == dummy_device
+
+        log_prob_2 = dist.log_prob(samples)
+        assert log_prob_2.device == dummy_device
+
+        with pytest.raises(RuntimeError):
+            inputs_cpu = torch.rand(5, dim)
+            dist.log_prob(inputs_cpu)
 
 
 # class ConditionalDiagonalNormalTest(torchtestcase.TorchTestCase):

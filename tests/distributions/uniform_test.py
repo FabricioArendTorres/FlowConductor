@@ -46,6 +46,29 @@ def test_box_uniform_log_prob():
     assert torch.all(log_prob_outside == float("-inf"))
 
 
+def test_device():
+    dim = 2
+    dummy_device = torch.device("meta")
+    low = torch.tensor(
+        [0.0, 0.0],
+    )
+    high = torch.tensor([1.5, 1.0])
+    dist = Uniform(dim, low, high)
+    dist.to(dummy_device)
+
+    inputs_inside = torch.rand(5, 2).to(dummy_device)
+    log_prob_inside = dist.log_prob(inputs_inside)
+    assert log_prob_inside.device == dummy_device
+
+    with pytest.raises(RuntimeError):
+        inputs_inside = torch.rand(5, 2)
+        log_prob_inside = dist.log_prob(inputs_inside)
+
+    assert dist.sample(10).device == dummy_device
+    assert dist.sample_and_log_prob(2)[0].device == dummy_device
+    assert dist.sample_and_log_prob(3)[1].device == dummy_device
+
+
 @pytest.mark.expensive
 def test_compile():
     dim = 2
