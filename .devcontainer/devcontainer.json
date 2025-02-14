@@ -1,7 +1,7 @@
 {
     "name": "Docker Development",
     "image": "pytorch/pytorch:latest",
-    "postCreateCommand": "apt-get update && apt-get install -y openssh-client && pip install --no-cache -e .[all]",
+    "postCreateCommand": "apt-get update && apt-get install -y g++ && apt-get install -y openssh-client && pip install --no-cache -e .[all]",
     "customizations": {
         "vscode": {
             "extensions": [
