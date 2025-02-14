@@ -1,6 +1,6 @@
 """Basic definitions for the transforms module."""
 
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable, Optional, Tuple
 
 import numpy as np
 import torch
@@ -24,17 +24,75 @@ class InputOutsideDomain(Exception):
 class Transform(nn.Module):
     """Base class for all transform objects."""
 
-    def forward(self, inputs: torch.Tensor, context: torch.Tensor = None):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._inverted = False
+
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        A function that bijectively transforms the inputs,
+        and returns the transformed input as well as the logabsdet of the transformation.
+        The forward direction is always the efficient direction of the bijection.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input values that should be transformed.
+        context : torch.Tensor, optional
+            Context for conditioning the transforms applied to the inputs, if applicable, by default None
+        """
         raise NotImplementedError()
 
-    def inverse(self, inputs: torch.Tensor, context: torch.Tensor = None):
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        A function that bijectively transforms the inputs,
+        and returns the transformed input as well as the logabsdet of the transformation.
+        The inverse direction is always the less efficient direction of the bijection.
+        It might also be just an approximation, rather than the exact inverse.
+        Avoid differentiating through this function if possible.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input values that should be transformed.
+        context : torch.Tensor, optional
+            Context for conditioning the transforms applied to the inputs, if applicable, by default None
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor]
+            (outputs, total_logabsdet)
+
+        Raises
+        ------
+        InverseNotAvailable
+            Inverses always have to exist, but are not necessarily known.
+
+        """
         raise InverseNotAvailable()
+
+    def is_inverted(self):
+        """
+        Method to help keep track of this class was inverted or not.
+        If not, the forward direction is still the more efficient one.
+        Two Inverted should cancel each other out.
+
+        Returns
+        -------
+        bool
+            Whether this layer was inverted.
+        """
+        return self._inverted
 
 
 class CompositeTransform(Transform):
     """Composes several transforms into one, in the order they are given."""
 
-    def __init__(self, transforms):
+    def __init__(self, transforms: Iterable[Transform]):
         """Constructor.
 
         Args:
@@ -50,7 +108,7 @@ class CompositeTransform(Transform):
             Callable[[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]
         ],
         context: torch.Tensor,
-    ):
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         batch_size = inputs.shape[0]
         outputs = inputs
         total_logabsdet = inputs.new_zeros(batch_size)
@@ -59,13 +117,17 @@ class CompositeTransform(Transform):
             total_logabsdet += logabsdet
         return outputs, total_logabsdet
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         funcs = self._transforms
         return self._cascade(inputs, funcs, context)
 
-    def inverse(self, inputs, context=None):
-        funcs = (transform.inverse for transform in self._transforms[::-1])
-        return self._cascade(inputs, funcs, context)
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        inverted_funcs = (transform.inverse for transform in reversed(self._transforms))
+        return self._cascade(inputs, inverted_funcs, context)
 
 
 class MultiscaleCompositeTransform(Transform):
@@ -80,7 +142,7 @@ class MultiscaleCompositeTransform(Transform):
     > L. Dinh et al., Density estimation using Real NVP, ICLR 2017.
     """
 
-    def __init__(self, num_transforms, split_dim=1):
+    def __init__(self, num_transforms: int, split_dim: int = 1):
         """Constructor.
 
         Args:
@@ -96,7 +158,9 @@ class MultiscaleCompositeTransform(Transform):
         self._num_transforms = num_transforms
         self._split_dim = split_dim
 
-    def add_transform(self, transform, transform_output_shape):
+    def add_transform(
+        self, transform: Transform, transform_output_shape: Tuple[int, ...]
+    ) -> Optional[Tuple[int, ...]]:
         """Add a transform. Must be called exactly `num_transforms` times.
 
         Parameters:
@@ -140,7 +204,9 @@ class MultiscaleCompositeTransform(Transform):
         self._output_shapes.append(output_shape)
         return hidden_shape
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if self._split_dim >= inputs.dim():
             raise ValueError("No split_dim in inputs.")
         if self._num_transforms != len(self._transforms):
@@ -175,7 +241,7 @@ class MultiscaleCompositeTransform(Transform):
         all_outputs = torch.cat(all_outputs, dim=-1)
         return all_outputs, total_logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None):
         if inputs.dim() != 2:
             raise ValueError("Expecting NxD inputs")
         if self._num_transforms != len(self._transforms):
@@ -217,7 +283,7 @@ class MultiscaleCompositeTransform(Transform):
 class InverseTransform(Transform):
     """Creates a transform that is the inverse of a given transform."""
 
-    def __init__(self, transform):
+    def __init__(self, transform: Transform):
         """Constructor.
 
         Args:
@@ -225,6 +291,7 @@ class InverseTransform(Transform):
         """
         super().__init__()
         self._transform = transform
+        self._inverted = not transform._inverted
 
     def forward(self, inputs, context=None):
         return self._transform.inverse(inputs, context)
