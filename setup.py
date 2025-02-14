@@ -11,6 +11,7 @@ extras_require = {
         "torchtestcase",
         "pytest",
         "pytest-cov",
+        "pytest-mock",
         "ruff",
         "parameterized",
     ],
@@ -30,12 +31,7 @@ setup(
     author="Fabricio Arend Torres, Marcello Massimo Negri, Jonathan Aellen",
     packages=find_packages(exclude=["tests"]),
     license="MIT",
-    install_requires=[
-        "numpy",
-        "torch",
-        "ninja",
-        "h5py",
-    ],
+    install_requires=["numpy", "torch", "ninja", "h5py", "umnn"],
     extras_require=extras_require,
     classifiers=[
         "Programming Language :: Python :: 3",
