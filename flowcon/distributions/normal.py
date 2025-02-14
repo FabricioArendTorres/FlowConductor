@@ -4,177 +4,128 @@ import numpy as np
 import torch
 from torch import nn
 
-from flowcon.distributions.base import Distribution
+from flowcon.distributions.base import BaseDistribution
 from flowcon.utils import torchutils
 
 
-class StandardNormal(Distribution):
-    """A multivariate Normal with zero mean and unit covariance."""
+class StandardNormal(BaseDistribution):
+    """A multivariate Normal 𝒩(µ=0,  Σ=I), i.e. with zero mean and unit covariance."""
 
-    def __init__(self, shape):
-        super().__init__()
-        self._shape = torch.Size(shape)
+    def __init__(self, dim: int):
+        """
+        Constructor.
 
-        self.register_buffer("_log_z",
-                             torch.tensor(0.5 * np.prod(shape) * np.log(2 * np.pi),
-                                          dtype=torch.float64),
-                             persistent=False)
+        Parameters
+        ----------
+        dim : int
+            Dimension of the random variable.
+            Samples of this distribution will be of shape [num_samples, dim].
+            Likelihood evaluation will assume input of shape [batch_size, dim].
+        """
+        super().__init__(dim=dim)
 
-    def _log_prob(self, inputs, context):
-        # Note: the context is ignored.
-        if inputs.shape[1:] != self._shape:
-            raise ValueError(
-                "Expected input of shape {}, got {}".format(
-                    self._shape, inputs.shape[1:]
-                )
-            )
-        neg_energy = -0.5 * \
-            torchutils.sum_except_batch(inputs ** 2, num_batch_dims=1)
+        self.register_buffer(
+            "_log_z",
+            torch.tensor(
+                0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()
+            ),
+            persistent=True,
+        )
+
+    def log_prob(self, inputs: torch.Tensor) -> torch.Tensor:
+        assert len(inputs.shape) == 2, "Expected tensor of length 2."
+        assert inputs.shape[1] == self.dim, (
+            f"Expected input of shape [None, {self.dim}]"
+        )
+
+        neg_energy = -0.5 * torchutils.sum_except_batch(inputs**2, num_batch_dims=1)
         return neg_energy - self._log_z
 
-    def _sample(self, num_samples, context):
-        if context is None:
-            return torch.randn(num_samples, *self._shape, device=self._log_z.device)
-        else:
-            # The value of the context is ignored, only its size and device are taken into account.
-            context_size = context.shape[0]
-            samples = torch.randn(context_size * num_samples, *self._shape,
-                                  device=context.device)
-            return torchutils.split_leading_dim(samples, [context_size, num_samples])
-
-    def _mean(self, context):
-        if context is None:
-            return self._log_z.new_zeros(self._shape)
-        else:
-            # The value of the context is ignored, only its size is taken into account.
-            return context.new_zeros(context.shape[0], *self._shape)
+    def _sample(self, num_samples: int) -> torch.Tensor:
+        samples = torch.randn(num_samples, self.dim, device=self._log_z.device)
+        return samples
 
 
-class ConditionalDiagonalNormal(Distribution):
-    """A diagonal multivariate Normal whose parameters are functions of a context."""
+class DiagonalNormal(BaseDistribution):
+    """
+    A diagonal multivariate Normal 𝒩(µ,  Σ=σI) with optionally trainable parameters.
+    This should be redundant to a transform with elementwise shift and / or scales,
+    but is added nonetheless as a utility.
+    """
 
-    def __init__(self, shape, context_encoder=None):
-        """Constructor.
-
-        Args:
-            shape: list, tuple or torch.Size, the shape of the input variables.
-            context_encoder: callable or None, encodes the context to the distribution parameters.
-                If None, defaults to the identity function.
+    def __init__(
+        self,
+        dim: int,
+        mean: torch.Tensor = None,
+        log_std: torch.Tensor = None,
+        trainable_mean: bool = True,
+        trainable_log_std: bool = True,
+    ):
         """
-        super().__init__()
-        self._shape = torch.Size(shape)
-        if context_encoder is None:
-            self._context_encoder = lambda x: x
+        Constructor.
+
+
+        Parameters
+        ----------
+        dim : int
+            Dimension of Distribution.
+        mean : torch.Tensor, optional
+            Optional initial mean of the DiagonalNormal, by default None.
+            Initialized as zero if None.
+            Needs to be squeezable to shape [dim].
+        log_std : torch.Tensor, optional
+            Optional initial log_std of the DiagonalNormal, by default None.
+            Initialized as zero if None.
+            Needs to be squeezable to shape [dim].
+        trainable_mean : bool, optional
+            Whether the mean is trainable, by default True.
+        trainable_log_std : bool, optional
+            Whether the log_std is trainable, by default True.
+        """
+        super().__init__(dim=dim)
+
+        if mean is None:
+            mean = torch.zeros(self.dim)
         else:
-            self._context_encoder = context_encoder
-        self.register_buffer("_log_z",
-                             torch.tensor(0.5 * np.prod(shape) * np.log(2 * np.pi),
-                                          dtype=torch.float64),
-                             persistent=False)
+            mean = torch.squeeze(mean)
 
-    def _compute_params(self, context):
-        """Compute the means and log stds form the context."""
-        if context is None:
-            raise ValueError("Context can't be None.")
+        if log_std is None:
+            log_std = torch.zeros(self.dim)
+        else:
+            log_std = torch.squeeze(log_std)
 
-        params = self._context_encoder(context)
-        if params.shape[-1] % 2 != 0:
-            raise RuntimeError(
-                "The context encoder must return a tensor whose last dimension is even."
-            )
-        if params.shape[0] != context.shape[0]:
-            raise RuntimeError(
-                "The batch dimension of the parameters is inconsistent with the input."
-            )
+        assert len(mean.shape) == 1 and mean.shape[0] == self.dim
+        assert len(log_std.shape) == 1 and log_std.shape[0] == self.dim
 
-        split = params.shape[-1] // 2
-        means = params[..., :split].reshape(params.shape[0], *self._shape)
-        log_stds = params[..., split:].reshape(params.shape[0], *self._shape)
-        return means, log_stds
+        self._mean = nn.Parameter(
+            mean.reshape(1, self.dim), requires_grad=trainable_mean
+        )
+        self._log_std = nn.Parameter(
+            log_std.reshape(1, self.dim), requires_grad=trainable_log_std
+        )
 
-    def _log_prob(self, inputs, context):
-        if inputs.shape[1:] != self._shape:
-            raise ValueError(
-                "Expected input of shape {}, got {}".format(
-                    self._shape, inputs.shape[1:]
-                )
-            )
+        self.register_buffer(
+            "_log_z",
+            torch.tensor(
+                0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()
+            ),
+            persistent=True,
+        )
+
+    def log_prob(self, inputs: torch.Tensor) -> torch.Tensor:
+        assert inputs.shape[1] == self.dim
 
         # Compute parameters.
-        means, log_stds = self._compute_params(context)
-        assert means.shape == inputs.shape and log_stds.shape == inputs.shape
+        means = self._mean
+        log_stds = self._log_std
 
         # Compute log prob.
         norm_inputs = (inputs - means) * torch.exp(-log_stds)
-        log_prob = -0.5 * torchutils.sum_except_batch(
-            norm_inputs ** 2, num_batch_dims=1
-        )
+        log_prob = -0.5 * torchutils.sum_except_batch(norm_inputs**2, num_batch_dims=1)
         log_prob -= torchutils.sum_except_batch(log_stds, num_batch_dims=1)
         log_prob -= self._log_z
         return log_prob
 
-    def _sample(self, num_samples, context):
-        # Compute parameters.
-        means, log_stds = self._compute_params(context)
-        stds = torch.exp(log_stds)
-        means = torchutils.repeat_rows(means, num_samples)
-        stds = torchutils.repeat_rows(stds, num_samples)
-
-        # Generate samples.
-        context_size = context.shape[0]
-        noise = torch.randn(context_size * num_samples, *
-                            self._shape, device=means.device)
-        samples = means + stds * noise
-        return torchutils.split_leading_dim(samples, [context_size, num_samples])
-
-    def _mean(self, context):
-        means, _ = self._compute_params(context)
-        return means
-
-
-class DiagonalNormal(Distribution):
-    """A diagonal multivariate Normal with trainable parameters."""
-
-    def __init__(self, shape):
-        """Constructor.
-
-        Args:
-            shape: list, tuple or torch.Size, the shape of the input variables.
-            context_encoder: callable or None, encodes the context to the distribution parameters.
-                If None, defaults to the identity function.
-        """
-        super().__init__()
-        self._shape = torch.Size(shape)
-        self.mean_ = nn.Parameter(torch.zeros(shape).reshape(1, -1))
-        self.log_std_ = nn.Parameter(torch.zeros(shape).reshape(1, -1))
-        self.register_buffer("_log_z",
-                             torch.tensor(0.5 * np.prod(shape) * np.log(2 * np.pi),
-                                          dtype=torch.float64),
-                             persistent=False)
-
-    def _log_prob(self, inputs, context):
-        if inputs.shape[1:] != self._shape:
-            raise ValueError(
-                "Expected input of shape {}, got {}".format(
-                    self._shape, inputs.shape[1:]
-                )
-            )
-
-        # Compute parameters.
-        means = self.mean_
-        log_stds = self.log_std_
-
-        # Compute log prob.
-        norm_inputs = (inputs - means) * torch.exp(-log_stds)
-        log_prob = -0.5 * torchutils.sum_except_batch(
-            norm_inputs ** 2, num_batch_dims=1
-        )
-        log_prob -= torchutils.sum_except_batch(log_stds, num_batch_dims=1)
-        log_prob -= self._log_z
-        return log_prob
-
-    def _sample(self, num_samples, context):
-        raise NotImplementedError()
-
-    def _mean(self, context):
-        return self.mean
+    def _sample(self, num_samples: int) -> torch.Tensor:
+        samples = torch.randn(num_samples, self.dim, device=self._log_z.device)
+        return (samples * torch.exp(self._log_std)) + self._mean

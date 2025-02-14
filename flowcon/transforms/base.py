@@ -9,7 +9,6 @@ import flowcon.utils.typechecks as check
 
 class InverseNotAvailable(Exception):
     """Exception to be thrown when a transform does not have an inverse."""
-
     pass
 
 
