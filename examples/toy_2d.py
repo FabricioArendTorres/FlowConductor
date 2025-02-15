@@ -1,14 +1,16 @@
-import matplotlib.pyplot as plt
 import os
 
+import matplotlib.pyplot as plt
 import torch
 from torch import optim
 
-from flowcon.flows import Flow
+from flowcon.datasets import InfiniteLoader, load_plane_dataset
 from flowcon.distributions import StandardNormal
-from flowcon.datasets import load_plane_dataset, InfiniteLoader
-from flowcon.transforms import *
-from flowcon.nn.nets import *
+from flowcon.flows import Flow
+from flowcon.nn.nets import CSin
+from flowcon.transforms import CompositeTransform
+from flowcon.transforms.lipschitz import iResBlock
+from flowcon.transforms.normalization import ActNorm
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -20,21 +22,21 @@ CONTINUE_TRAINING = False
 os.makedirs("figures", exist_ok=True)
 os.makedirs("models", exist_ok=True)
 
-base_dist = StandardNormal(shape=[2])
+base_dist = StandardNormal(dim=2)
 MB_SIZE = 500
 selected_data = "two_spirals"
 num_layers = 10
 
-num_iter = {"eight_gaussians": 3_000,
-            "diamond": 50_000,
-            "crescent": 3_000,
-            "four_circles": 3_000,
-            "two_circles": 3_000
-            }.get(selected_data, 10_000)
+num_iter = {
+    "eight_gaussians": 3_000,
+    "diamond": 50_000,
+    "crescent": 3_000,
+    "four_circles": 3_000,
+    "two_circles": 3_000,
+}.get(selected_data, 10_000)
 
 
 def main():
-
     # create data
     train_dataset = load_plane_dataset(selected_data, int(1e7))
     train_loader = InfiniteLoader(
@@ -42,14 +44,14 @@ def main():
         batch_size=MB_SIZE,
         shuffle=True,
         drop_last=True,
-        num_epochs=None
+        num_epochs=None,
     )
     test_loader = InfiniteLoader(
         dataset=train_dataset,
         batch_size=10_000,
         shuffle=True,
         drop_last=True,
-        num_epochs=None
+        num_epochs=None,
     )
 
     flow = build_flow()
@@ -60,7 +62,7 @@ def main():
         for i in range(num_iter):
             x = next(train_loader).to(device)
             optimizer.zero_grad()
-            loss = -flow.log_prob(inputs=x).mean()
+            loss = -flow.log_prob(x=x).mean()
             if (i % 50) == 0:
                 print(f"{i:04}: {loss=:.3f}")
             loss.backward()
@@ -70,7 +72,7 @@ def main():
                 with torch.no_grad():
                     flow.eval()
                     x = next(test_loader).to(device)
-                    test_loss = -flow.log_prob(inputs=x).mean()
+                    test_loss = -flow.log_prob(x=x).mean()
                     print(f"{i:04}: {test_loss=:.3f}")
                     plot_model(flow)
                     flow.train()
@@ -82,13 +84,16 @@ def main():
 
 def build_flow():
     transforms = []
-    densenet_factory = (iResBlock.Factory()
-                        .set_logabsdet_estimator(brute_force=True)
-                        .set_densenet(dimension=2,
-                                      densenet_depth=3,
-                                      densenet_growth=16,
-                                      activation_function=CSin(10))
-                        )
+    densenet_factory = (
+        iResBlock.Factory()
+        .set_logabsdet_estimator(brute_force=True)
+        .set_densenet(
+            dimension=2,
+            densenet_depth=3,
+            densenet_growth=16,
+            activation_function=CSin(10),
+        )
+    )
     for _ in range(num_layers):
         transforms.append(ActNorm(features=2))
         transforms.append(densenet_factory.build())
@@ -108,8 +113,7 @@ def plot_model(flow):
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
     axs = axs.flatten()
     x_min, x_max, y_min, y_max = dict(
-        two_spirals=[-4, 4, -4, 4],
-        checkerboard=[-4, 4, -4, 4]
+        two_spirals=[-4, 4, -4, 4], checkerboard=[-4, 4, -4, 4]
     ).get(selected_data, [-4, 4, -4, 4])
     # x_min = torch.floor(x.min(0)[0][0]) - 1e-1
     # y_min = torch.floor(x.min(0)[0][1]) - 1e-1
@@ -117,7 +121,7 @@ def plot_model(flow):
     # y_max = torch.ceil(x.max(0)[0][1]) + 1e-1
     xline = torch.linspace(x_min, x_max, nsamples).to(device)
     yline = torch.linspace(y_min, y_max, nsamples).to(device)
-    xgrid, ygrid = torch.meshgrid(xline, yline, indexing='xy')
+    xgrid, ygrid = torch.meshgrid(xline, yline, indexing="xy")
     xyinput = torch.cat([xgrid.reshape(-1, 1), ygrid.reshape(-1, 1)], dim=1)
     # flow.train()
     # flow.eval()
@@ -126,18 +130,25 @@ def plot_model(flow):
 
         samples = flow.sample(num_samples=5_000)
     # plt.contourf(xgrid.detach().cpu().numpy(), ygrid.detach().cpu().numpy(), zgrid.detach().cpu().numpy())
-    axs[0].imshow(zgrid.detach().cpu().numpy(), origin='lower', extent=[-4, 4, -4, 4],
-                  cmap="inferno")
-    axs[0].axis('off')
-    axs[1].axis('off')
-    axs[0].set_aspect('equal', 'box')
-    axs[1].set_aspect('equal', 'box')
-    axs[1].scatter(*samples.detach().cpu().numpy().T, marker='+', alpha=0.1, color="black")
+    axs[0].imshow(
+        zgrid.detach().cpu().numpy(),
+        origin="lower",
+        extent=[-4, 4, -4, 4],
+        cmap="inferno",
+    )
+    axs[0].axis("off")
+    axs[1].axis("off")
+    axs[0].set_aspect("equal", "box")
+    axs[1].set_aspect("equal", "box")
+    axs[1].scatter(
+        *samples.detach().cpu().numpy().T, marker="+", alpha=0.1, color="black"
+    )
     plt.tight_layout()
     # plt.title('iteration {}'.format(i + 1))
     plt.savefig(f"figures/{selected_data}.png")
     plt.close()
-    print("Saved plot to figures/{}.png".format(selected_data))
+    print(f"Saved plot to figures/{selected_data}.png")
+
 
 if __name__ == "__main__":
     main()

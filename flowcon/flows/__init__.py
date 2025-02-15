@@ -1,5 +1,3 @@
-from flowcon.flows.autoregressive import MaskedAutoregressiveFlow
-from flowcon.flows.base import Flow
-from flowcon.flows.realnvp import SimpleRealNVP
+from flowcon.flows.base import ConditionalFlow, Flow
 
-__all__ = ['Flow', 'MaskedAutoregressiveFlow', 'SimpleRealNVP']
+__all__ = ["Flow", "ConditionalFlow"]

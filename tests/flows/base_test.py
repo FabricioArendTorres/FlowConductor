@@ -1,12 +1,15 @@
 """Tests for the basic flow definitions."""
 
-import unittest
+from math import prod
 
+import pytest
 import torch
 import torchtestcase
 
 from flowcon.distributions.normal import StandardNormal
 from flowcon.flows import base
+from flowcon.transforms.base import CompositeTransform
+from flowcon.transforms.reshape import FlattenTransform
 from flowcon.transforms.standard import AffineScalarTransform
 
 
@@ -14,49 +17,72 @@ class FlowTest(torchtestcase.TorchTestCase):
     def test_log_prob(self):
         batch_size = 10
         input_shape = [2, 3, 4]
-        context_shape = [5, 6]
         flow = base.Flow(
-            transform=AffineScalarTransform(scale=2.0),
-            distribution=StandardNormal(input_shape),
+            transform=CompositeTransform(
+                (AffineScalarTransform(scale=2.0), FlattenTransform())
+            ),
+            distribution=StandardNormal(prod(input_shape)),
         )
         inputs = torch.randn(batch_size, *input_shape)
-        maybe_context = torch.randn(batch_size, *context_shape)
-        for context in [None, maybe_context]:
-            with self.subTest(context=context):
-                log_prob = flow.log_prob(inputs, context=context)
-                self.assertIsInstance(log_prob, torch.Tensor)
-                self.assertEqual(log_prob.shape, torch.Size([batch_size]))
+        log_prob = flow.log_prob(inputs)
+        self.assertIsInstance(log_prob, torch.Tensor)
+        self.assertEqual(log_prob.shape, torch.Size([batch_size]))
 
     def test_sample(self):
         num_samples = 10
-        context_size = 20
         input_shape = [2, 3, 4]
-        context_shape = [5, 6]
         flow = base.Flow(
-            transform=AffineScalarTransform(scale=2.0),
-            distribution=StandardNormal(input_shape),
+            transform=CompositeTransform(
+                (AffineScalarTransform(scale=2.0), FlattenTransform())
+            ),
+            distribution=StandardNormal(prod(input_shape)),
         )
-        maybe_context = torch.randn(context_size, *context_shape)
-        for context in [None, maybe_context]:
-            with self.subTest(context=context):
-                samples = flow.sample(num_samples, context=context)
-                self.assertIsInstance(samples, torch.Tensor)
-                if context is None:
-                    self.assertEqual(
-                        samples.shape, torch.Size([num_samples] + input_shape)
-                    )
-                else:
-                    self.assertEqual(
-                        samples.shape,
-                        torch.Size([context_size, num_samples] + input_shape),
-                    )
+        flow.log_prob(torch.rand(1, *input_shape))
+        samples = flow.sample(num_samples)
+        self.assertIsInstance(samples, torch.Tensor)
+        self.assertEqual(samples.shape, torch.Size([num_samples] + input_shape))
+
+    @pytest.mark.expensive
+    def test_logprob_compiled(self):
+        num_samples = 10
+        input_shape = [2]
+        flow = base.Flow(
+            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            distribution=StandardNormal(prod(input_shape)),
+        )
+        logprob_compiled = torch.compile(flow.log_prob)
+
+        torch.random.manual_seed(1234)
+        rand_val = torch.rand(num_samples, *input_shape)
+        ll_ref = flow.log_prob(rand_val)
+        ll_comp = logprob_compiled(rand_val)
+
+        torch.testing.assert_close(ll_ref, ll_comp)
+
+    @pytest.mark.expensive
+    def test_sample_compiled(self):
+        num_samples = 10
+        input_shape = [2]
+        flow = base.Flow(
+            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            distribution=StandardNormal(prod(input_shape)),
+        )
+        torch.random.manual_seed(1234)
+        sample_compiled = torch.compile(flow.sample)
+        samples = flow.sample(num_samples)
+        samples_c = sample_compiled(num_samples)
+
+        self.assertIsInstance(samples, torch.Tensor)
+        self.assertIsInstance(samples_c, torch.Tensor)
+        self.assertEqual(samples.shape, torch.Size([num_samples] + input_shape))
+        self.assertEqual(samples_c.shape, samples.shape)
 
     def test_sample_and_log_prob(self):
         num_samples = 10
-        input_shape = [2, 3, 4]
+        input_shape = [2]
         flow = base.Flow(
             transform=AffineScalarTransform(scale=2.0),
-            distribution=StandardNormal(input_shape),
+            distribution=StandardNormal(prod(input_shape)),
         )
         samples, log_prob_1 = flow.sample_and_log_prob(num_samples)
         log_prob_2 = flow.log_prob(samples)
@@ -68,62 +94,131 @@ class FlowTest(torchtestcase.TorchTestCase):
         self.assertEqual(log_prob_2.shape, torch.Size([num_samples]))
         self.assertEqual(log_prob_1, log_prob_2)
 
-    def test_sample_and_log_prob_with_context(self):
-        num_samples = 10
-        context_size = 20
+
+class ConditionalFlowTest(torchtestcase.TorchTestCase):
+    def setUp(self):
+        super().setUp()
+        self.mb_size = 10
+        self.context_shape = [5, 6]
+        self.context = torch.randn(self.mb_size, *self.context_shape)
+
+    def test_log_prob(self):
         input_shape = [2, 3, 4]
-        context_shape = [5, 6]
-        flow = base.Flow(
-            transform=AffineScalarTransform(scale=2.0),
-            distribution=StandardNormal(input_shape),
+        flow = base.ConditionalFlow(
+            transform=CompositeTransform(
+                (AffineScalarTransform(scale=2.0), FlattenTransform())
+            ),
+            distribution=StandardNormal(prod(input_shape)),
         )
-        context = torch.randn(context_size, *context_shape)
-        samples, log_prob = flow.sample_and_log_prob(num_samples, context=context)
+        inputs = torch.randn(self.mb_size, *input_shape)
+        log_prob = flow.log_prob(inputs, context=self.context)
+        with pytest.raises(AssertionError):
+            log_prob = flow.log_prob(inputs, context=None)
+        self.assertIsInstance(log_prob, torch.Tensor)
+        self.assertEqual(log_prob.shape, torch.Size([self.mb_size]))
+
+    def test_sample(self):
+        num_samples = 10
+        input_shape = [2, 3, 4]
+        flow = base.ConditionalFlow(
+            transform=CompositeTransform(
+                (AffineScalarTransform(scale=2.0), FlattenTransform())
+            ),
+            distribution=StandardNormal(prod(input_shape)),
+        )
+        x = torch.rand(self.mb_size, *input_shape)
+        flow.log_prob(x, context=self.context)
+
+        samples = flow.sample(context=self.context)
+        self.assertIsInstance(samples, torch.Tensor)
+        self.assertEqual(samples.shape, torch.Size([self.mb_size] + input_shape))
+        samples2 = flow.sample_multi(num_samples, context=self.context)
+        self.assertEqual(
+            samples2.shape,
+            torch.Size([self.mb_size, num_samples] + input_shape),
+        )
+
+        with pytest.raises(AssertionError):
+            flow.sample(context=None)
+        with pytest.raises(AssertionError):
+            flow.sample_multi(num_samples=10, context=None)
+
+    @pytest.mark.expensive
+    def test_logprob_compiled(self):
+        num_samples = 10
+        input_shape = [2]
+
+        flow = base.ConditionalFlow(
+            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            distribution=StandardNormal(prod(input_shape)),
+        )
+        logprob_compiled = torch.compile(flow.log_prob)
+
+        torch.random.manual_seed(1234)
+        rand_val = torch.rand(num_samples, *input_shape)
+        ll_ref = flow.log_prob(rand_val, self.context)
+        ll_comp = logprob_compiled(rand_val, self.context)
+
+        torch.testing.assert_close(ll_ref, ll_comp)
+
+    @pytest.mark.expensive
+    def test_sample_compiled(self):
+        num_samples = 10
+        input_shape = [2]
+        flow = base.ConditionalFlow(
+            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            distribution=StandardNormal(prod(input_shape)),
+        )
+        torch.random.manual_seed(1234)
+        sample_compiled = torch.compile(flow.sample)
+        samples = flow.sample(context=self.context)
+        samples_c = sample_compiled(context=self.context)
+
+        self.assertIsInstance(samples, torch.Tensor)
+        self.assertIsInstance(samples_c, torch.Tensor)
+        self.assertEqual(samples.shape, torch.Size([self.mb_size] + input_shape))
+        self.assertEqual(samples_c.shape, samples.shape)
+
+        samples2 = flow.sample_multi(num_samples, context=self.context)
+        samples2_compiled = torch.compile(flow.sample_multi)(
+            num_samples, context=self.context
+        )
+
+        self.assertEqual(
+            samples2.shape,
+            samples2_compiled.shape,
+        )
+
+    def test_sample_and_log_prob_with_context(self):
+        input_dim = 2 * 3 * 4
+        context_shape = [5, 6]
+        flow = base.ConditionalFlow(
+            transform=AffineScalarTransform(scale=2.0),
+            distribution=StandardNormal(input_dim),
+        )
+        context = torch.randn(self.mb_size, *context_shape)
+        samples, log_prob = flow.sample_and_log_prob(context=self.context)
+
         self.assertIsInstance(samples, torch.Tensor)
         self.assertIsInstance(log_prob, torch.Tensor)
-        self.assertEqual(
-            samples.shape, torch.Size([context_size, num_samples] + input_shape)
-        )
-        self.assertEqual(log_prob.shape, torch.Size([context_size, num_samples]))
+        self.assertEqual(samples.shape, torch.Size([self.mb_size, input_dim]))
+        self.assertEqual(log_prob.shape, torch.Size([self.mb_size]))
 
-    def test_transform_to_noise(self):
-        batch_size = 10
-        context_size = 20
-        shape = [2, 3, 4]
-        context_shape = [5, 6]
-        flow = base.Flow(
+    def test_sample_and_log_prob_with_context_multi(self):
+        num_samples = 10
+        input_dim = 2 * 3 * 4
+        flow = base.ConditionalFlow(
             transform=AffineScalarTransform(scale=2.0),
-            distribution=StandardNormal(shape),
+            distribution=StandardNormal(input_dim),
         )
-        inputs = torch.randn(batch_size, *shape)
-        maybe_context = torch.randn(context_size, *context_shape)
-        for context in [None, maybe_context]:
-            with self.subTest(context=context):
-                noise = flow.transform_to_noise(inputs, context=context)
-                self.assertIsInstance(noise, torch.Tensor)
-                self.assertEqual(noise.shape, torch.Size([batch_size] + shape))
-
-    def test_sample_maps(self):
-        batch_size = 10
-        context_size = 20
-        shape = [2, 3, 4]
-        context_shape = [5, 6]
-        # zero mean with variance shape
-        distribution = StandardNormal(shape)
-        # testing no context
-        context = torch.randn(context_size, *context_shape)
-        for context, should_be_less in zip(
-                [None, context],
-                [1e-4 * torch.ones(batch_size, *shape), 1e-4 * torch.ones(context_size, batch_size, *shape)]):
-            with self.subTest(context=context, fdesc="multiple: sample_maps"):
-                xs, logps = distribution.sample_maxima(batch_size, context, its=2)
-                self.assertIsInstance(xs, torch.Tensor)
-                self.assert_tensor_less(torch.abs(xs), should_be_less)
-            with self.subTest(context=context, fdesc="singular: sample_map"):
-                x, logp = distribution.sample_maximum(batch_size, context, its=2)
-                self.assertIsInstance(x, torch.Tensor)
-                self.assert_tensor_less(torch.abs(x), should_be_less[0] if context is None else should_be_less[:, 0:1])
+        samples_multi, log_prob_multi = flow.sample_and_log_prob_multi(
+            num_samples=num_samples, context=self.context
+        )
+        self.assertEqual(
+            samples_multi.shape, torch.Size([self.mb_size, num_samples, input_dim])
+        )
+        self.assertEqual(log_prob_multi.shape, torch.Size([self.mb_size, num_samples]))
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main()

@@ -1,1 +1,1 @@
-from flowcon.transforms.UMNN.MonotonicNormalizer import MonotonicNormalizer, IntegrandNet
+from .MonotonicNormalizer import IntegrandNet, MonotonicNormalizer

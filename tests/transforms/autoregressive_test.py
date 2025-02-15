@@ -4,10 +4,10 @@ import unittest
 
 import torch
 
-from flowcon.transforms import autoregressive, InverseTransform
+from flowcon.transforms.autoregressive import autoregressive
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
-from parameterized import parameterized_class
+
 
 class MaskedAffineAutoregressiveTransformTest(TransformTest):
     def test_forward(self):
@@ -40,7 +40,6 @@ class MaskedAffineAutoregressiveTransformTest(TransformTest):
                 self.assertEqual(upper_diags, torch.zeros_like(upper_diags))
                 self.assertNotEqual(lower_diags, torch.zeros_like(upper_diags))
 
-
     def test_inverse(self):
         batch_size = 10
         features = 20
@@ -70,8 +69,6 @@ class MaskedAffineAutoregressiveTransformTest(TransformTest):
 
                 self.assertEqual(upper_diags, torch.zeros_like(upper_diags))
                 self.assertNotEqual(lower_diags, torch.zeros_like(upper_diags))
-
-
 
     def test_forward_inverse_are_consistent(self):
         batch_size = 10
@@ -133,12 +130,12 @@ class MaskedAdaptiveSigmoidAutoregressiveTransformTest(TransformTest):
         self.assert_tensor_is_good(outputs, [batch_size, features])
         self.assert_tensor_is_good(logabsdet, [batch_size])
 
-
         self.assert_forward_inverse_are_consistent(transform, inputs)
 
-        _, ref_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(outputs, inputs))
+        _, ref_logabsdet = torch.linalg.slogdet(
+            torchutils.batch_jacobian(outputs, inputs)
+        )
         self.assert_jacobian_correct(transform, inputs)
-
 
 
 class MaskedPiecewiseQuadraticAutoregressiveTranformTest(TransformTest):
@@ -193,8 +190,6 @@ class MaskedPiecewiseCubicAutoregressiveTranformTest(TransformTest):
         )
 
         self.assert_forward_inverse_are_consistent(transform, inputs)
-
-
 
 
 if __name__ == "__main__":

@@ -1,1 +1,1 @@
-from flowcon.transforms.lipschitz.iresblock import iResBlock
+from .iresblock import iResBlock

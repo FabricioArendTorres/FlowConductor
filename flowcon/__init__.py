@@ -6,6 +6,7 @@ of conditional density estimation.
 
 .. include:: ./documentation.md
 """
-from flowcon.flows import Flow, MaskedAutoregressiveFlow
 
-__all__ = ['Flow']
+from flowcon.flows import ConditionalFlow, Flow
+
+__all__ = ["Flow", "ConditionalFlow"]

@@ -1,15 +1,15 @@
 """Tests for the basic transform definitions."""
+
 import unittest
 
 import numpy as np
 import torch
 
-from flowcon.transforms import base, standard, ConditionalTransform, InverseTransform
+from flowcon.transforms import InverseTransform, base, conditional, standard
 from tests.transforms.transform_test import TransformTest
 
 
 class CompositeTransformTest(TransformTest):
-
     def test_forward(self):
         batch_size = 10
         shape = [2, 3, 4]
@@ -96,7 +96,9 @@ class MultiscaleCompositeTransformTest(TransformTest):
             with self.subTest(shape=shape):
                 transform = self.create_transform(shape)
                 inputs = torch.randn(batch_size, *shape).view(batch_size, -1)
-                self.assert_forward_inverse_are_consistent(InverseTransform(transform), inputs)
+                self.assert_forward_inverse_are_consistent(
+                    InverseTransform(transform), inputs
+                )
 
 
 class InverseTransformTest(TransformTest):
@@ -134,7 +136,9 @@ class ConditionalTransformTest(TransformTest):
 
         self.random_input = torch.randn((self.batch_size, self.features))
 
-        self.transform = ConditionalTransform(features=self.features, conditional_net=torch.nn.Identity())
+        self.transform = conditional.ConditionalTransform(
+            features=self.features, conditional_net=torch.nn.Identity()
+        )
 
     def test_no_condition(self):
         with self.assertRaises(expected_exception=TypeError) as cm:

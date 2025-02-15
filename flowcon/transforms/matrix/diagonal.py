@@ -2,15 +2,9 @@ import numpy as np
 import torch
 from torch import nn
 
-from flowcon.transforms import (
-    CompositeTransform,
-    Exp,
-    ScalarScale,
-    ScalarShift,
-    Sigmoid,
-    Softplus,
-    Transform,
-)
+from flowcon.transforms.base import CompositeTransform, Transform
+from flowcon.transforms.linear import ScalarScale, ScalarShift
+from flowcon.transforms.nonlinearities import Exp, Sigmoid, Softplus
 
 fancy_exp_transform = CompositeTransform(
     [

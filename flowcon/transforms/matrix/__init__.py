@@ -1,2 +1,8 @@
-from flowcon.transforms.matrix.diagonal import TransformDiagonal, TransformDiagonalSoftplus, TransformDiagonalExponential
-from flowcon.transforms.matrix.cholesky import CholeskyOuterProduct
+# from flowcon.transforms.matrix import cholesky, diagonal
+from . import cholesky, diagonal
+from .cholesky import CholeskyOuterProduct
+from .diagonal import (
+    TransformDiagonal,
+    TransformDiagonalExponential,
+    TransformDiagonalSoftplus,
+)

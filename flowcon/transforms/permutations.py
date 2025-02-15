@@ -1,10 +1,10 @@
 """Implementations of permutation-like transforms."""
 
+import numpy as np
 import torch
 
-from flowcon.transforms.base import Transform
 import flowcon.utils.typechecks as check
-import numpy as np
+from flowcon.transforms.base import Transform
 
 
 class Permutation(Transform):
@@ -27,12 +27,10 @@ class Permutation(Transform):
     @staticmethod
     def _permute(inputs, permutation, dim):
         if dim >= inputs.ndimension():
-            raise ValueError("No dimension {} in inputs.".format(dim))
+            raise ValueError(f"No dimension {dim} in inputs.")
         if inputs.shape[dim] != len(permutation):
             raise ValueError(
-                "Dimension {} in inputs must be of size {}.".format(
-                    dim, len(permutation)
-                )
+                f"Dimension {dim} in inputs must be of size {len(permutation)}."
             )
         batch_size = inputs.shape[0]
         outputs = torch.index_select(inputs, dim, permutation)
@@ -75,16 +73,21 @@ class FillTriangular(Transform):
             self.features = self.calc_n_ltri(matrix_dimension)
             self.matrix_dim = matrix_dimension
         else:
-            raise ValueError("Provide either 'features' or 'full_matrix_dimension', but not both.")
+            raise ValueError(
+                "Provide either 'features' or 'full_matrix_dimension', but not both."
+            )
 
         self.lower_indices = np.tril_indices(self.matrix_dim, k=0)
 
     @staticmethod
     def calc_matrix_dimension(n_ltri_entries):
-        assert n_ltri_entries > 0, f"Dimension must be positive, but is {n_ltri_entries}"
+        assert n_ltri_entries > 0, (
+            f"Dimension must be positive, but is {n_ltri_entries}"
+        )
         temp = 1 + 8 * n_ltri_entries
-        assert np.square(
-            np.floor(np.sqrt(temp))) == temp, "invalid dimension: can't be mapped to lower triangular matrix"
+        assert np.square(np.floor(np.sqrt(temp))) == temp, (
+            "invalid dimension: can't be mapped to lower triangular matrix"
+        )
         matrix_dim = int((-1 + np.floor(np.sqrt(temp))) // 2)
         return matrix_dim
 

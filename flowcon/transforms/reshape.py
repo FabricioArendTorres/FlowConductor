@@ -120,6 +120,13 @@ class FlattenTransform(Transform):
         """
         Sidesteps the issue of having a dynamic inference of the shape
         for storing and restoring from / to a state_dict.
+
+        Parameters
+        ----------
+        state_dict : _type_
+            _description_
+        strict : bool, optional
+            _description_, by default True
         """
         if "_cached_shape" in state_dict and state_dict["_cached_shape"].numel() > 0:
             self._cached_shape = state_dict["_cached_shape"]
