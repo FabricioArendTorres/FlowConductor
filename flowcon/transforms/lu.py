@@ -10,7 +10,20 @@ from flowcon.transforms.linear import Linear
 
 
 class LULinear(Linear):
-    """A linear transform where we parameterize the LU decomposition of the weights."""
+    """
+    A linear transform that parameterizes the LU decomposition of the weights.
+
+    Parameters
+    ----------
+    num_features : int
+        Number of features (dimensions) in the input.
+    using_cache : bool, optional
+        Whether to use caching, by default False.
+    identity_init : bool, optional
+        If True, initializes the transformation as an identity matrix, by default False.
+    eps : float, optional
+        Small constant added to ensure numerical stability, by default 1e-3.
+    """
 
     def __init__(
         self,
@@ -31,9 +44,17 @@ class LULinear(Linear):
 
         self.register_buffer("eye", torch.eye(num_features), persistent=True)
 
-        self._initialize(identity_init)
+        self._initialize_weights(identity_init)
 
-    def _initialize(self, identity_init: bool):
+    def _initialize_weights(self, identity_init: bool):
+        """
+        Initializes the weight matrix.
+
+        Parameters
+        ----------
+        identity_init : bool
+            If True, initializes as an identity matrix; otherwise, random initialization.
+        """
         # inverse softplus to ensure 1-diagonal in softplus transformed diagonal
         raw_diagonal_constant = np.log(np.exp(1 - self.eps) - 1)
 
@@ -52,6 +73,14 @@ class LULinear(Linear):
                 init.constant_(self.bias, 1e-3)
 
     def get_lower_upper(self):
+        """
+        Computes the lower and upper triangular matrices from the LU decomposition.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Lower and upper triangular matrices.
+        """
         # lower triangular values + ones on diagonal
         lower = torch.tril(self._raw_matrix, diagonal=-1) + self.eye
         # upper triangular values with zeros on diagonal
@@ -66,12 +95,18 @@ class LULinear(Linear):
     def forward_no_cache(
         self, inputs: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Cost:
-            output = O(D^2N)
-            logabsdet = O(D)
-        where:
-            D = num of features
-            N = num of inputs
+        """
+        Computes the forward transformation without caching.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input tensor of shape (N, D), where N is batch size and D is number of features.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Transformed output and log absolute determinant of the Jacobian.
         """
         lower, upper = self.get_lower_upper()
         outputs = F.linear(inputs, upper)
@@ -82,12 +117,18 @@ class LULinear(Linear):
     def inverse_no_cache(
         self, inputs: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Cost:
-            output = O(D^2N)
-            logabsdet = O(D)
-        where:
-            D = num of features
-            N = num of inputs
+        """
+        Computes the inverse transformation without caching.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input tensor of shape (N, D).
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Inverted output and log absolute determinant of the inverse Jacobian.
         """
         lower, upper = self.get_lower_upper()
         outputs = inputs - self.bias
@@ -111,19 +152,25 @@ class LULinear(Linear):
         return outputs, logabsdet
 
     def weight(self) -> torch.Tensor:
-        """Cost:
-            weight = O(D^3)
-        where:
-            D = num of features
+        """
+        Computes the full weight matrix from the LU decomposition.
+
+        Returns
+        -------
+        torch.Tensor
+            Weight matrix of shape (D, D).
         """
         lower, upper = self.get_lower_upper()
         return lower @ upper
 
     def weight_inverse(self) -> torch.Tensor:
-        """Cost:
-            inverse = O(D^3)
-        where:
-            D = num of features
+        """
+        Computes the inverse of the weight matrix.
+
+        Returns
+        -------
+        torch.Tensor
+            Inverse weight matrix of shape (D, D).
         """
         lower, upper = self.get_lower_upper()
         lower_inverse = cast(
@@ -142,12 +189,23 @@ class LULinear(Linear):
 
     @property
     def upper_diag_flat(self) -> torch.Tensor:
+        """
+        Computes the softplus-transformed diagonal of the upper triangular matrix.
+
+        Returns
+        -------
+        torch.Tensor
+            Transformed diagonal values of shape (D,).
+        """
         return F.softplus(self._raw_matrix.diagonal()) + self.eps
 
     def logabsdet(self) -> torch.Tensor:
-        """Cost:
-            logabsdet = O(D)
-        where:
-            D = num of features
+        """
+        Computes the log absolute determinant of the forward transformation T.
+
+        Returns
+        -------
+        torch.Tensor
+            Scalar tensor representing log absolute determinant.
         """
         return torch.sum(torch.log1p(self.upper_diag_flat - 1))
