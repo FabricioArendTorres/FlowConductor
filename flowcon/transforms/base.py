@@ -375,7 +375,7 @@ class InverseTransform(Transform):
         return self._transform(inputs, context)
 
 
-class BlockContextTransform(Transform):
+class RemoveContextTransform(Transform):
     """
     A wrapper for transforms that ensures they do not receive external context.
 
@@ -399,7 +399,7 @@ class BlockContextTransform(Transform):
         self._inverted = not transform._inverted
 
     def forward(self, inputs, context=None):
-        return self._transform.inverse(inputs, context)
+        return self._transform.inverse(inputs, None)
 
     def inverse(self, inputs, context=None):
-        return self._transform(inputs, context)
+        return self._transform(inputs, None)

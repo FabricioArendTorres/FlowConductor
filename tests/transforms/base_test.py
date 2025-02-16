@@ -1,11 +1,11 @@
 """Tests for the basic transform definitions."""
 
-import unittest
-
 import numpy as np
+import pytest
 import torch
 
 from flowcon.transforms import InverseTransform, base, conditional, standard
+from tests.transforms import transform_test
 from tests.transforms.transform_test import TransformTest
 
 
@@ -148,5 +148,84 @@ class ConditionalTransformTest(TransformTest):
             self.transform.inverse(self.random_input)
 
 
+class MockTransform(base.Transform):
+    def __init__(self, allow_context=True):
+        super().__init__()
+        self._inverted = False
+        self._allow_context = allow_context
+
+    def forward(self, inputs, context=None):
+        if not self._allow_context and (context is not None):
+            raise RuntimeError(f"No context allowed, but {context=}.")
+        elif self._allow_context and context is None:
+            raise RuntimeError(f"Context expected, but {context=}.")
+
+        _sum = torch.sum(context, -1, keepdim=True) if context is not None else 0
+        return inputs + 1 + _sum, torch.zeros(inputs.shape[0])
+
+    def inverse(self, inputs, context=None):
+        if not self._allow_context and (context is not None):
+            raise RuntimeError(f"No context allowed, but {context=}.")
+        elif self._allow_context and context is None:
+            raise RuntimeError(f"Context expected, but {context=}.")
+        _sum = torch.sum(context, -1, keepdim=True) if context is not None else 0
+
+        return inputs - 1 - _sum, torch.zeros(inputs.shape[0])
+
+
+class RemoveContextTransformTest(transform_test.ConditionalTransformTest):
+    def setUp(self):
+        super().setUp()
+        self.features = 3
+        self.batch_size = 10
+        self.random_context = torch.randn(self.batch_size, 5)
+        self.random_input = torch.randn((self.batch_size, self.features))
+        transforms_with_context1 = base.CompositeTransform(
+            [
+                MockTransform(allow_context=True),
+                MockTransform(allow_context=True),
+            ]
+        )
+        transforms_with_context2 = base.CompositeTransform(
+            [
+                MockTransform(allow_context=True),
+                MockTransform(allow_context=True),
+            ]
+        )
+        transforms_wo_context = base.CompositeTransform(
+            [MockTransform(allow_context=False), MockTransform(allow_context=False)]
+        )
+        transforms_wo_context2 = base.CompositeTransform(
+            [MockTransform(allow_context=False), MockTransform(allow_context=False)]
+        )
+        self.transform = base.CompositeTransform(
+            [
+                transforms_with_context1,
+                base.RemoveContextTransform(transforms_wo_context),
+                transforms_with_context2,
+                base.RemoveContextTransform(transforms_wo_context2),
+            ]
+        )
+
+    def test_nocontext_passed(self):
+        # the testing logic is in the mock class
+        outputs, logabsdet = self.transform.forward(
+            self.random_input, context=self.random_context
+        )
+        outputs_inv, logabsdet_inv = self.transform.inverse(
+            self.random_input, context=self.random_context
+        )
+        with pytest.raises(RuntimeError):
+            outputs, logabsdet = self.transform.forward(self.random_input)
+            expected_outputs, expected_logabsdet = self.transform.inverse(
+                self.random_input
+            )
+
+    def test_inverse(self):
+        self.assert_conditional_forward_inverse_are_consistent(
+            self.transform, self.random_input, self.random_context
+        )
+
+
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main()
