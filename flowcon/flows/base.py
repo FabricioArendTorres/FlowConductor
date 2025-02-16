@@ -207,8 +207,6 @@ class ConditionalFlow(Module):
         self._base_distribution = distribution
 
         if context_embedder is not None:
-            if not isinstance(context_embedder, torch.nn.Module):
-                raise TypeError("`embedding_net` must be a torch.nn.Module. ")
             self._context_embedder = context_embedder
         else:
             self._context_embedder = torch.nn.Identity()
