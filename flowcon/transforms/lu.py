@@ -1,4 +1,5 @@
-from typing import Tuple, cast
+from typing import cast
+
 import numpy as np
 import torch
 from torch import nn
@@ -13,56 +14,58 @@ class LULinear(Linear):
 
     def __init__(
         self,
-        features: int,
+        num_features: int,
         using_cache: bool = False,
-        identity_init: bool = True,
+        identity_init: bool = False,
         eps: float = 1e-3,
     ):
-        super().__init__(features, using_cache)
+        super().__init__(num_features, using_cache)
 
         self.eps = eps
 
-        self.lower_indices = np.tril_indices(features, k=-1)
-        self.upper_indices = np.triu_indices(features, k=1)
-        self.diag_indices = np.diag_indices(features)
+        self._raw_matrix = nn.Parameter(torch.empty(num_features, num_features))
 
-        n_triangular_entries = ((features - 1) * features) // 2
+        self.lower_indices = np.tril_indices(num_features, k=-1)
+        self.upper_indices = np.triu_indices(num_features, k=1)
+        self.diag_indices = np.diag_indices(num_features)
 
-        self.lower_entries = nn.Parameter(torch.zeros(n_triangular_entries))
-        self.upper_entries = nn.Parameter(torch.zeros(n_triangular_entries))
-        self.unconstrained_upper_diag = nn.Parameter(torch.zeros(features))
+        self.register_buffer("eye", torch.eye(num_features), persistent=True)
 
         self._initialize(identity_init)
 
     def _initialize(self, identity_init: bool):
-        init.zeros_(self.bias)
+        # inverse softplus to ensure 1-diagonal in softplus transformed diagonal
+        raw_diagonal_constant = np.log(np.exp(1 - self.eps) - 1)
 
-        if identity_init:
-            init.zeros_(self.lower_entries)
-            init.zeros_(self.upper_entries)
-            constant = np.log(np.exp(1 - self.eps) - 1)
-            init.constant_(self.unconstrained_upper_diag, constant)
-        else:
-            stdv = 1.0 / np.sqrt(self.features)
-            init.uniform_(self.lower_entries, -stdv, stdv)
-            init.uniform_(self.upper_entries, -stdv, stdv)
-            init.uniform_(self.unconstrained_upper_diag, -stdv, stdv)
+        with torch.no_grad():
+            if identity_init:
+                init.eye_(self._raw_matrix)
+                self._raw_matrix.fill_diagonal_(raw_diagonal_constant)
+                init.zeros_(self.bias)
 
-    def _create_lower_upper(self):
-        lower = self.lower_entries.new_zeros(self.features, self.features)
-        lower[self.lower_indices[0], self.lower_indices[1]] = self.lower_entries
-        # The diagonal of L is taken to be all-ones without loss of generality.
-        lower[self.diag_indices[0], self.diag_indices[1]] = 1.0
+            else:
+                self._raw_matrix.data.copy_(
+                    torch.randn_like(self._raw_matrix) * 1e-2
+                )  # Add small noise
+                raw_diagonal_constant = np.log(np.expm1(1 - self.eps))
+                self._raw_matrix.fill_diagonal_(raw_diagonal_constant)
+                init.constant_(self.bias, 1e-3)
 
-        upper = self.upper_entries.new_zeros(self.features, self.features)
-        upper[self.upper_indices[0], self.upper_indices[1]] = self.upper_entries
-        upper[self.diag_indices[0], self.diag_indices[1]] = self.upper_diag
+    def get_lower_upper(self):
+        # lower triangular values + ones on diagonal
+        lower = torch.tril(self._raw_matrix, diagonal=-1) + self.eye
+        # upper triangular values with zeros on diagonal
+        upper = torch.triu(self._raw_matrix, diagonal=1)
+        # set diagonal
+        # preserves gradient flow, does not create new values, looks nice
+        # i did not find a better solution..
+        upper.diagonal()[:] = self.upper_diag_flat
 
         return lower, upper
 
     def forward_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N)
             logabsdet = O(D)
@@ -70,7 +73,7 @@ class LULinear(Linear):
             D = num of features
             N = num of inputs
         """
-        lower, upper = self._create_lower_upper()
+        lower, upper = self.get_lower_upper()
         outputs = F.linear(inputs, upper)
         outputs = F.linear(outputs, lower, self.bias)
         logabsdet = self.logabsdet() * inputs.new_ones(outputs.shape[0])
@@ -78,7 +81,7 @@ class LULinear(Linear):
 
     def inverse_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N)
             logabsdet = O(D)
@@ -86,7 +89,7 @@ class LULinear(Linear):
             D = num of features
             N = num of inputs
         """
-        lower, upper = self._create_lower_upper()
+        lower, upper = self.get_lower_upper()
         outputs = inputs - self.bias
         outputs = cast(
             torch.Tensor,
@@ -113,7 +116,7 @@ class LULinear(Linear):
         where:
             D = num of features
         """
-        lower, upper = self._create_lower_upper()
+        lower, upper = self.get_lower_upper()
         return lower @ upper
 
     def weight_inverse(self) -> torch.Tensor:
@@ -122,14 +125,11 @@ class LULinear(Linear):
         where:
             D = num of features
         """
-        lower, upper = self._create_lower_upper()
-        identity = torch.eye(
-            self.features, self.features, device=self.lower_entries.device
-        )
+        lower, upper = self.get_lower_upper()
         lower_inverse = cast(
             torch.Tensor,
             torch.linalg.solve_triangular(
-                lower, identity, upper=False, unitriangular=True
+                lower, self.eye, upper=False, unitriangular=True
             ),
         )
         weight_inverse = cast(
@@ -141,8 +141,8 @@ class LULinear(Linear):
         return weight_inverse
 
     @property
-    def upper_diag(self) -> torch.Tensor:
-        return F.softplus(self.unconstrained_upper_diag) + self.eps
+    def upper_diag_flat(self) -> torch.Tensor:
+        return F.softplus(self._raw_matrix.diagonal()) + self.eps
 
     def logabsdet(self) -> torch.Tensor:
         """Cost:
@@ -150,4 +150,4 @@ class LULinear(Linear):
         where:
             D = num of features
         """
-        return torch.sum(torch.log(self.upper_diag))
+        return torch.sum(torch.log1p(self.upper_diag_flat - 1))
