@@ -1,5 +1,6 @@
 """Implementations of Normal distributions."""
 
+from typing import Optional
 import numpy as np
 import torch
 from torch import nn
@@ -56,8 +57,8 @@ class DiagonalNormal(BaseDistribution):
     def __init__(
         self,
         dim: int,
-        mean: torch.Tensor = None,
-        log_std: torch.Tensor = None,
+        mean: Optional[torch.Tensor] = None,
+        log_std: Optional[torch.Tensor] = None,
         trainable_mean: bool = True,
         trainable_log_std: bool = True,
     ):

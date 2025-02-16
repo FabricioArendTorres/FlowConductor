@@ -1,3 +1,4 @@
+from typing import Optional
 import torch
 
 from flowcon.distributions import BaseDistribution
@@ -11,8 +12,8 @@ class Uniform(BaseDistribution):
     def __init__(
         self,
         dim: int,
-        low: torch.Tensor = None,
-        high: torch.Tensor = None,
+        low: Optional[torch.Tensor] = None,
+        high: Optional[torch.Tensor] = None,
     ):
         """
         Constructor.
@@ -68,7 +69,3 @@ class Uniform(BaseDistribution):
             (num_samples, self.dim), dtype=self._low.dtype, device=self._low.device
         )
         return self._low + rand * (self._high - self._low)
-
-
-class Uniform(Uniform):
-    pass

@@ -18,7 +18,7 @@ class BaseDistribution(nn.Module):
     If you desire a conditional distribution, do so via defining a transform with an embedding network.
     """
 
-    def __init__(self, dim: int):
+    def __init__(self, dim: int) -> None:
         super().__init__()
 
         if not check.is_positive_int(dim):
