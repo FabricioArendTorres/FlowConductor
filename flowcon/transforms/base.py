@@ -1,6 +1,17 @@
 """Basic definitions for the transforms module."""
 
-from typing import Callable, Iterable, Optional, Tuple
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Any,
+    Union,
+    Generator,
+    cast,
+)
 
 import numpy as np
 import torch
@@ -24,7 +35,7 @@ class InputOutsideDomain(Exception):
 class Transform(nn.Module):
     """Base class for all transform objects."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple[Any, ...], **kwargs: Dict[str, Any]):
         super().__init__(*args, **kwargs)
         self._inverted = False
 
@@ -114,9 +125,12 @@ class Sequential(Transform):
     def _cascade(
         inputs: torch.Tensor,
         funcs: Iterable[
-            Callable[[torch.Tensor, torch.Tensor], Tuple[torch.Tensor, torch.Tensor]]
+            Callable[
+                [torch.Tensor, Union[torch.Tensor, None]],
+                Tuple[torch.Tensor, torch.Tensor],
+            ]
         ],
-        context: torch.Tensor,
+        context: Union[torch.Tensor, None],
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Applies a sequence of functions to the inputs, accumulating log determinants.
@@ -214,8 +228,8 @@ class MultiscaleSequential(Transform):
             raise TypeError("Split dimension must be a positive integer.")
 
         super().__init__()
-        self._transforms = nn.ModuleList()
-        self._output_shapes = []
+        self._transforms = cast(List[Transform], nn.ModuleList())
+        self._output_shapes: List[Tuple[int, ...]] = []
         self._num_transforms = num_transforms
         self._split_dim = split_dim
 
@@ -283,7 +297,7 @@ class MultiscaleSequential(Transform):
 
         batch_size = inputs.shape[0]
 
-        def cascade():
+        def cascade() -> Generator[tuple[torch.Tensor, torch.Tensor], None, None]:
             hiddens = inputs
 
             for i, transform in enumerate(self._transforms[:-1]):
@@ -323,7 +337,7 @@ class MultiscaleSequential(Transform):
         split_indices = np.cumsum([np.prod(shape) for shape in self._output_shapes])
         split_indices = np.insert(split_indices, 0, 0)
 
-        split_inputs = []
+        split_inputs: List[torch.Tensor] = []
         for i in range(len(self._output_shapes)):
             flat_input = inputs[:, split_indices[i] : split_indices[i + 1]]
             split_inputs.append(flat_input.view(-1, *self._output_shapes[i]))
@@ -369,10 +383,14 @@ class Inverse(Transform):
         self._transform = transform
         self._inverted = not transform._inverted
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         return self._transform.inverse(inputs, context)
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         return self._transform(inputs, context)
 
 
@@ -399,8 +417,12 @@ class RemoveContext(Transform):
         self._transform = transform
         self._inverted = not transform._inverted
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         return self._transform.inverse(inputs, None)
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         return self._transform(inputs, None)
