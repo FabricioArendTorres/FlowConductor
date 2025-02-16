@@ -1,17 +1,16 @@
 """Tests for linear transforms."""
 
-import unittest
 from unittest.mock import MagicMock
 
+import pytest
 import torch
+import torch._dynamo
+from parameterized import parameterized_class
 
 from flowcon.transforms import linear
 from flowcon.transforms.linear import Linear, ScalarScale, ScalarShift
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
-
-from flowcon.utils import torchutils
-from parameterized import parameterized_class
 
 
 class LinearTest(TransformTest):
@@ -196,7 +195,7 @@ class LinearTest(TransformTest):
 class NaiveLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = linear.NaiveLinear(features=self.features)
+        self.transform = linear.NaiveLinear(num_features=self.features)
 
         self.weight = self.transform._weight
         self.weight_inverse = torch.inverse(self.weight)
@@ -218,6 +217,46 @@ class NaiveLinearTest(TransformTest):
         self.assertEqual(outputs, outputs_ref)
         self.assertEqual(logabsdet, logabsdet_ref)
 
+    @pytest.mark.expensive
+    def test_forward_no_cache_compiled(self):
+        batch_size = 10
+        inputs = torch.randn(batch_size, self.features)
+        forward_no_cache_comp = torch.compile(
+            self.transform.forward_no_cache, mode="reduce-overhead"
+        )
+
+        outputs_ref, logabsdet_ref = self.transform.forward_no_cache(inputs)
+        outputs, logabsdet = forward_no_cache_comp(inputs)
+
+        assert (
+            torch._dynamo.explain(forward_no_cache_comp)(inputs).graph_break_count == 0
+        ), "Graph break occured."
+
+        self.assert_tensor_is_good(outputs, [batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [batch_size])
+
+        self.assertEqual(outputs, outputs_ref)
+        self.assertEqual(logabsdet, logabsdet_ref)
+
+    @pytest.mark.expensive
+    def test_forward_compiled(self):
+        batch_size = 10
+        inputs = torch.randn(batch_size, self.features)
+        forward_comp = torch.compile(self.transform.forward, mode="reduce-overhead")
+
+        outputs_ref, logabsdet_ref = self.transform.forward(inputs)
+        outputs, logabsdet = forward_comp(inputs)
+
+        assert torch._dynamo.explain(forward_comp)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
+
+        self.assert_tensor_is_good(outputs, [batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [batch_size])
+
+        self.assertEqual(outputs, outputs_ref)
+        self.assertEqual(logabsdet, logabsdet_ref)
+
     def test_inverse_no_cache(self):
         batch_size = 10
         inputs = torch.randn(batch_size, self.features)
@@ -231,6 +270,65 @@ class NaiveLinearTest(TransformTest):
 
         self.assertEqual(outputs, outputs_ref)
         self.assertEqual(logabsdet, logabsdet_ref)
+
+    @pytest.mark.expensive
+    def test_inverse_no_cache_compiled(self):
+        batch_size = 10
+
+        inverse_no_cache_comp = torch.compile(
+            self.transform.inverse_no_cache, mode="reduce-overhead"
+        )
+        inputs = torch.randn(batch_size, self.features)
+        outputs, logabsdet = inverse_no_cache_comp(inputs)
+
+        assert (
+            torch._dynamo.explain(inverse_no_cache_comp)(inputs).graph_break_count == 0
+        ), "Graph break occured."
+        outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
+        logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
+
+        self.assert_tensor_is_good(outputs, [batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [batch_size])
+
+        self.assertEqual(outputs, outputs_ref)
+        self.assertEqual(logabsdet, logabsdet_ref)
+
+    @pytest.mark.expensive
+    def test_inverse_compiled(self):
+        batch_size = 10
+
+        inverse_comp = torch.compile(self.transform.inverse, mode="reduce-overhead")
+        inputs = torch.randn(batch_size, self.features)
+        outputs, logabsdet = inverse_comp(inputs)
+
+        assert torch._dynamo.explain(inverse_comp)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
+        outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
+        logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
+
+        self.assert_tensor_is_good(outputs, [batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet, [batch_size])
+
+        self.assertEqual(outputs, outputs_ref)
+        self.assertEqual(logabsdet, logabsdet_ref)
+
+    def test_weight_inverse_and_logabsdet(self):
+        batch_size = 10
+        inputs = torch.randn(batch_size, self.features)
+        outputs, logabsdet_Tinv = self.transform.inverse_no_cache(inputs)
+        w_inv, logabsdet_T = self.transform.weight_inverse_and_forwardlogabsdet()
+
+        outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
+        logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
+
+        self.assert_tensor_is_good(outputs, [batch_size, self.features])
+        self.assert_tensor_is_good(logabsdet_Tinv, [batch_size])
+
+        self.assertEqual(outputs, outputs_ref)
+        self.assertEqual(logabsdet_Tinv, logabsdet_ref)
+        self.assertEqual(logabsdet_Tinv[0], -logabsdet_T)
+        self.assertEqual(self.weight_inverse, w_inv)
 
     def test_weight(self):
         weight = self.transform.weight()
@@ -253,14 +351,17 @@ class NaiveLinearTest(TransformTest):
         self.assert_forward_inverse_are_consistent(self.transform, inputs)
 
 
-@parameterized_class(('batch_size', 'features', 'scale'), [
-    (10, 2, 1),
-    (2, 4, 2),
-    (10, 2, 15.),
-    (16, 3, 0.01),
-    (10, 20, 142),
-    (1, 3, 4),
-])
+@parameterized_class(
+    ("batch_size", "features", "scale"),
+    [
+        (10, 2, 1),
+        (2, 4, 2),
+        (10, 2, 15.0),
+        (16, 3, 0.01),
+        (10, 20, 142),
+        (1, 3, 4),
+    ],
+)
 class ScalarScaleTest(TransformTest):
     def setUp(self):
         # self.features = 2
@@ -271,11 +372,12 @@ class ScalarScaleTest(TransformTest):
 
     def test_forward(self):
         outputs, logabsdet = self.transform.forward(self.inputs)
-
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(outputs, self.inputs)
+        ).view(-1)
 
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -286,7 +388,9 @@ class ScalarScaleTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(inputs_rec, outputs)
+        ).view(-1)
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
 
     def test_forward_inverse_are_consistent(self):
@@ -294,14 +398,17 @@ class ScalarScaleTest(TransformTest):
         self.assert_forward_inverse_are_consistent(self.transform, inputs)
 
 
-@parameterized_class(('batch_size', 'features', 'scale'), [
-    (10, 2, 1.),
-    (2, 4, 2.),
-    (10, 2, 15.),
-    (16, 3, 0.01),
-    (10, 20, 142),
-    (1, 3, 4.),
-])
+@parameterized_class(
+    ("batch_size", "features", "scale"),
+    [
+        (10, 2, 1.0),
+        (2, 4, 2.0),
+        (10, 2, 15.0),
+        (16, 3, 0.01),
+        (10, 20, 142),
+        (1, 3, 4.0),
+    ],
+)
 class ScalarShiftTest(TransformTest):
     def setUp(self):
         # self.features = 2
@@ -316,7 +423,9 @@ class ScalarShiftTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(outputs, self.inputs)
+        ).view(-1)
 
         self.assertEqual(logabsdet, logabsdet_ref)
         self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
@@ -328,7 +437,9 @@ class ScalarShiftTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(inputs_rec, outputs)
+        ).view(-1)
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
         self.assertEqual(logabsdet_inverse, torch.zeros_like(logabsdet_inverse))
 
@@ -338,4 +449,4 @@ class ScalarShiftTest(TransformTest):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    pytest.main()
