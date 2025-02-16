@@ -1,6 +1,6 @@
 """Implementations of linear transforms."""
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 import numpy as np
 import torch
@@ -104,7 +104,7 @@ class Linear(Transform):
         elif self.cache.is_logabsdet_empty():
             self.cache.logabsdet = self.logabsdet()
 
-    def train(self, mode=True):
+    def train(self, mode: bool = True):
         if mode:
             # If training again, invalidate cache.
             self.cache.reset_cache()
@@ -177,7 +177,10 @@ class NaiveLinear(Linear):
     """
 
     def __init__(
-        self, num_features: int, orthogonal_initialization=True, using_cache=False
+        self,
+        num_features: int,
+        orthogonal_initialization: bool = True,
+        using_cache: bool = False,
     ):
         """
         Constructor.
@@ -251,8 +254,12 @@ class NaiveLinear(Linear):
         batch_size = inputs.shape[0]
         outputs = inputs - self.bias
         # LU-decompose the weights and solve for the outputs.
-        lu, lu_pivots = torch.linalg.lu_factor(self._weight)
-        outputs = torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
+        lu, lu_pivots = cast(
+            Tuple[torch.Tensor, torch.Tensor], torch.linalg.lu_factor(self._weight)
+        )
+        outputs = cast(
+            torch.Tensor, torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
+        )
         # The linear-system solver returns the LU decomposition of the weights, which we
         # can use to obtain the log absolute determinant directly.
         logabsdet_Tinv = -torch.sum(torch.log(torch.abs(torch.diag(lu))))
@@ -302,7 +309,7 @@ class NaiveLinear(Linear):
         # If both weight inverse and logabsdet are needed, it's cheaper to compute both together.
         identity = torch.eye(self.features, self.features)
         # LU-decompose the weights and solve for the outputs.
-        lu, lu_pivots = torch.lu(self._weight)
+        lu, lu_pivots = cast(Tuple[torch.Tensor, torch.Tensor], torch.lu(self._weight))
         weight_inv = torch.lu_solve(identity, lu, lu_pivots)
         logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
         return weight_inv, logabsdet
@@ -376,7 +383,9 @@ class ScalarScale(Transform):
         """
         return torch.nn.functional.softplus(self._scale) + self.eps
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         outputs = self.scale * inputs
 
         logabsdet = (
@@ -386,7 +395,9 @@ class ScalarScale(Transform):
         )
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs * (1.0 / self.scale)
         logabsdet = (
             -inputs.new_ones(inputs.shape[0])
@@ -420,17 +431,21 @@ class ScalarShift(Transform):
 
     """
 
-    def __init__(self, shift=0.0, trainable=True):
+    def __init__(self, shift: float = 0.0, trainable: bool = True):
         super().__init__()
         self.shift = nn.Parameter(
             torch.tensor(shift, dtype=torch.get_default_dtype()),
             requires_grad=trainable,
         )
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs + self.shift
         return outputs, inputs.new_zeros(inputs.shape[0])
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs - self.shift
         return outputs, inputs.new_zeros(inputs.shape[0])
