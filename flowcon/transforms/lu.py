@@ -1,3 +1,4 @@
+from typing import Tuple, cast
 import numpy as np
 import torch
 from torch import nn
@@ -10,7 +11,13 @@ from flowcon.transforms.linear import Linear
 class LULinear(Linear):
     """A linear transform where we parameterize the LU decomposition of the weights."""
 
-    def __init__(self, features, using_cache=False, identity_init=True, eps=1e-3):
+    def __init__(
+        self,
+        features: int,
+        using_cache: bool = False,
+        identity_init: bool = True,
+        eps: float = 1e-3,
+    ):
         super().__init__(features, using_cache)
 
         self.eps = eps
@@ -27,7 +34,7 @@ class LULinear(Linear):
 
         self._initialize(identity_init)
 
-    def _initialize(self, identity_init):
+    def _initialize(self, identity_init: bool):
         init.zeros_(self.bias)
 
         if identity_init:
@@ -53,7 +60,9 @@ class LULinear(Linear):
 
         return lower, upper
 
-    def forward_no_cache(self, inputs):
+    def forward_no_cache(
+        self, inputs: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N)
             logabsdet = O(D)
@@ -67,7 +76,9 @@ class LULinear(Linear):
         logabsdet = self.logabsdet() * inputs.new_ones(outputs.shape[0])
         return outputs, logabsdet
 
-    def inverse_no_cache(self, inputs):
+    def inverse_no_cache(
+        self, inputs: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N)
             logabsdet = O(D)
@@ -77,11 +88,17 @@ class LULinear(Linear):
         """
         lower, upper = self._create_lower_upper()
         outputs = inputs - self.bias
-        outputs = torch.linalg.solve_triangular(
-            lower, outputs.t(), upper=False, unitriangular=True
+        outputs = cast(
+            torch.Tensor,
+            torch.linalg.solve_triangular(
+                lower, outputs.t(), upper=False, unitriangular=True
+            ),
         )
-        outputs = torch.linalg.solve_triangular(
-            upper, outputs, upper=True, unitriangular=False
+        outputs = cast(
+            torch.Tensor,
+            torch.linalg.solve_triangular(
+                upper, outputs, upper=True, unitriangular=False
+            ),
         )
         outputs = outputs.t()
 
@@ -90,7 +107,7 @@ class LULinear(Linear):
 
         return outputs, logabsdet
 
-    def weight(self):
+    def weight(self) -> torch.Tensor:
         """Cost:
             weight = O(D^3)
         where:
@@ -99,7 +116,7 @@ class LULinear(Linear):
         lower, upper = self._create_lower_upper()
         return lower @ upper
 
-    def weight_inverse(self):
+    def weight_inverse(self) -> torch.Tensor:
         """Cost:
             inverse = O(D^3)
         where:
@@ -107,20 +124,27 @@ class LULinear(Linear):
         """
         lower, upper = self._create_lower_upper()
         identity = torch.eye(
-            self.features, self.features, device=self.lower_entries.device)
-        lower_inverse = torch.linalg.solve_triangular(
-            lower, identity, upper=False, unitriangular=True
+            self.features, self.features, device=self.lower_entries.device
         )
-        weight_inverse = torch.linalg.solve_triangular(
-            upper, lower_inverse, upper=True, unitriangular=False
+        lower_inverse = cast(
+            torch.Tensor,
+            torch.linalg.solve_triangular(
+                lower, identity, upper=False, unitriangular=True
+            ),
+        )
+        weight_inverse = cast(
+            torch.Tensor,
+            torch.linalg.solve_triangular(
+                upper, lower_inverse, upper=True, unitriangular=False
+            ),
         )
         return weight_inverse
 
     @property
-    def upper_diag(self):
+    def upper_diag(self) -> torch.Tensor:
         return F.softplus(self.unconstrained_upper_diag) + self.eps
 
-    def logabsdet(self):
+    def logabsdet(self) -> torch.Tensor:
         """Cost:
             logabsdet = O(D)
         where:

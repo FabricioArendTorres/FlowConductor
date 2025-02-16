@@ -1,7 +1,7 @@
 """Various PyTorch utility functions."""
 
 import random
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple, cast
 
 import numpy as np
 import torch
@@ -107,7 +107,7 @@ def random_orthogonal(dim: int) -> torch.Tensor:
 
     # Use the QR decomposition of a random Gaussian matrix.
     x = torch.randn(dim, dim)
-    q, _ = torch.linalg.qr(x)
+    q, _ = cast(Tuple[torch.Tensor, torch.Tensor], torch.linalg.qr(x))
     return q
 
 
