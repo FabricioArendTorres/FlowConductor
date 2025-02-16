@@ -11,7 +11,7 @@ from flowcon.datasets.base import InfiniteLoader, PlaneDataset, load_plane_datas
 from flowcon.distributions.normal import DiagonalNormal
 from flowcon.flows import ConditionalFlow as Flow
 from flowcon.nn import ResidualNet, Sin
-from flowcon.transforms import CompositeTransform
+from flowcon.transforms import Sequential
 from flowcon.transforms.lipschitz import iResBlock
 from flowcon.transforms.normalization import ActNorm
 from flowcon.utils.torchutils import *
@@ -107,7 +107,7 @@ def build_flow(num_layers=5, num_shared_embedding=50):
         transforms.append(ActNorm(2))
         transforms.append(densenet_factory.build())
 
-    transform = CompositeTransform(transforms)
+    transform = Sequential(transforms)
     context_embedder = ResidualNet(
         in_features=1,
         out_features=num_shared_embedding,

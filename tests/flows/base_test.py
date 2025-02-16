@@ -8,7 +8,7 @@ import torchtestcase
 
 from flowcon.distributions.normal import StandardNormal
 from flowcon.flows import base
-from flowcon.transforms.base import CompositeTransform
+from flowcon.transforms.base import Sequential
 from flowcon.transforms.reshape import FlattenTransform
 from flowcon.transforms.standard import AffineScalarTransform
 
@@ -18,7 +18,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         batch_size = 10
         input_shape = [2, 3, 4]
         flow = base.Flow(
-            transform=CompositeTransform(
+            transform=Sequential(
                 (AffineScalarTransform(scale=2.0), FlattenTransform())
             ),
             distribution=StandardNormal(prod(input_shape)),
@@ -32,7 +32,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2, 3, 4]
         flow = base.Flow(
-            transform=CompositeTransform(
+            transform=Sequential(
                 (AffineScalarTransform(scale=2.0), FlattenTransform())
             ),
             distribution=StandardNormal(prod(input_shape)),
@@ -47,7 +47,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2]
         flow = base.Flow(
-            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            transform=Sequential((AffineScalarTransform(scale=2.0),)),
             distribution=StandardNormal(prod(input_shape)),
         )
         logprob_compiled = torch.compile(flow.log_prob)
@@ -64,7 +64,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2]
         flow = base.Flow(
-            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            transform=Sequential((AffineScalarTransform(scale=2.0),)),
             distribution=StandardNormal(prod(input_shape)),
         )
         torch.random.manual_seed(1234)
@@ -105,7 +105,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
     def test_log_prob(self):
         input_shape = [2, 3, 4]
         flow = base.ConditionalFlow(
-            transform=CompositeTransform(
+            transform=Sequential(
                 (AffineScalarTransform(scale=2.0), FlattenTransform())
             ),
             distribution=StandardNormal(prod(input_shape)),
@@ -121,7 +121,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2, 3, 4]
         flow = base.ConditionalFlow(
-            transform=CompositeTransform(
+            transform=Sequential(
                 (AffineScalarTransform(scale=2.0), FlattenTransform())
             ),
             distribution=StandardNormal(prod(input_shape)),
@@ -149,7 +149,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         input_shape = [2]
 
         flow = base.ConditionalFlow(
-            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            transform=Sequential((AffineScalarTransform(scale=2.0),)),
             distribution=StandardNormal(prod(input_shape)),
         )
         logprob_compiled = torch.compile(flow.log_prob)
@@ -166,7 +166,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2]
         flow = base.ConditionalFlow(
-            transform=CompositeTransform((AffineScalarTransform(scale=2.0),)),
+            transform=Sequential((AffineScalarTransform(scale=2.0),)),
             distribution=StandardNormal(prod(input_shape)),
         )
         torch.random.manual_seed(1234)

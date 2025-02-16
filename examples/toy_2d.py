@@ -8,7 +8,7 @@ from flowcon.datasets import InfiniteLoader, load_plane_dataset
 from flowcon.distributions import StandardNormal
 from flowcon.flows import Flow
 from flowcon.nn.nets import CSin
-from flowcon.transforms import CompositeTransform
+from flowcon.transforms import Sequential
 from flowcon.transforms.lipschitz import iResBlock
 from flowcon.transforms.normalization import ActNorm
 
@@ -98,7 +98,7 @@ def build_flow():
         transforms.append(ActNorm(features=2))
         transforms.append(densenet_factory.build())
 
-    transform = CompositeTransform(transforms)
+    transform = Sequential(transforms)
     flow = Flow(transform, base_dist).to(device)
     return flow
 

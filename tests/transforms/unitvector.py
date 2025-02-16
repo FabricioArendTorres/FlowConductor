@@ -3,22 +3,24 @@
 import unittest
 
 import torch
-
-from flowcon.transforms import UnitVector, InverseTransform
-from flowcon.utils import torchutils
-from tests.transforms.transform_test import TransformTest
-from flowcon.utils import torchutils
 from parameterized import parameterized_class
 
+from flowcon.transforms import Inverse, UnitVector
+from flowcon.utils import torchutils
+from tests.transforms.transform_test import TransformTest
 
-@parameterized_class(('batch_size', 'features'), [
-    (10, 2),
-    (2, 4),
-    (10, 2),
-    (16, 3),
-    (10, 20),
-    (1, 3),
-])
+
+@parameterized_class(
+    ("batch_size", "features"),
+    [
+        (10, 2),
+        (2, 4),
+        (10, 2),
+        (16, 3),
+        (10, 20),
+        (1, 3),
+    ],
+)
 class UnitVectorTest(TransformTest):
     def setUp(self):
         # self.features = 2
@@ -34,7 +36,9 @@ class UnitVectorTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features + 1])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.batch_JTJ_logabsdet(inputs=self.inputs, outputs=outputs).view(-1)
+        logabsdet_ref = torchutils.batch_JTJ_logabsdet(
+            inputs=self.inputs, outputs=outputs
+        ).view(-1)
 
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -71,7 +75,7 @@ class UnitVectorTest(TransformTest):
 
     def test_forward_inverse_are_consistent(self):
         inputs = self.inputs
-        self.assert_forward_inverse_are_consistent(InverseTransform(self.transform), inputs)
+        self.assert_forward_inverse_are_consistent(Inverse(self.transform), inputs)
 
 
 if __name__ == "__main__":

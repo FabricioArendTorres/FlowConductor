@@ -1,9 +1,13 @@
 """Various PyTorch utility functions."""
-from flowcon.utils import typechecks as check
+
+import random
+
 import numpy as np
 import torch
 from numpy.typing import ArrayLike
-import random
+
+from flowcon.utils import typechecks as check
+
 
 def set_seeds(SEED):
     np.random.seed(SEED)
@@ -62,11 +66,23 @@ def tensor2numpy(x):
     return tensor_to_np(x)
 
 
-def logabsdet(x):
-    """Returns the log absolute determinant of square matrix x."""
+def logabsdet(matrix: torch.Tensor) -> torch.Tensor:
+    """
+    Returns the log absolute determinant of a square matrix.
+
+    Parameters
+    ----------
+    matrix : torch.Tensor
+        Square matrix in a tensor of shape [dim, dim]
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar valued logabsdet of the input matrix.
+    """
     # Note: torch.logdet() only works for positive determinant.
-    _, res = torch.slogdet(x)
-    return res
+    _, logabsdet = torch.slogdet(matrix)
+    return logabsdet
 
 
 def batch_JTJ_logabsdet(inputs, outputs):
@@ -75,13 +91,24 @@ def batch_JTJ_logabsdet(inputs, outputs):
     return logabsdet
 
 
-def random_orthogonal(size):
+def random_orthogonal(dim: int) -> torch.Tensor:
     """
-    Returns a random orthogonal matrix as a 2-dim tensor of shape [size, size].
+    Returns a random orthogonal matrix as a tensor of shape [dim, dim]
+    using the QR decomposition of a normaly distributed dim x dim matrix.
+
+    Parameters
+    ----------
+    size : int
+        Dimension of the matrix.
+
+    Returns
+    -------
+    torch.Tensor
+        Q component of the QR c, shape [dim, dim]
     """
 
     # Use the QR decomposition of a random Gaussian matrix.
-    x = torch.randn(size, size)
+    x = torch.randn(dim, dim)
     q, _ = torch.linalg.qr(x)
     return q
 
@@ -175,7 +202,7 @@ def get_temperature(max_value, bound=1 - 1e-3):
 def gaussian_kde_log_eval(samples, query):
     N, D = samples.shape[0], samples.shape[-1]
     std = N ** (-1 / (D + 4))
-    precision = (1 / (std ** 2)) * torch.eye(D)
+    precision = (1 / (std**2)) * torch.eye(D)
     a = query - samples
     b = a @ precision
     c = -0.5 * torch.sum(a * b, dim=-1)
@@ -198,12 +225,16 @@ def batchwise_dot_prod(bvector1, bvector2):
 def batch_jacobian(g, x):
     jac = []
     for d in range(g.shape[1]):
-        jac.append(torch.autograd.grad(torch.sum(g[:, d]), x, create_graph=True)[0].view(x.shape[0], 1, x.shape[1]))
+        jac.append(
+            torch.autograd.grad(torch.sum(g[:, d]), x, create_graph=True)[0].view(
+                x.shape[0], 1, x.shape[1]
+            )
+        )
     return torch.cat(jac, 1)
 
 
 def batch_trace(M):
-    return M.view(M.shape[0], -1)[:, ::M.shape[1] + 1].sum(1)
+    return M.view(M.shape[0], -1)[:, :: M.shape[1] + 1].sum(1)
 
 
 def sech2(x):
@@ -246,5 +277,8 @@ def _flatten(sequence):
 
 
 def _flatten_convert_none_to_zeros(sequence, like_sequence):
-    flat = [p.reshape(-1) if p is not None else torch.zeros_like(q).view(-1) for p, q in zip(sequence, like_sequence)]
+    flat = [
+        p.reshape(-1) if p is not None else torch.zeros_like(q).view(-1)
+        for p, q in zip(sequence, like_sequence)
+    ]
     return torch.cat(flat) if len(flat) > 0 else torch.tensor([])

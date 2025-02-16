@@ -1,6 +1,6 @@
 # isort:skip_file
 
-from flowcon.transforms.base import Transform, CompositeTransform, InverseTransform
+from flowcon.transforms.base import Transform, Sequential, Inverse
 from flowcon.transforms.reshape import FlattenTransform
 
 from flowcon.transforms import (

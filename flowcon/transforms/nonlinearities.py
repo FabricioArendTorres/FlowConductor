@@ -7,9 +7,9 @@ from torch.nn import functional as F
 
 from flowcon.transforms import splines
 from flowcon.transforms.base import (
-    CompositeTransform,
     InputOutsideDomain,
-    InverseTransform,
+    Inverse,
+    Sequential,
     Transform,
 )
 from flowcon.utils import torchutils
@@ -23,7 +23,7 @@ class Exp(Transform):
         return outputs, logabsdet
 
     def inverse(self, inputs, context=None):
-        if torch.min(inputs) <= 0.:
+        if torch.min(inputs) <= 0.0:
             raise InputOutsideDomain()
 
         outputs = torch.log(inputs)
@@ -35,7 +35,7 @@ class Exp(Transform):
 class Tanh(Transform):
     def forward(self, inputs, context=None):
         outputs = torch.tanh(inputs)
-        logabsdet = torch.log(1 - outputs ** 2)
+        logabsdet = torch.log(1 - outputs**2)
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
         return outputs, logabsdet
 
@@ -43,13 +43,13 @@ class Tanh(Transform):
         if torch.min(inputs) <= -1 or torch.max(inputs) >= 1:
             raise InputOutsideDomain()
         outputs = 0.5 * torch.log((1 + inputs) / (1 - inputs))
-        logabsdet = -torch.log(1 - inputs ** 2)
+        logabsdet = -torch.log(1 - inputs**2)
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
         return outputs, logabsdet
 
 
 class LogTanh(Transform):
-    """Tanh with unbounded output. 
+    """Tanh with unbounded output.
 
     Constructed by selecting a cut_point, and replacing values to the right of cut_point
     with alpha * log(beta * x), and to the left of -cut_point with -alpha * log(-beta *
@@ -102,10 +102,10 @@ class LogTanh(Transform):
         logabsdet = torch.zeros_like(inputs)
         logabsdet[mask_middle] = -torch.log(1 - inputs[mask_middle] ** 2)
         logabsdet[mask_right] = (
-                -np.log(self.alpha * self.beta) + inputs[mask_right] / self.alpha
+            -np.log(self.alpha * self.beta) + inputs[mask_right] / self.alpha
         )
         logabsdet[mask_left] = (
-                -np.log(self.alpha * self.beta) - inputs[mask_left] / self.alpha
+            -np.log(self.alpha * self.beta) - inputs[mask_left] / self.alpha
         )
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
 
@@ -119,7 +119,9 @@ class LeakyReLU(Transform):
         super().__init__()
         # self.device = device
         self.negative_slope = negative_slope
-        self.log_negative_slope = torch.nn.Parameter(torch.log(torch.as_tensor(self.negative_slope)))  # .to(device)
+        self.log_negative_slope = torch.nn.Parameter(
+            torch.log(torch.as_tensor(self.negative_slope))
+        )  # .to(device)
 
     def forward(self, inputs, context=None):
         outputs = F.leaky_relu(inputs, negative_slope=self.negative_slope)
@@ -144,7 +146,7 @@ class Sigmoid(Transform):
             self.temperature = nn.Parameter(torch.Tensor([temperature]))
         else:
             temperature = torch.Tensor([temperature])
-            self.register_buffer('temperature', temperature)
+            self.register_buffer("temperature", temperature)
 
     def forward(self, inputs, context=None):
         inputs = self.temperature * inputs
@@ -170,7 +172,7 @@ class Sigmoid(Transform):
 
 
 class Softplus(Transform):
-    def __init__(self, threshold=20, eps=0.):
+    def __init__(self, threshold=20, eps=0.0):
         super().__init__()
 
         self.eps = eps
@@ -184,12 +186,14 @@ class Softplus(Transform):
 
     def inverse(self, inputs, context=None):
         inputs = inputs - self.eps
-        outputs = torch.where(inputs > self.softplus.threshold, inputs, inputs.expm1().log())
+        outputs = torch.where(
+            inputs > self.softplus.threshold, inputs, inputs.expm1().log()
+        )
         logabsdet = -torch.log(-torch.expm1(-inputs)).sum(-1)
         return outputs, logabsdet
 
 
-class Logit(InverseTransform):
+class Logit(Inverse):
     def __init__(self, temperature=1, eps=1e-6):
         super().__init__(Sigmoid(temperature=temperature, eps=eps))
 
@@ -216,7 +220,7 @@ class CauchyCDF(Transform):
     def forward(self, inputs, context=None):
         outputs = (1 / np.pi) * torch.atan(inputs) + 0.5
         logabsdet = torchutils.sum_except_batch(
-            -np.log(np.pi) - torch.log(1 + inputs ** 2)
+            -np.log(np.pi) - torch.log(1 + inputs**2)
         )
         return outputs, logabsdet
 
@@ -226,20 +230,24 @@ class CauchyCDF(Transform):
 
         outputs = torch.tan(np.pi * (inputs - 0.5))
         logabsdet = -torchutils.sum_except_batch(
-            -np.log(np.pi) - torch.log(1 + outputs ** 2)
+            -np.log(np.pi) - torch.log(1 + outputs**2)
         )
         return outputs, logabsdet
 
 
-class CauchyCDFInverse(InverseTransform):
+class CauchyCDFInverse(Inverse):
     def __init__(self, location=None, scale=None, features=None):
         super().__init__(CauchyCDF(location=location, scale=scale, features=features))
 
 
-class CompositeCDFTransform(CompositeTransform):
+class CompositeCDFTransform(Sequential):
     def __init__(self, squashing_transform, cdf_transform):
         super().__init__(
-            [squashing_transform, cdf_transform, InverseTransform(squashing_transform), ]
+            [
+                squashing_transform,
+                cdf_transform,
+                Inverse(squashing_transform),
+            ]
         )
 
 
@@ -285,13 +293,13 @@ class PiecewiseLinearCDF(Transform):
 
 class PiecewiseQuadraticCDF(Transform):
     def __init__(
-            self,
-            shape,
-            num_bins=10,
-            tails=None,
-            tail_bound=1.0,
-            min_bin_width=splines.quadratic.DEFAULT_MIN_BIN_WIDTH,
-            min_bin_height=splines.quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        self,
+        shape,
+        num_bins=10,
+        tails=None,
+        tail_bound=1.0,
+        min_bin_width=splines.quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=splines.quadratic.DEFAULT_MIN_BIN_HEIGHT,
     ):
         super().__init__()
         self.min_bin_width = min_bin_width
@@ -327,7 +335,7 @@ class PiecewiseQuadraticCDF(Transform):
             inverse=inverse,
             min_bin_width=self.min_bin_width,
             min_bin_height=self.min_bin_height,
-            **spline_kwargs
+            **spline_kwargs,
         )
 
         return outputs, torchutils.sum_except_batch(logabsdet)
@@ -341,13 +349,13 @@ class PiecewiseQuadraticCDF(Transform):
 
 class PiecewiseCubicCDF(Transform):
     def __init__(
-            self,
-            shape,
-            num_bins=10,
-            tails=None,
-            tail_bound=1.0,
-            min_bin_width=splines.cubic.DEFAULT_MIN_BIN_WIDTH,
-            min_bin_height=splines.cubic.DEFAULT_MIN_BIN_HEIGHT,
+        self,
+        shape,
+        num_bins=10,
+        tails=None,
+        tail_bound=1.0,
+        min_bin_width=splines.cubic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=splines.cubic.DEFAULT_MIN_BIN_HEIGHT,
     ):
         super().__init__()
 
@@ -391,7 +399,7 @@ class PiecewiseCubicCDF(Transform):
             inverse=inverse,
             min_bin_width=self.min_bin_width,
             min_bin_height=self.min_bin_height,
-            **spline_kwargs
+            **spline_kwargs,
         )
 
         return outputs, torchutils.sum_except_batch(logabsdet)
@@ -405,15 +413,15 @@ class PiecewiseCubicCDF(Transform):
 
 class PiecewiseRationalQuadraticCDF(Transform):
     def __init__(
-            self,
-            shape,
-            num_bins=10,
-            tails=None,
-            tail_bound=1.0,
-            identity_init=False,
-            min_bin_width=splines.rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
-            min_bin_height=splines.rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
-            min_derivative=splines.rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+        self,
+        shape,
+        num_bins=10,
+        tails=None,
+        tail_bound=1.0,
+        identity_init=False,
+        min_bin_width=splines.rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=splines.rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative=splines.rational_quadratic.DEFAULT_MIN_DERIVATIVE,
     ):
         super().__init__()
 
@@ -475,7 +483,7 @@ class PiecewiseRationalQuadraticCDF(Transform):
             min_bin_width=self.min_bin_width,
             min_bin_height=self.min_bin_height,
             min_derivative=self.min_derivative,
-            **spline_kwargs
+            **spline_kwargs,
         )
 
         return outputs, torchutils.sum_except_batch(logabsdet)
@@ -500,7 +508,9 @@ class ExtendedSoftplus(torch.nn.Module):
         self.features = features
         super(ExtendedSoftplus, self).__init__()
         if shift is None:
-            self.shift = torch.nn.Parameter(torch.ones(1, features) * 3, requires_grad=True)
+            self.shift = torch.nn.Parameter(
+                torch.ones(1, features) * 3, requires_grad=True
+            )
             # self.log_scale = torch.nn.Parameter(torch.zeros(1, features), requires_grad=True)
         elif torch.is_tensor(shift):
             self.shift = shift.reshape(-1, features)
@@ -520,10 +530,10 @@ class ExtendedSoftplus(torch.nn.Module):
         return self._softplus(self.shift) + 1e-1
 
     def softplus(self, x, shift):
-        return self._softplus((x - shift))
+        return self._softplus(x - shift)
 
     def softminus(self, x, shift):
-        return - self._softplus(-(x + shift))
+        return -self._softplus(-(x + shift))
 
     def diag_jacobian_pos(self, x, shift):
         # (b e^(b x))/(e^(a b) + e^(b x))
@@ -535,10 +545,10 @@ class ExtendedSoftplus(torch.nn.Module):
         return log_jac
 
     def diag_jacobian_neg(self, x, shift):
-        return torch.sigmoid(- (shift + x))
+        return torch.sigmoid(-(shift + x))
 
     def log_diag_jacobian_neg(self, x, shift):
-        return - self._softplus((shift + x))
+        return -self._softplus(shift + x)
 
     def forward(self, inputs):
         # inputs = inputs.requires_grad_()
@@ -547,6 +557,8 @@ class ExtendedSoftplus(torch.nn.Module):
         # ref_batch_jacobian = torchutils.batch_jacobian(outputs, inputs)
         # ref_logabsdet = torchutils.logabsdet(ref_batch_jacobian)
         # breakpoint()
-        diag_jacobian = torch.logaddexp(self.log_diag_jacobian_pos(inputs, shift),
-                                        self.log_diag_jacobian_neg(inputs, shift))
+        diag_jacobian = torch.logaddexp(
+            self.log_diag_jacobian_pos(inputs, shift),
+            self.log_diag_jacobian_neg(inputs, shift),
+        )
         return outputs, diag_jacobian  # torch.log(diag_jacobian).sum(-1)

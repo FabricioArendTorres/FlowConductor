@@ -89,9 +89,10 @@ class Transform(nn.Module):
         return self._inverted
 
 
-class CompositeTransform(Transform):
+class Sequential(Transform):
     """
-    A transform that composes multiple transforms sequentially.
+    A transform that composes multiple transforms sequentially,
+    similar in spirit to torch.nn.Sequential.
 
     During the forward pass, the transforms are applied in order.
     During the inverse pass, they are applied in reverse order
@@ -185,7 +186,7 @@ class CompositeTransform(Transform):
         return self._cascade(inputs, inverted_funcs, context)
 
 
-class MultiscaleCompositeTransform(Transform):
+class MultiscaleSequential(Transform):
     """
     A multiscale composite transform as described in the RealNVP paper.
 
@@ -346,7 +347,7 @@ class MultiscaleCompositeTransform(Transform):
         return outputs, total_logabsdet
 
 
-class InverseTransform(Transform):
+class Inverse(Transform):
     """
     Wraps a transform to create its inverse.
 
@@ -375,7 +376,7 @@ class InverseTransform(Transform):
         return self._transform(inputs, context)
 
 
-class RemoveContextTransform(Transform):
+class RemoveContext(Transform):
     """
     A wrapper for transforms that ensures they do not receive external context.
 

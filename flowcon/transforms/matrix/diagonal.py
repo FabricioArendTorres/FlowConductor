@@ -2,11 +2,11 @@ import numpy as np
 import torch
 from torch import nn
 
-from flowcon.transforms.base import CompositeTransform, Transform
+from flowcon.transforms.base import Sequential, Transform
 from flowcon.transforms.linear import ScalarScale, ScalarShift
 from flowcon.transforms.nonlinearities import Exp, Sigmoid, Softplus
 
-fancy_exp_transform = CompositeTransform(
+fancy_exp_transform = Sequential(
     [
         Sigmoid(),
         ScalarScale(scale=80.0, trainable=False),
@@ -15,7 +15,7 @@ fancy_exp_transform = CompositeTransform(
     ]
 )
 
-fancy_softplus_transform = CompositeTransform(
+fancy_softplus_transform = Sequential(
     [
         Sigmoid(),
         ScalarScale(scale=80.0, trainable=False),
@@ -56,9 +56,7 @@ class TransformDiagonalExponential(TransformDiagonal):
     def __init__(self, N, eps=1e-5):
         super().__init__(
             N=N,
-            diag_transformation=CompositeTransform(
-                [Exp(), ScalarShift(eps, trainable=False)]
-            ),
+            diag_transformation=Sequential([Exp(), ScalarShift(eps, trainable=False)]),
         )
 
 
@@ -66,7 +64,7 @@ class TransformDiagonalSoftplus(TransformDiagonal):
     def __init__(self, N, eps=1e-5):
         super().__init__(
             N=N,
-            diag_transformation=CompositeTransform(
+            diag_transformation=Sequential(
                 [Softplus(), ScalarShift(eps, trainable=False)]
             ),
         )

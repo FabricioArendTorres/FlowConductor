@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from flowcon.transforms import InverseTransform, base, conditional, standard
+from flowcon.transforms import Inverse, base, conditional, standard
 from tests.transforms import transform_test
 from tests.transforms.transform_test import TransformTest
 
@@ -19,7 +19,7 @@ class CompositeTransformTest(TransformTest):
             standard.IdentityTransform(),
             standard.AffineScalarTransform(scale=0.25),
         ]
-        composite = base.CompositeTransform(transforms)
+        composite = base.Sequential(transforms)
         reference = standard.AffineScalarTransform(scale=0.5)
         outputs, logabsdet = composite(inputs)
         outputs_ref, logabsdet_ref = reference(inputs)
@@ -37,7 +37,7 @@ class CompositeTransformTest(TransformTest):
             standard.IdentityTransform(),
             standard.AffineScalarTransform(scale=0.25),
         ]
-        composite = base.CompositeTransform(transforms)
+        composite = base.Sequential(transforms)
         reference = standard.AffineScalarTransform(scale=0.5)
         outputs, logabsdet = composite.inverse(inputs)
         outputs_ref, logabsdet_ref = reference.inverse(inputs)
@@ -49,7 +49,7 @@ class CompositeTransformTest(TransformTest):
 
 class MultiscaleCompositeTransformTest(TransformTest):
     def create_transform(self, shape, split_dim=1):
-        mct = base.MultiscaleCompositeTransform(num_transforms=4, split_dim=split_dim)
+        mct = base.MultiscaleSequential(num_transforms=4, split_dim=split_dim)
         for transform in [
             standard.AffineScalarTransform(scale=2.0),
             standard.AffineScalarTransform(scale=4.0),
@@ -96,9 +96,7 @@ class MultiscaleCompositeTransformTest(TransformTest):
             with self.subTest(shape=shape):
                 transform = self.create_transform(shape)
                 inputs = torch.randn(batch_size, *shape).view(batch_size, -1)
-                self.assert_forward_inverse_are_consistent(
-                    InverseTransform(transform), inputs
-                )
+                self.assert_forward_inverse_are_consistent(Inverse(transform), inputs)
 
 
 class InverseTransformTest(TransformTest):
@@ -106,7 +104,7 @@ class InverseTransformTest(TransformTest):
         batch_size = 10
         shape = [2, 3, 4]
         inputs = torch.randn(batch_size, *shape)
-        transform = base.InverseTransform(standard.AffineScalarTransform(scale=2.0))
+        transform = base.Inverse(standard.AffineScalarTransform(scale=2.0))
         reference = standard.AffineScalarTransform(scale=0.5)
         outputs, logabsdet = transform(inputs)
         outputs_ref, logabsdet_ref = reference(inputs)
@@ -119,7 +117,7 @@ class InverseTransformTest(TransformTest):
         batch_size = 10
         shape = [2, 3, 4]
         inputs = torch.randn(batch_size, *shape)
-        transform = base.InverseTransform(standard.AffineScalarTransform(scale=2.0))
+        transform = base.Inverse(standard.AffineScalarTransform(scale=2.0))
         reference = standard.AffineScalarTransform(scale=0.5)
         outputs, logabsdet = transform.inverse(inputs)
         outputs_ref, logabsdet_ref = reference.inverse(inputs)
@@ -180,30 +178,30 @@ class RemoveContextTransformTest(transform_test.ConditionalTransformTest):
         self.batch_size = 10
         self.random_context = torch.randn(self.batch_size, 5)
         self.random_input = torch.randn((self.batch_size, self.features))
-        transforms_with_context1 = base.CompositeTransform(
+        transforms_with_context1 = base.Sequential(
             [
                 MockTransform(allow_context=True),
                 MockTransform(allow_context=True),
             ]
         )
-        transforms_with_context2 = base.CompositeTransform(
+        transforms_with_context2 = base.Sequential(
             [
                 MockTransform(allow_context=True),
                 MockTransform(allow_context=True),
             ]
         )
-        transforms_wo_context = base.CompositeTransform(
+        transforms_wo_context = base.Sequential(
             [MockTransform(allow_context=False), MockTransform(allow_context=False)]
         )
-        transforms_wo_context2 = base.CompositeTransform(
+        transforms_wo_context2 = base.Sequential(
             [MockTransform(allow_context=False), MockTransform(allow_context=False)]
         )
-        self.transform = base.CompositeTransform(
+        self.transform = base.Sequential(
             [
                 transforms_with_context1,
-                base.RemoveContextTransform(transforms_wo_context),
+                base.RemoveContext(transforms_wo_context),
                 transforms_with_context2,
-                base.RemoveContextTransform(transforms_wo_context2),
+                base.RemoveContext(transforms_wo_context2),
             ]
         )
 
