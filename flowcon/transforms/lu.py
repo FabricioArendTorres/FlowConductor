@@ -34,15 +34,9 @@ class LULinear(Linear):
     ):
         super().__init__(num_features, using_cache)
 
-        self.eps = eps
-
         self._raw_matrix = nn.Parameter(torch.empty(num_features, num_features))
-
-        self.lower_indices = np.tril_indices(num_features, k=-1)
-        self.upper_indices = np.triu_indices(num_features, k=1)
-        self.diag_indices = np.diag_indices(num_features)
-
         self.register_buffer("eye", torch.eye(num_features), persistent=True)
+        self.register_buffer("eps", torch.tensor(eps), persistent=True)
 
         self._initialize_weights(identity_init)
 
