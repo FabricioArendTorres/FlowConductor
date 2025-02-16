@@ -1,21 +1,23 @@
 """Various PyTorch utility functions."""
 
 import random
+from typing import Iterable, Optional
 
 import numpy as np
 import torch
 from numpy.typing import ArrayLike
+import torch.types
 
 from flowcon.utils import typechecks as check
 
 
-def set_seeds(SEED):
-    np.random.seed(SEED)
-    torch.random.manual_seed(SEED)
-    random.seed(SEED)
+def set_seeds(seed: int) -> None:
+    np.random.seed(seed)
+    torch.random.manual_seed(seed)
+    random.seed(seed)
 
 
-def tile(x, n):
+def tile(x: torch.Tensor, n: int):
     if not check.is_positive_int(n):
         raise TypeError("Argument 'n' must be a positive integer.")
     x_ = x.reshape(-1)
@@ -26,7 +28,7 @@ def tile(x, n):
     return x_
 
 
-def sum_except_batch(x, num_batch_dims=1):
+def sum_except_batch(x: torch.Tensor, num_batch_dims: int = 1) -> torch.Tensor:
     """Sums all elements of `x` except for the first `num_batch_dims` dimensions."""
     if not check.is_nonnegative_int(num_batch_dims):
         raise TypeError("Number of batch dimensions must be a non-negative integer.")
@@ -34,13 +36,13 @@ def sum_except_batch(x, num_batch_dims=1):
     return torch.sum(x, dim=reduce_dims)
 
 
-def split_leading_dim(x, shape):
+def split_leading_dim(x: torch.Tensor, shape: Iterable[int]) -> torch.Tensor:
     """Reshapes the leading dim of `x` to have the given shape."""
     new_shape = torch.Size(shape) + x.shape[1:]
     return torch.reshape(x, new_shape)
 
 
-def merge_leading_dims(x, num_dims):
+def merge_leading_dims(x: torch.Tensor, num_dims: int) -> torch.Tensor:
     """Reshapes the tensor `x` such that the first `num_dims` dimensions are merged to one."""
     if not check.is_positive_int(num_dims):
         raise TypeError("Number of leading dims must be a positive integer.")
@@ -52,7 +54,7 @@ def merge_leading_dims(x, num_dims):
     return torch.reshape(x, new_shape)
 
 
-def repeat_rows(x, num_reps):
+def repeat_rows(x: torch.Tensor, num_reps: int) -> torch.Tensor:
     """Each row of tensor `x` is repeated `num_reps` times along leading dimension."""
     if not check.is_positive_int(num_reps):
         raise TypeError("Number of repetitions must be a positive integer.")
@@ -60,10 +62,6 @@ def repeat_rows(x, num_reps):
     x = x.unsqueeze(1)
     x = x.expand(shape[0], num_reps, *shape[1:])
     return merge_leading_dims(x, num_dims=2)
-
-
-def tensor2numpy(x):
-    return tensor_to_np(x)
 
 
 def logabsdet(matrix: torch.Tensor) -> torch.Tensor:
@@ -85,7 +83,7 @@ def logabsdet(matrix: torch.Tensor) -> torch.Tensor:
     return logabsdet
 
 
-def batch_JTJ_logabsdet(inputs, outputs):
+def batch_JTJ_logabsdet(inputs: torch.Tensor, outputs: torch.Tensor) -> torch.Tensor:
     jacs = batch_jacobian(outputs, inputs)
     logabsdet = 0.5 * torch.slogdet(torch.bmm(torch.transpose(jacs, -2, -1), jacs))[1]
     return logabsdet
@@ -113,7 +111,7 @@ def random_orthogonal(dim: int) -> torch.Tensor:
     return q
 
 
-def get_num_parameters(model):
+def get_num_parameters(model: torch.nn.Module) -> int:
     """
     Returns the number of trainable parameters in a model of type nets.Module
     :param model: nets.Module containing trainable parameters
@@ -126,7 +124,7 @@ def get_num_parameters(model):
     return num_parameters
 
 
-def create_alternating_binary_mask(features, even=True):
+def create_alternating_binary_mask(features: int, even: bool = True) -> torch.Tensor:
     """
     Creates a binary mask of a given dimension which alternates its masking.
 
@@ -140,7 +138,7 @@ def create_alternating_binary_mask(features, even=True):
     return mask
 
 
-def create_mid_split_binary_mask(features):
+def create_mid_split_binary_mask(features: int) -> torch.Tensor:
     """
     Creates a binary mask of a given dimension which splits its masking at the midpoint.
 
@@ -153,7 +151,7 @@ def create_mid_split_binary_mask(features):
     return mask
 
 
-def create_random_binary_mask(features):
+def create_random_binary_mask(features: int) -> torch.Tensor:
     """
     Creates a random binary mask of a given dimension with half of its entries
     randomly set to 1s.
@@ -171,58 +169,32 @@ def create_random_binary_mask(features):
     return mask
 
 
-def searchsorted(bin_locations, inputs, eps=1e-6):
+def searchsorted(
+    bin_locations: torch.Tensor, inputs: torch.Tensor, eps: float = 1e-6
+) -> torch.Tensor:
     bin_locations[..., -1] += eps
     return torch.sum(inputs[..., None] >= bin_locations, dim=-1) - 1
 
 
-def cbrt(x):
+def cbrt(x: torch.Tensor) -> torch.Tensor:
     """Cube root. Equivalent to torch.pow(x, 1/3), but numerically stable."""
     return torch.sign(x) * torch.exp(torch.log(torch.abs(x)) / 3.0)
 
 
-def get_temperature(max_value, bound=1 - 1e-3):
-    """
-    For a dataset with max value 'max_value', returns the temperature such that
-
-        sigmoid(temperature * max_value) = bound.
-
-    If temperature is greater than 1, returns 1.
-
-    :param max_value:
-    :param bound:
-    :return:
-    """
-    max_value = torch.Tensor([max_value])
-    bound = torch.Tensor([bound])
-    temperature = min(-(1 / max_value) * (torch.log1p(-bound) - torch.log(bound)), 1)
-    return temperature
-
-
-def gaussian_kde_log_eval(samples, query):
-    N, D = samples.shape[0], samples.shape[-1]
-    std = N ** (-1 / (D + 4))
-    precision = (1 / (std**2)) * torch.eye(D)
-    a = query - samples
-    b = a @ precision
-    c = -0.5 * torch.sum(a * b, dim=-1)
-    d = -np.log(N) - (D / 2) * np.log(2 * np.pi) - D * np.log(std)
-    c += d
-    return torch.logsumexp(c, dim=-1)
-
-
-def gradient(y, x, grad_outputs=None):
+def gradient(
+    y: torch.Tensor, x: torch.Tensor, grad_outputs: Optional[torch.Tensor] = None
+):
     if grad_outputs is None:
         grad_outputs = torch.ones_like(y)
     grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
     return grad
 
 
-def batchwise_dot_prod(bvector1, bvector2):
+def batchwise_dot_prod(bvector1: torch.Tensor, bvector2: torch.Tensor) -> torch.Tensor:
     return (bvector1 * bvector2).sum(-1)
 
 
-def batch_jacobian(g, x):
+def batch_jacobian(g: torch.Tensor, x: torch.Tensor):
     jac = []
     for d in range(g.shape[1]):
         jac.append(
@@ -233,25 +205,26 @@ def batch_jacobian(g, x):
     return torch.cat(jac, 1)
 
 
-def batch_trace(M):
+def batch_trace(M: torch.Tensor):
     return M.view(M.shape[0], -1)[:, :: M.shape[1] + 1].sum(1)
 
 
-def sech2(x):
+def sech2(x: torch.Tensor):
     return 1 / torch.cosh(x) ** 2
 
 
-def np_to_tensor(input: ArrayLike, dtype=None, device="cpu") -> torch.Tensor:
+def np_to_tensor(
+    array: ArrayLike, dtype: Optional[torch.dtype] = None, device: str = "cpu"
+) -> torch.Tensor:
     if dtype is None:
         dtype = torch.get_default_dtype()
 
-    if isinstance(input, np.ndarray):
-        return torch.tensor(input, dtype=dtype, device=device)
-    elif isinstance(input, torch.Tensor):
-        input: torch.Tensor
-        return input.to(dtype).to(device)
+    if isinstance(array, np.ndarray):
+        return torch.tensor(array, dtype=dtype, device=device)
+    elif isinstance(array, torch.Tensor):
+        return array.to(dtype).to(device)
     else:
-        raise ValueError("Unknown Type: " + str(type(input)))
+        raise ValueError("Unknown Type: " + str(type(array)))
 
 
 def tensor_to_np(tensor: torch.Tensor) -> ArrayLike:
@@ -263,22 +236,9 @@ def tensor_to_np(tensor: torch.Tensor) -> ArrayLike:
         raise ValueError("Unknown Type: " + str(type(tensor)))
 
 
-def sample_rademacher_like(y):
+def sample_rademacher_like(y: torch.Tensor) -> torch.Tensor:
     return torch.randint(low=0, high=2, size=y.shape).to(y) * 2 - 1
 
 
-def safe_detach(tensor):
+def safe_detach(tensor: torch.Tensor) -> torch.Tensor:
     return tensor.detach().requires_grad_(tensor.requires_grad)
-
-
-def _flatten(sequence):
-    flat = [p.reshape(-1) for p in sequence]
-    return torch.cat(flat) if len(flat) > 0 else torch.tensor([])
-
-
-def _flatten_convert_none_to_zeros(sequence, like_sequence):
-    flat = [
-        p.reshape(-1) if p is not None else torch.zeros_like(q).view(-1)
-        for p, q in zip(sequence, like_sequence)
-    ]
-    return torch.cat(flat) if len(flat) > 0 else torch.tensor([])
