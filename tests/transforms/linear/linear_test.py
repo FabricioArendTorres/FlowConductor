@@ -7,8 +7,8 @@ import torch
 import torch._dynamo
 from parameterized import parameterized_class
 
-from flowcon.transforms import linear
-from flowcon.transforms.linear import Linear, ScalarScale, ScalarShift
+from flowcon.transforms.linear import linear
+from flowcon.transforms.linear.linear import Linear, ScalarScale, ScalarShift
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 

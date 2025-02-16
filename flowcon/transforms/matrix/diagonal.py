@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 from flowcon.transforms.base import Sequential, Transform
-from flowcon.transforms.linear import ScalarScale, ScalarShift
+from flowcon.transforms.linear.linear import ScalarScale, ScalarShift
 from flowcon.transforms.nonlinearities import Exp, Sigmoid, Softplus
 
 fancy_exp_transform = Sequential(

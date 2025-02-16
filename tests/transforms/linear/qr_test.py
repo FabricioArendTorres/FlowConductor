@@ -2,23 +2,19 @@ import unittest
 
 import torch
 
-from flowcon.transforms.svd import SVDLinear
+from flowcon.transforms.linear import qr
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 
-class SVDLinearTest(TransformTest):
+class QRLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = SVDLinear(features=self.features, num_householder=4)
-        self.transform.bias.data = torch.randn(
-            self.features
-        )  # Just so bias isn't zero.
+        self.transform = qr.QRLinear(features=self.features, num_householder=4)
 
-        diagonal = torch.diag(torch.exp(self.transform.log_diagonal))
-        orthogonal_1 = self.transform.orthogonal_1.matrix()
-        orthogonal_2 = self.transform.orthogonal_2.matrix()
-        self.weight = orthogonal_1 @ diagonal @ orthogonal_2
+        upper = self.transform._create_upper()
+        orthogonal = self.transform.orthogonal.matrix()
+        self.weight = orthogonal @ upper
         self.weight_inverse = torch.inverse(self.weight)
         self.logabsdet = torchutils.logabsdet(self.weight)
 
@@ -29,7 +25,7 @@ class SVDLinearTest(TransformTest):
         inputs = torch.randn(batch_size, self.features)
         outputs, logabsdet = self.transform.forward_no_cache(inputs)
 
-        outputs_ref = inputs @ self.weight.t() + self.transform.bias
+        outputs_ref = torch.matmul(inputs, self.weight.t()) + self.transform.bias
         logabsdet_ref = torch.full([batch_size], self.logabsdet.item())
 
         self.assert_tensor_is_good(outputs, [batch_size, self.features])

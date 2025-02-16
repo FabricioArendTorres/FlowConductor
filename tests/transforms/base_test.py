@@ -4,7 +4,8 @@ import numpy as np
 import pytest
 import torch
 
-from flowcon.transforms import Inverse, base, conditional, standard
+from flowcon.transforms import Inverse, base, conditional
+from flowcon.transforms.linear import standard
 from tests.transforms import transform_test
 from tests.transforms.transform_test import TransformTest
 

@@ -9,8 +9,8 @@ import torchtestcase
 from flowcon.distributions.normal import StandardNormal
 from flowcon.flows import base
 from flowcon.transforms.base import Sequential
+from flowcon.transforms.linear.standard import AffineScalarTransform
 from flowcon.transforms.reshape import FlattenTransform
-from flowcon.transforms.standard import AffineScalarTransform
 
 
 class FlowTest(torchtestcase.TorchTestCase):

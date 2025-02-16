@@ -1,6 +1,6 @@
 """Implementations of linear transforms."""
 
-from typing import Optional, Tuple, cast
+from typing import cast
 
 import numpy as np
 import torch
@@ -11,6 +11,8 @@ from torch.nn import init
 import flowcon.utils.typechecks as check
 from flowcon.transforms.base import Transform
 from flowcon.utils import torchutils
+
+__all__ = ["Linear", "NaiveLinear", "ScalarScale", "ScalarShift"]
 
 
 class LinearCache(nn.Module):
@@ -59,8 +61,8 @@ class Linear(Transform):
         self.cache = LinearCache()
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if not self.training and self.using_cache:
             self._update_forward_cache()
             outputs = F.linear(inputs, self.cache.weight, self.bias)
@@ -82,8 +84,8 @@ class Linear(Transform):
             self.cache.logabsdet = self.logabsdet()
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if not self.training and self.using_cache:
             self._update_inverse_cache()
             outputs = F.linear(inputs - self.bias, self.cache.inverse)
@@ -115,7 +117,7 @@ class Linear(Transform):
             raise TypeError("Mode must be boolean.")
         self.using_cache = mode
 
-    def weight_and_logabsdet(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def weight_and_logabsdet(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
         To be overridden by subclasses if it is more efficient to compute the weight matrix
         and its logabsdet together.
@@ -127,7 +129,7 @@ class Linear(Transform):
         """
         return self.weight(), self.logabsdet()
 
-    def weight_inverse_and_forwardlogabsdet(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def weight_inverse_and_forwardlogabsdet(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
         To be overridden by subclasses if it is more efficient to compute the weight matrix
         inverse and weight matrix logabsdet together.
@@ -141,13 +143,13 @@ class Linear(Transform):
 
     def forward_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Applies `forward` method without using the cache."""
         raise NotImplementedError()
 
     def inverse_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Applies `inverse` method without using the cache."""
         raise NotImplementedError()
 
@@ -205,7 +207,7 @@ class NaiveLinear(Linear):
 
     def forward_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Cost:
             output = O(D^2N)
@@ -232,7 +234,7 @@ class NaiveLinear(Linear):
 
     def inverse_no_cache(
         self, inputs: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Cost:
             output = O(D^3 + D^2N)
@@ -255,7 +257,7 @@ class NaiveLinear(Linear):
         outputs = inputs - self.bias
         # LU-decompose the weights and solve for the outputs.
         lu, lu_pivots = cast(
-            Tuple[torch.Tensor, torch.Tensor], torch.linalg.lu_factor(self._weight)
+            tuple[torch.Tensor, torch.Tensor], torch.linalg.lu_factor(self._weight)
         )
         outputs = cast(
             torch.Tensor, torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
@@ -292,7 +294,7 @@ class NaiveLinear(Linear):
         """
         return torch.inverse(self._weight)
 
-    def weight_inverse_and_forwardlogabsdet(self) -> Tuple[torch.Tensor, torch.Tensor]:
+    def weight_inverse_and_forwardlogabsdet(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Cost:
             inverse = O(D^3)
@@ -309,7 +311,7 @@ class NaiveLinear(Linear):
         # If both weight inverse and logabsdet are needed, it's cheaper to compute both together.
         identity = torch.eye(self.features, self.features)
         # LU-decompose the weights and solve for the outputs.
-        lu, lu_pivots = cast(Tuple[torch.Tensor, torch.Tensor], torch.lu(self._weight))
+        lu, lu_pivots = cast(tuple[torch.Tensor, torch.Tensor], torch.lu(self._weight))
         weight_inv = torch.lu_solve(identity, lu, lu_pivots)
         logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
         return weight_inv, logabsdet
@@ -384,8 +386,8 @@ class ScalarScale(Transform):
         return torch.nn.functional.softplus(self._scale) + self.eps
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = self.scale * inputs
 
         logabsdet = (
@@ -396,8 +398,8 @@ class ScalarScale(Transform):
         return outputs, logabsdet
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs * (1.0 / self.scale)
         logabsdet = (
             -inputs.new_ones(inputs.shape[0])
@@ -439,13 +441,13 @@ class ScalarShift(Transform):
         )
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs + self.shift
         return outputs, inputs.new_zeros(inputs.shape[0])
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = inputs - self.shift
         return outputs, inputs.new_zeros(inputs.shape[0])

@@ -1,24 +1,28 @@
-"""Tests for the LU linear transforms."""
+import unittest
 
-import pytest
 import torch
 
-from flowcon.transforms import lu
+from flowcon.transforms.linear.svd import SVDLinear
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
 
-class LULinearTest(TransformTest):
+class SVDLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = lu.LULinear(num_features=self.features)
+        self.transform = SVDLinear(features=self.features, num_householder=4)
+        self.transform.bias.data = torch.randn(
+            self.features
+        )  # Just so bias isn't zero.
 
-        lower, upper = self.transform.get_lower_upper()
-        self.weight = lower @ upper
+        diagonal = torch.diag(torch.exp(self.transform.log_diagonal))
+        orthogonal_1 = self.transform.orthogonal_1.matrix()
+        orthogonal_2 = self.transform.orthogonal_2.matrix()
+        self.weight = orthogonal_1 @ diagonal @ orthogonal_2
         self.weight_inverse = torch.inverse(self.weight)
         self.logabsdet = torchutils.logabsdet(self.weight)
 
-        self.eps = 1e-6
+        self.eps = 1e-5
 
     def test_forward_no_cache(self):
         batch_size = 10
@@ -34,52 +38,10 @@ class LULinearTest(TransformTest):
         self.assertEqual(outputs, outputs_ref)
         self.assertEqual(logabsdet, logabsdet_ref)
 
-    @pytest.mark.expensive
-    def test_forward_no_cache_compiled(self):
-        batch_size = 10
-        inputs = torch.randn(batch_size, self.features)
-        forward_no_cache_compiled = torch.compile(self.transform.forward_no_cache)
-        outputs, logabsdet = forward_no_cache_compiled(inputs)
-
-        assert (
-            torch._dynamo.explain(forward_no_cache_compiled)(inputs).graph_break_count
-            == 0
-        ), "Graph break occured."
-
-        outputs_ref = inputs @ self.weight.t() + self.transform.bias
-        logabsdet_ref = torch.full([batch_size], self.logabsdet.item())
-
-        self.assert_tensor_is_good(outputs, [batch_size, self.features])
-        self.assert_tensor_is_good(logabsdet, [batch_size])
-
-        self.assertEqual(outputs, outputs_ref)
-        self.assertEqual(logabsdet, logabsdet_ref)
-
     def test_inverse_no_cache(self):
         batch_size = 10
         inputs = torch.randn(batch_size, self.features)
         outputs, logabsdet = self.transform.inverse_no_cache(inputs)
-
-        outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
-        logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
-
-        self.assert_tensor_is_good(outputs, [batch_size, self.features])
-        self.assert_tensor_is_good(logabsdet, [batch_size])
-
-        self.assertEqual(outputs, outputs_ref)
-        self.assertEqual(logabsdet, logabsdet_ref)
-
-    @pytest.mark.expensive
-    def test_inverse_no_cache_compiled(self):
-        batch_size = 10
-        inputs = torch.randn(batch_size, self.features)
-        inverse_no_cache_compiled = torch.compile(self.transform.inverse_no_cache)
-        outputs, logabsdet = inverse_no_cache_compiled(inputs)
-
-        assert (
-            torch._dynamo.explain(inverse_no_cache_compiled)(inputs).graph_break_count
-            == 0
-        ), "Graph break occured."
 
         outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
         logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
@@ -112,4 +74,4 @@ class LULinearTest(TransformTest):
 
 
 if __name__ == "__main__":
-    pytest.main()
+    unittest.main()

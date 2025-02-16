@@ -1,4 +1,4 @@
-from flowcon.transforms.lu import LULinear
+from flowcon.transforms.linear.lu import LULinear
 from flowcon.transforms.permutations import RandomPermutation
 from flowcon.utils import torchutils
 

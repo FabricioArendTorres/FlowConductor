@@ -3,15 +3,14 @@
 import unittest
 
 import torch
+from parameterized import parameterized_class
 
 from flowcon.transforms import nonlinearities as nl
-from flowcon.transforms import standard
 from flowcon.transforms.base import InputOutsideDomain
+from flowcon.transforms.linear import standard
 from flowcon.utils import torchutils
 from tests.transforms.transform_test import TransformTest
 
-
-from parameterized import parameterized_class
 
 class ExpTest(TransformTest):
     def test_raises_domain_exception(self):
@@ -167,16 +166,17 @@ class NonlinearitiesTest(TransformTest):
                 self.assert_forward_inverse_are_consistent(transform, inputs)
 
 
-
-
-@parameterized_class(('batch_size', 'features', 'scale'), [
-    (10, 2),
-    (2, 4),
-    (10, 2),
-    (16, 3),
-    (10, 20),
-    (1, 3),
-])
+@parameterized_class(
+    ("batch_size", "features", "scale"),
+    [
+        (10, 2),
+        (2, 4),
+        (10, 2),
+        (16, 3),
+        (10, 20),
+        (1, 3),
+    ],
+)
 class SoftplusTest(TransformTest):
     def setUp(self):
         # self.features = 2
@@ -191,7 +191,9 @@ class SoftplusTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(outputs, self.inputs)
+        ).view(-1)
 
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -202,7 +204,9 @@ class SoftplusTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(-1)
+        logabsdet_ref = torchutils.logabsdet(
+            torchutils.batch_jacobian(inputs_rec, outputs)
+        ).view(-1)
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
 
     def test_forward_inverse_are_consistent(self):

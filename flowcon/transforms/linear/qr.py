@@ -4,8 +4,10 @@ from torch import nn
 from torch.nn import functional as F
 from torch.nn import init
 
-from flowcon.transforms.linear import Linear
+from flowcon.transforms.linear.linear import Linear
 from flowcon.transforms.orthogonal import HouseholderSequence
+
+__all__ = ["QRLinear"]
 
 
 class QRLinear(Linear):
