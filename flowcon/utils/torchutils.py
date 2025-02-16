@@ -17,7 +17,7 @@ def set_seeds(seed: int) -> None:
     random.seed(seed)
 
 
-def tile(x: torch.Tensor, n: int):
+def tile(x: torch.Tensor, n: int) -> torch.Tensor:
     if not check.is_positive_int(n):
         raise TypeError("Argument 'n' must be a positive integer.")
     x_ = x.reshape(-1)
@@ -183,7 +183,7 @@ def cbrt(x: torch.Tensor) -> torch.Tensor:
 
 def gradient(
     y: torch.Tensor, x: torch.Tensor, grad_outputs: Optional[torch.Tensor] = None
-):
+) -> torch.Tensor:
     if grad_outputs is None:
         grad_outputs = torch.ones_like(y)
     grad = torch.autograd.grad(y, [x], grad_outputs=grad_outputs, create_graph=True)[0]
@@ -194,7 +194,7 @@ def batchwise_dot_prod(bvector1: torch.Tensor, bvector2: torch.Tensor) -> torch.
     return (bvector1 * bvector2).sum(-1)
 
 
-def batch_jacobian(g: torch.Tensor, x: torch.Tensor):
+def batch_jacobian(g: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
     jac = []
     for d in range(g.shape[1]):
         jac.append(
@@ -205,11 +205,11 @@ def batch_jacobian(g: torch.Tensor, x: torch.Tensor):
     return torch.cat(jac, 1)
 
 
-def batch_trace(M: torch.Tensor):
+def batch_trace(M: torch.Tensor) -> torch.Tensor:
     return M.view(M.shape[0], -1)[:, :: M.shape[1] + 1].sum(1)
 
 
-def sech2(x: torch.Tensor):
+def sech2(x: torch.Tensor) -> torch.Tensor:
     return 1 / torch.cosh(x) ** 2
 
 
