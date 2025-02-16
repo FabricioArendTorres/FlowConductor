@@ -75,7 +75,7 @@ class Transform(nn.Module):
         """
         raise InverseNotAvailable()
 
-    def is_inverted(self):
+    def is_inverted(self) -> bool:
         """
         Method to help keep track of this class was inverted or not.
         If not, the forward direction is still the more efficient one.
@@ -90,13 +90,21 @@ class Transform(nn.Module):
 
 
 class CompositeTransform(Transform):
-    """Composes several transforms into one, in the order they are given."""
+    """
+    A transform that composes multiple transforms sequentially.
+
+    During the forward pass, the transforms are applied in order.
+    During the inverse pass, they are applied in reverse order
+    """
 
     def __init__(self, transforms: Iterable[Transform]):
-        """Constructor.
+        """
+        Initialize the composite transform.
 
-        Args:
-            transforms: an iterable of `Transform` objects.
+        Parameters
+        ----------
+        transforms : Iterable[Transform]
+            An iterable of `Transform` objects to be applied sequentially.
         """
         super().__init__()
         self._transforms = nn.ModuleList(transforms)
@@ -109,6 +117,23 @@ class CompositeTransform(Transform):
         ],
         context: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Applies a sequence of functions to the inputs, accumulating log determinants.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input tensor to transform.
+        funcs : Iterable[Callable]
+            Sequence of transformation functions.
+        context : torch.Tensor
+            Optional context tensor.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor]
+            Transformed output and accumulated log determinant.
+        """
         batch_size = inputs.shape[0]
         outputs = inputs
         total_logabsdet = inputs.new_zeros(batch_size)
@@ -120,18 +145,49 @@ class CompositeTransform(Transform):
     def forward(
         self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Apply the sequence of transforms in forward order.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input tensor.
+        context : Optional[torch.Tensor], default=None
+            Optional conditioning tensor.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor]
+            Transformed output and accumulated log absolute determinant ln|det(JT(x))|.
+        """
         funcs = self._transforms
         return self._cascade(inputs, funcs, context)
 
     def inverse(
         self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Apply the sequence of transforms in reverse order.
+
+        Parameters
+        ----------
+        inputs : torch.Tensor
+            Input tensor.
+        context : Optional[torch.Tensor], default=None
+            Optional conditioning tensor.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor]
+            Inverted output and accumulated log determinant ln|det(JT^{-1}(x))|
+        """
         inverted_funcs = (transform.inverse for transform in reversed(self._transforms))
         return self._cascade(inputs, inverted_funcs, context)
 
 
 class MultiscaleCompositeTransform(Transform):
-    """A multiscale composite transform as described in the RealNVP paper.
+    """
+    A multiscale composite transform as described in the RealNVP paper.
 
     Splits the outputs along the given dimension after every transform, outputs one half, and
     passes the other half to further transforms. No splitting is done before the last transform.
@@ -143,11 +199,15 @@ class MultiscaleCompositeTransform(Transform):
     """
 
     def __init__(self, num_transforms: int, split_dim: int = 1):
-        """Constructor.
+        """
+        Constructor.
 
-        Args:
-            num_transforms: int, total number of transforms to be added.
-            split_dim: dimension along which to split.
+        Parameters
+        ----------
+        num_transforms : int
+            Total number of transforms to be added.
+        split_dim : int, optional
+            dimension along which to split, by default 1
         """
         if not check.is_positive_int(split_dim):
             raise TypeError("Split dimension must be a positive integer.")
@@ -161,15 +221,21 @@ class MultiscaleCompositeTransform(Transform):
     def add_transform(
         self, transform: Transform, transform_output_shape: Tuple[int, ...]
     ) -> Optional[Tuple[int, ...]]:
-        """Add a transform. Must be called exactly `num_transforms` times.
+        """
+        Add a transform. Must be called exactly `num_transforms` times.
 
-        Parameters:
-            transform: the `Transform` object to be added.
-            transform_output_shape: tuple, shape of transform's outputs, excl. the first batch
-                dimension.
+        Parameters
+        ----------
+        transform : Transform
+            The `Transform` object to be added.
+        transform_output_shape : Tuple[int, ...]
+            shape of transform's outputs, excl. the first batch dimension.
 
-        Returns:
+        Returns
+        -------
+        Optional[Tuple[int, ...]]
             Input shape for the next transform, or None if adding the last transform.
+
         """
         assert len(self._transforms) <= self._num_transforms
 
@@ -281,13 +347,52 @@ class MultiscaleCompositeTransform(Transform):
 
 
 class InverseTransform(Transform):
-    """Creates a transform that is the inverse of a given transform."""
+    """
+    Wraps a transform to create its inverse.
+
+    This class inverts a given transform, effectively swapping its forward
+    and inverse operations. The inversion status can be checked using
+    the `Transform.is_inverted()` method.
+    """
 
     def __init__(self, transform: Transform):
-        """Constructor.
+        """
+        Initialize the inverse transform.
 
-        Args:
-            transform: An object of type `Transform`.
+        Parameters
+        ----------
+        transform : Transform
+            The transform to be inverted.
+        """
+        super().__init__()
+        self._transform = transform
+        self._inverted = not transform._inverted
+
+    def forward(self, inputs, context=None):
+        return self._transform.inverse(inputs, context)
+
+    def inverse(self, inputs, context=None):
+        return self._transform(inputs, context)
+
+
+class BlockContextTransform(Transform):
+    """
+    A wrapper for transforms that ensures they do not receive external context.
+
+    This is useful for autoregressive or coupling transforms that internally use conditioning.
+    Wrapping a transform with this class forces it to condition only on itself,
+    preventing issues with architectures like neural spline flows,
+    which can be overly flexible when conditioned on additional variables.
+    """
+
+    def __init__(self, transform: Transform):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        transform : Transform
+            The transform that shall be inverted.
         """
         super().__init__()
         self._transform = transform
