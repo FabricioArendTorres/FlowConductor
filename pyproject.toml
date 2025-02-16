@@ -45,26 +45,29 @@ quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
 
-[mypy]
+[tool.mypy]
 python_version = 3.9  # Adjust based on your Python version
-
 # Core settings
-disallow_untyped_defs = True  # Enforce type hints for all functions
-disallow_untyped_calls = False  # Allow calls to untyped functions (useful for PyTorch ops)
-warn_return_any = True  # Warn when a function returns `Any`
-warn_unused_ignores = True  # Ensure `# type: ignore` is necessary
-strict_equality = True  # Disallow `==` between incompatible types
+disallow_untyped_defs = true  # Enforce type hints for all functions
+disallow_untyped_calls = false  # Allow calls to untyped functions (useful for PyTorch ops)
+warn_return_any = true  # Warn when a function returns `Any`
+warn_unused_ignores = true  # Ensure `# type: ignore` is necessary
+strict_equality = true  # Disallow `==` between incompatible types
 
 # Allow dynamically typed attributes in classes (useful for PyTorch models)
-allow_untyped_globals = False
-allow_redefinition = True  # Common in PyTorch training loops
+allow_untyped_globals = false
+allow_redefinition = true  # Common in PyTorch training loops
+exclude = ["tests/"]
 
 # PyTorch-specific considerations
-[mypy-torch.*]
-ignore_missing_imports = True  # Avoid issues with missing type hints in PyTorch
+[[tool.mypy.overrides]]
+module = "torch.*"
+ignore_missing_imports = true
 
-[mypy-torchvision.*]
-ignore_missing_imports = True  # For torchvision modules
+[[tool.mypy.overrides]]
+module = "torchvision.*"
+ignore_missing_imports = true
 
-[mypy-torch.nn.*]
-disallow_untyped_calls = False  # Allow calling PyTorch layers without full type annotations
+[[tool.mypy.overrides]]
+module = "torch.nn.*"
+disallow_untyped_calls = false
