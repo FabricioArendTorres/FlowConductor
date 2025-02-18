@@ -10,7 +10,7 @@ from tests.transforms.transform_test import TransformTest
 class QRLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = qr.QRLinear(features=self.features, num_householder=4)
+        self.transform = qr.QRLinear(n_features=self.features)
 
         upper = self.transform._create_upper()
         orthogonal = self.transform.orthogonal.matrix()

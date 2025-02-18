@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import cast
 
 import numpy as np
@@ -31,15 +33,15 @@ class LULinear(Linear):
 
     def __init__(
         self,
-        num_features: int,
+        n_features: int,
         using_cache: bool = False,
-        identity_init: bool = False,
+        identity_init: bool = True,
         eps: float = 1e-3,
     ):
-        super().__init__(num_features, using_cache)
+        super().__init__(n_features, using_cache)
 
-        self._raw_matrix = nn.Parameter(torch.empty(num_features, num_features))
-        self.register_buffer("eye", torch.eye(num_features), persistent=True)
+        self._raw_matrix = nn.Parameter(torch.empty(n_features, n_features))
+        self.register_buffer("eye", torch.eye(n_features), persistent=True)
         self.register_buffer("eps", torch.tensor(eps), persistent=True)
 
         self._initialize_weights(identity_init)
@@ -64,11 +66,11 @@ class LULinear(Linear):
 
             else:
                 self._raw_matrix.data.copy_(
-                    torch.randn_like(self._raw_matrix) * 1e-2
+                    torch.randn_like(self._raw_matrix) * 1e-1
                 )  # Add small noise
                 raw_diagonal_constant = np.log(np.expm1(1 - self.eps))
                 self._raw_matrix.fill_diagonal_(raw_diagonal_constant)
-                init.constant_(self.bias, 1e-3)
+                init.zeros_(self.bias)
 
     def get_lower_upper(self):
         """

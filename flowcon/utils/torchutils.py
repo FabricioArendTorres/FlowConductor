@@ -1,12 +1,14 @@
 """Various PyTorch utility functions."""
 
 import random
-from typing import Iterable, Optional, Tuple, cast
+from collections.abc import Iterable
+from typing import cast
 
 import numpy as np
 import torch
-from numpy.typing import ArrayLike
+import torch.nn.functional as F
 import torch.types
+from numpy.typing import ArrayLike
 
 from flowcon.utils import typechecks as check
 
@@ -107,7 +109,7 @@ def random_orthogonal(dim: int) -> torch.Tensor:
 
     # Use the QR decomposition of a random Gaussian matrix.
     x = torch.randn(dim, dim)
-    q, _ = cast(Tuple[torch.Tensor, torch.Tensor], torch.linalg.qr(x))
+    q, _ = cast(tuple[torch.Tensor, torch.Tensor], torch.linalg.qr(x))
     return q
 
 
@@ -182,7 +184,7 @@ def cbrt(x: torch.Tensor) -> torch.Tensor:
 
 
 def gradient(
-    y: torch.Tensor, x: torch.Tensor, grad_outputs: Optional[torch.Tensor] = None
+    y: torch.Tensor, x: torch.Tensor, grad_outputs: torch.Tensor | None = None
 ) -> torch.Tensor:
     if grad_outputs is None:
         grad_outputs = torch.ones_like(y)
@@ -214,7 +216,7 @@ def sech2(x: torch.Tensor) -> torch.Tensor:
 
 
 def np_to_tensor(
-    array: ArrayLike, dtype: Optional[torch.dtype] = None, device: str = "cpu"
+    array: ArrayLike, dtype: torch.dtype | None = None, device: str = "cpu"
 ) -> torch.Tensor:
     if dtype is None:
         dtype = torch.get_default_dtype()
@@ -242,3 +244,27 @@ def sample_rademacher_like(y: torch.Tensor) -> torch.Tensor:
 
 def safe_detach(tensor: torch.Tensor) -> torch.Tensor:
     return tensor.detach().requires_grad_(tensor.requires_grad)
+
+
+def map_to_0_1_stable(S: torch.Tensor, epsilon: float = 1e-4) -> torch.Tensor:
+    """
+    Applies a softplus-based transformation to map input values to the range (epsilon, 1 - epsilon).
+
+    This function ensures smooth and stable gradients while constraining the output to a valid range,
+    which is useful in applications like singular value normalization.
+
+    Parameters
+    ----------
+    S : torch.Tensor
+        Input tensor with unconstrained values.
+    epsilon : float, optional
+        Minimum and maximum constraint margin to ensure numerical stability, by default 1e-4.
+
+    Returns
+    -------
+    torch.Tensor
+        Transformed tensor with values constrained in the range (epsilon, 1 - epsilon).
+    """
+    positive_S = F.softplus(S)
+    S_transformed = positive_S / (1 + positive_S)
+    return epsilon + (1 - 2 * epsilon) * S_transformed

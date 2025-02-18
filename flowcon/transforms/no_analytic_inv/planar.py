@@ -1,13 +1,10 @@
 import numpy as np
 import torch
 from torch import nn
-from torch.nn import functional as F
 from torch.nn import init
 
 from flowcon.transforms.base import Transform
-from flowcon.utils import torchutils
-import flowcon.utils.typechecks as check
-from flowcon.transforms.orthogonal import HouseholderSequence
+from flowcon.transforms.linear.orthogonal import OrthogonalCaley
 
 
 class PlanarTransform(Transform):
@@ -16,7 +13,7 @@ class PlanarTransform(Transform):
     See Section 4.1 in https://arxiv.org/pdf/1505.05770.pdf.
     """
 
-    def __init__(self, features: int = 2, num_iterations=25, lim = 50):
+    def __init__(self, features: int = 2, num_iterations=25, lim=50):
         """Initialise weights and bias.
 
         Args:
@@ -65,7 +62,7 @@ class PlanarTransform(Transform):
         """
         wtu = torch.mm(self.u, self.w.T)
         m_wtu = -1 + torch.nn.functional.softplus(wtu)
-        w_direction = (self.w / (torch.norm(self.w, p=2, dim=1) ** 2))
+        w_direction = self.w / (torch.norm(self.w, p=2, dim=1) ** 2)
         return self.u + (m_wtu - wtu) * w_direction
 
 
@@ -104,7 +101,9 @@ class SylvesterTransform(Transform):
         self.log_upper_diag2 = nn.Parameter(torch.zeros(features))
 
         # Q
-        self.Q_orth = HouseholderSequence(features=features, num_transforms=self.num_householder).to(device=device)
+        self.Q_orth = OrthogonalCaley(
+            n_features=features, n_transforms=self.num_householder
+        ).to(device=device)
 
         # bias
         self.bias = nn.Parameter(torch.zeros(features))
@@ -197,10 +196,11 @@ class RadialTransform(Transform):
             self.z_0 = nn.Parameter(torch.randn(self.features)[None])
 
     def forward(self, inputs, context=None):
-
         beta = torch.log(1 + torch.exp(self.beta)) - torch.abs(self.alpha)
         dz = inputs - self.z_0
-        r = torch.linalg.vector_norm(dz, dim=list(range(1, self.z_0.dim())), keepdim=True)
+        r = torch.linalg.vector_norm(
+            dz, dim=list(range(1, self.z_0.dim())), keepdim=True
+        )
         h_arr = beta / (torch.abs(self.alpha) + r)
         h_arr_ = -beta * r / (torch.abs(self.alpha) + r) ** 2
         z_ = inputs + h_arr * dz

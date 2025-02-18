@@ -10,7 +10,7 @@ from tests.transforms.transform_test import TransformTest
 class SVDLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = SVDLinear(features=self.features, num_householder=4)
+        self.transform = SVDLinear(n_features=self.features)
         self.transform.bias.data = torch.randn(
             self.features
         )  # Just so bias isn't zero.

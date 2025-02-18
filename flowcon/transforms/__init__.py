@@ -1,7 +1,7 @@
 # isort:skip_file
 
 from flowcon.transforms.base import Transform, Sequential, Inverse
-from flowcon.transforms.linear import linear, lu, qr, standard, svd
+from flowcon.transforms.linear import linear, lu, orthogonal, qr, standard, svd
 from flowcon.transforms.reshape import FlattenTransform
 
 from flowcon.transforms import (
@@ -12,7 +12,6 @@ from flowcon.transforms import (
     coupling,
     nonlinearities,
     normalization,
-    orthogonal,
     permutations,
     reshape,
     adaptive_sigmoids,

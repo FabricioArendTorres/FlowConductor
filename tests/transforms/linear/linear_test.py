@@ -195,7 +195,7 @@ class LinearTest(TransformTest):
 class NaiveLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = linear.NaiveLinear(num_features=self.features)
+        self.transform = linear.NaiveLinear(n_features=self.features)
 
         self.weight = self.transform._weight
         self.weight_inverse = torch.inverse(self.weight)

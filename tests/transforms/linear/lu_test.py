@@ -11,7 +11,7 @@ from tests.transforms.transform_test import TransformTest
 class LULinearTest(TransformTest):
     def setUp(self):
         self.features = 3
-        self.transform = lu.LULinear(num_features=self.features)
+        self.transform = lu.LULinear(n_features=self.features)
 
         lower, upper = self.transform.get_lower_upper()
         self.weight = lower @ upper

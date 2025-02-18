@@ -1,5 +1,7 @@
 """Implementations of linear transforms."""
 
+from __future__ import annotations
+
 from typing import cast
 
 import numpy as np
@@ -48,13 +50,13 @@ class LinearCache(nn.Module):
 class Linear(Transform):
     """Abstract base class for linear transforms that parameterize a weight matrix."""
 
-    def __init__(self, features: int, using_cache: bool = False):
-        if not check.is_positive_int(features):
+    def __init__(self, n_features: int, using_cache: bool = False):
+        if not check.is_positive_int(n_features):
             raise TypeError("Number of features must be a positive integer.")
         super().__init__()
 
-        self.features = features
-        self.bias = nn.Parameter(torch.zeros(features))
+        self.n_features = n_features
+        self.bias = nn.Parameter(torch.zeros(n_features))
 
         # Caching flag and values.
         self.using_cache = using_cache
@@ -180,7 +182,7 @@ class NaiveLinear(Linear):
 
     def __init__(
         self,
-        num_features: int,
+        n_features: int,
         orthogonal_initialization: bool = True,
         using_cache: bool = False,
     ):
@@ -196,13 +198,13 @@ class NaiveLinear(Linear):
         using_cache : bool, optional
             Whether to use cache in non-training mode, by default False
         """
-        super().__init__(num_features, using_cache)
+        super().__init__(n_features, using_cache)
 
         if orthogonal_initialization:
-            self._weight = nn.Parameter(torchutils.random_orthogonal(num_features))
+            self._weight = nn.Parameter(torchutils.random_orthogonal(n_features))
         else:
-            self._weight = nn.Parameter(torch.empty(num_features, num_features))
-            stdv = 1.0 / np.sqrt(num_features)
+            self._weight = nn.Parameter(torch.empty(n_features, n_features))
+            stdv = 1.0 / np.sqrt(n_features)
             init.uniform_(self._weight, -stdv, stdv)
 
     def forward_no_cache(
@@ -309,7 +311,7 @@ class NaiveLinear(Linear):
             Logabsdet of the inverse transform, scalar tensor.
         """
         # If both weight inverse and logabsdet are needed, it's cheaper to compute both together.
-        identity = torch.eye(self.features, self.features)
+        identity = torch.eye(self.n_features, self.n_features)
         # LU-decompose the weights and solve for the outputs.
         lu, lu_pivots = cast(tuple[torch.Tensor, torch.Tensor], torch.lu(self._weight))
         weight_inv = torch.lu_solve(identity, lu, lu_pivots)

@@ -8,14 +8,18 @@ from flowcon.utils import torchutils
 class TransformTest(torchtestcase.TorchTestCase):
     """Base test for all transforms."""
 
-    def assert_tensor_is_good(self, tensor, shape=None):
+    def assert_tensor_is_good(
+        self, tensor: torch.Tensor, shape: tuple[int, ...] | list[int] | None = None
+    ):
         self.assertIsInstance(tensor, torch.Tensor)
         self.assertFalse(torch.isnan(tensor).any())
         self.assertFalse(torch.isinf(tensor).any())
         if shape is not None:
             self.assertEqual(tensor.shape, torch.Size(shape))
 
-    def assert_forward_inverse_are_consistent(self, transform, inputs):
+    def assert_forward_inverse_are_consistent(
+        self, transform: base.Transform, inputs: torch.Tensor
+    ):
         inverse = base.Inverse(transform)
         identity = base.Sequential([transform, inverse])
         outputs, logabsdet = identity(inputs)
@@ -32,7 +36,7 @@ class TransformTest(torchtestcase.TorchTestCase):
             msg=f"Max Abs Error of {(logabsdet).abs().max().item():.3E}",
         )
 
-    def assert_jacobian_correct(self, transform, inputs):
+    def assert_jacobian_correct(self, transform: base.Transform, inputs: torch.Tensor):
         inputs = inputs.requires_grad_(True)
         outputs, logabsdet = transform.forward(inputs)
         _, ref_logabsdet = torch.linalg.slogdet(
@@ -47,7 +51,9 @@ class TransformTest(torchtestcase.TorchTestCase):
             msg=f"Jacobian mismatch by max abs error={(logabsdet - ref_logabsdet).abs().max():.2e}.",
         )
 
-    def assert_jacobian_correct_context(self, transform, inputs, context):
+    def assert_jacobian_correct_context(
+        self, transform: base.Transform, inputs: torch.Tensor, context: torch.Tensor
+    ):
         inputs = inputs.requires_grad_(True)
         outputs, logabsdet = transform.forward(inputs, context)
         _, ref_logabsdet = torch.linalg.slogdet(
@@ -59,7 +65,9 @@ class TransformTest(torchtestcase.TorchTestCase):
 
         self.assert_tensor_equal(logabsdet, ref_logabsdet, msg="Jacobian mismatch.")
 
-    def assert_inverse_jacobian_correct(self, transform, outputs):
+    def assert_inverse_jacobian_correct(
+        self, transform: base.Transform, outputs: torch.Tensor
+    ):
         outputs = outputs.detach().requires_grad_(True)
         inputs_reconstructed, inv_logabsdet = transform.inverse(outputs)
         _, ref_inv_logabsdet = torch.linalg.slogdet(
@@ -73,7 +81,9 @@ class TransformTest(torchtestcase.TorchTestCase):
             msg=f"Jacobian mismatch by max abs error={(inv_logabsdet - ref_inv_logabsdet).abs().max():.2e}.",
         )
 
-    def assertNotEqual(self, first, second, msg=None):
+    def assertNotEqual(
+        self, first: torch.Tensor, second: torch.Tensor, msg: str | None = None
+    ):
         if (self._eps and (first - second).abs().max().item() < self._eps) or (
             not self._eps and torch.equal(first, second)
         ):
