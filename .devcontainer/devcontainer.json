@@ -14,8 +14,20 @@
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",
                 "editor.formatOnSave": true,
+                "ruff.enable": true,
                 "python.defaultInterpreterPath": "/usr/bin/python3",
-                "autoDocstring.format": "numpy"
+                "python.analysis.typeCheckingMode": "strict",
+                "python.analysis.autoImportCompletions": true,
+                "python.analysis.useLibraryCodeForTypes": true,
+                "python.analysis.diagnosticSeverityOverrides": {
+                    "reportUnknownMemberType": "none",
+                    "reportUnknownArgumentType": "none",
+                    "reportUnknownVariableType": "warning",
+                    "reportUnknownLambdaType": "warning",
+                    "reportGeneralTypeIssues": "warning"
+                },
+                "autoDocstring.format": "numpy",
+                "autoDocstring.startOnNewLine": true,
             }
         }
     },

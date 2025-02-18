@@ -14,6 +14,7 @@ extras_require = {
         "pytest-mock",
         "ruff",
         "parameterized",
+        "mypy",
     ],
     "examples": ["matplotlib", "scikit-learn", "pandas"],
 }
