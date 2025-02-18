@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from math import sqrt
+from typing import cast
 
 import numpy as np
 import torch
@@ -52,10 +53,14 @@ class OrthogonalCaley(OrthogonalBase):
             orthogonal_map="cayley",
         )
 
-    def forward(self, inputs: torch.Tensor, context: torch.Tensor | None = None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return F.linear(inputs, self.matrix()), torch.zeros(inputs.shape[0])
 
-    def inverse(self, inputs: torch.Tensor, context: torch.Tensor | None = None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return F.linear(inputs, self.matrix().T), torch.zeros(inputs.shape[0])
 
     def matrix(self) -> torch.Tensor:
@@ -105,14 +110,18 @@ class OrthogonalHouseholderGEQR(OrthogonalBase):
             torch.randn(self.n_features, self.n_features) / sqrt(self.n_features)
         )
 
-    def forward(self, inputs: torch.Tensor, context: torch.Tensor | None = None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return F.linear(inputs, self.matrix()), torch.zeros(inputs.shape[0])
 
-    def inverse(self, inputs: torch.Tensor, context: torch.Tensor | None = None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return F.linear(inputs, self.matrix().T), torch.zeros(inputs.shape[0])
 
     def matrix(self) -> torch.Tensor:
-        return torch.linalg.householder_product(*torch.geqrf(self._A))
+        return cast(torch.Tensor, torch.linalg.householder_product(*torch.geqrf(self._A)))
 
 
 class OrthogonalHouseholder(OrthogonalBase):
@@ -144,9 +153,7 @@ class OrthogonalHouseholder(OrthogonalBase):
         self.q_vectors = torch.nn.Parameter(self.build_q_vectors(), requires_grad=True)
 
     def build_q_vectors(self) -> torch.Tensor:
-        qv = torch.repeat_interleave(
-            torch.eye(self.num_transforms // 2, self.n_features), 2, 0
-        )
+        qv = torch.repeat_interleave(torch.eye(self.num_transforms // 2, self.n_features), 2, 0)
         if np.mod(self.num_transforms, 2) != 0:  # odd number of transforms, including 1
             qv = torch.cat((qv, torch.zeros(1, self.n_features)))
             qv[-1, self.num_transforms // 2] = 1
@@ -165,7 +172,7 @@ class OrthogonalHouseholder(OrthogonalBase):
         reverse_idx = torch.arange(self.num_transforms - 1, -1, -1)
         return batchwise_householder_transform(inputs, self.q_vectors[reverse_idx])
 
-    def matrix(self):
+    def matrix(self) -> torch.Tensor:
         """Returns the orthogonal matrix that is equivalent to the total transform.
 
         Costs O(KD^2), where:
@@ -175,9 +182,7 @@ class OrthogonalHouseholder(OrthogonalBase):
         Returns:
             A Tensor of shape [D, D].
         """
-        identity = torch.eye(
-            self.n_features, self.n_features, device=self.q_vectors.device
-        )
+        identity = torch.eye(self.n_features, self.n_features, device=self.q_vectors.device)
         outputs, _ = self.inverse(identity)
         return outputs
 
@@ -203,9 +208,7 @@ class ParametrizedHouseHolder(Transform):
         self.features = q_vectors.shape[-1]
         self.num_transforms = q_vectors.shape[-2]
         self.q_vectors = q_vectors
-        self.reverse_idx = torch.arange(self.num_transforms - 1, -1, -1).to(
-            q_vectors.device
-        )
+        self.reverse_idx = torch.arange(self.num_transforms - 1, -1, -1).to(q_vectors.device)
 
     def forward(
         self, inputs: torch.Tensor, context: torch.Tensor | None = None
@@ -217,9 +220,7 @@ class ParametrizedHouseHolder(Transform):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         # Each householder transform is its own inverse, so the total inverse is given by
         # simply performing each transform in the reverse order.
-        return batchwise_householder_transform(
-            inputs, self.q_vectors[..., self.reverse_idx, :]
-        )
+        return batchwise_householder_transform(inputs, self.q_vectors[..., self.reverse_idx, :])
 
     def matrix(self) -> torch.Tensor:
         """Returns the orthogonal matrix that is equivalent to the total transform.
@@ -234,9 +235,7 @@ class ParametrizedHouseHolder(Transform):
 
         identity = torch.eye(self.features, self.features).to(self.q_vectors.device)
         if len(self.q_vectors.shape) > 2:
-            identity = torch.repeat_interleave(
-                identity[None, ...], self.q_vectors.shape[0], 0
-            )
+            identity = torch.repeat_interleave(identity[None, ...], self.q_vectors.shape[0], 0)
         outputs = []
         for i in range(self.features):
             outputs_, _ = self.inverse(identity[..., i, :])

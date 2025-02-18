@@ -1,5 +1,7 @@
 """Implementations of permutation-like transforms."""
 
+from __future__ import annotations
+
 import numpy as np
 import torch
 
@@ -10,7 +12,7 @@ from flowcon.transforms.base import Transform
 class Permutation(Transform):
     """Permutes inputs on a given dimension using a given permutation."""
 
-    def __init__(self, permutation, dim=1):
+    def __init__(self, permutation: torch.Tensor, dim: int = 1):
         if permutation.ndimension() != 1:
             raise ValueError("Permutation must be a 1D tensor.")
         if not check.is_positive_int(dim):

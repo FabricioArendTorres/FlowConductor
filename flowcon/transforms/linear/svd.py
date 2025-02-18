@@ -34,17 +34,17 @@ class SVDLinear(Linear):
         self._initialize()
 
     @property
-    def diagonal(self):
+    def diagonal(self) -> torch.Tensor:
         # return torchutils.map_to_0_1_stable(
         #     self.unconstrained_diagonal, epsilon=self.eps
         # )
         return torch.nn.functional.softplus(self.unconstrained_diagonal) + self.eps
 
     @property
-    def log_diagonal(self):
+    def log_diagonal(self) -> torch.Tensor:
         return torch.log(self.diagonal)
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         init.zeros_(self.bias)
         if self.identity_init:
             constant = np.log(np.exp(1 - self.eps) - 1)
@@ -57,7 +57,7 @@ class SVDLinear(Linear):
 
             init.uniform_(self.unconstrained_diagonal, -stdv, stdv)
 
-    def forward_no_cache(self, inputs: torch.Tensor):
+    def forward_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(KDN)
             logabsdet = O(D)
@@ -68,16 +68,14 @@ class SVDLinear(Linear):
         """
         outputs, _ = self.orthogonal_2(inputs)  # Ignore logabsdet as we know it's zero.
         outputs *= self.diagonal
-        outputs, _ = self.orthogonal_1(
-            outputs
-        )  # Ignore logabsdet as we know it's zero.
+        outputs, _ = self.orthogonal_1(outputs)  # Ignore logabsdet as we know it's zero.
         outputs += self.bias
 
         logabsdet_T = self.logabsdet() * outputs.new_ones(outputs.shape[0])
 
         return outputs, logabsdet_T
 
-    def inverse_no_cache(self, inputs: torch.Tensor):
+    def inverse_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(KDN)
             logabsdet = O(D)
@@ -87,18 +85,14 @@ class SVDLinear(Linear):
             N = num of inputs
         """
         outputs = inputs - self.bias
-        outputs, _ = self.orthogonal_1.inverse(
-            outputs
-        )  # Ignore logabsdet since we know it's zero.
+        outputs, _ = self.orthogonal_1.inverse(outputs)  # Ignore logabsdet since we know it's zero.
         outputs /= self.diagonal
-        outputs, _ = self.orthogonal_2.inverse(
-            outputs
-        )  # Ignore logabsdet since we know it's zero.
+        outputs, _ = self.orthogonal_2.inverse(outputs)  # Ignore logabsdet since we know it's zero.
         logabsdet_Tinv = -self.logabsdet()
         logabsdet_Tinv = logabsdet_Tinv * outputs.new_ones(outputs.shape[0])
         return outputs, logabsdet_Tinv
 
-    def weight(self):
+    def weight(self) -> torch.Tensor:
         """Cost:
             weight = O(KD^2)
         where:
@@ -110,7 +104,7 @@ class SVDLinear(Linear):
         weight, _ = self.orthogonal_1(weight.t())
         return weight.t()
 
-    def weight_inverse(self):
+    def weight_inverse(self) -> torch.Tensor:
         """Cost:
             inverse = O(KD^2)
         where:
@@ -122,7 +116,7 @@ class SVDLinear(Linear):
         weight_inv, _ = self.orthogonal_2.inverse(weight_inv.t())
         return weight_inv.t()
 
-    def logabsdet(self):
+    def logabsdet(self) -> torch.Tensor:
         """Cost:
             logabsdet = O(D)
         where:

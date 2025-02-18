@@ -46,7 +46,7 @@ class LULinear(Linear):
 
         self._initialize_weights(identity_init)
 
-    def _initialize_weights(self, identity_init: bool):
+    def _initialize_weights(self, identity_init: bool) -> None:
         """
         Initializes the weight matrix.
 
@@ -72,7 +72,7 @@ class LULinear(Linear):
                 self._raw_matrix.fill_diagonal_(raw_diagonal_constant)
                 init.zeros_(self.bias)
 
-    def get_lower_upper(self):
+    def get_lower_upper(self) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Computes the lower and upper triangular matrices from the LU decomposition.
 
@@ -92,9 +92,7 @@ class LULinear(Linear):
 
         return lower, upper
 
-    def forward_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Computes the forward transformation without caching.
 
@@ -114,9 +112,7 @@ class LULinear(Linear):
         logabsdet = self.logabsdet() * inputs.new_ones(outputs.shape[0])
         return outputs, logabsdet
 
-    def inverse_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def inverse_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Computes the inverse transformation without caching.
 
@@ -134,15 +130,11 @@ class LULinear(Linear):
         outputs = inputs - self.bias
         outputs = cast(
             torch.Tensor,
-            torch.linalg.solve_triangular(
-                lower, outputs.t(), upper=False, unitriangular=True
-            ),
+            torch.linalg.solve_triangular(lower, outputs.t(), upper=False, unitriangular=True),
         )
         outputs = cast(
             torch.Tensor,
-            torch.linalg.solve_triangular(
-                upper, outputs, upper=True, unitriangular=False
-            ),
+            torch.linalg.solve_triangular(upper, outputs, upper=True, unitriangular=False),
         )
         outputs = outputs.t()
 
@@ -175,15 +167,11 @@ class LULinear(Linear):
         lower, upper = self.get_lower_upper()
         lower_inverse = cast(
             torch.Tensor,
-            torch.linalg.solve_triangular(
-                lower, self.eye, upper=False, unitriangular=True
-            ),
+            torch.linalg.solve_triangular(lower, self.eye, upper=False, unitriangular=True),
         )
         weight_inverse = cast(
             torch.Tensor,
-            torch.linalg.solve_triangular(
-                upper, lower_inverse, upper=True, unitriangular=False
-            ),
+            torch.linalg.solve_triangular(upper, lower_inverse, upper=True, unitriangular=False),
         )
         return weight_inverse
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import cast
 
 import numpy as np
@@ -44,21 +46,19 @@ class QRLinear(Linear):
 
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         stdv = 1.0 / np.sqrt(self.n_features)
         init.uniform_(self.upper_entries, -stdv, stdv)
         init.uniform_(self.log_upper_diag, -stdv, stdv)
         init.constant_(self.bias, 0.0)
 
-    def _create_upper(self):
+    def _create_upper(self) -> torch.Tensor:
         upper = self.upper_entries.new_zeros(self.n_features, self.n_features)
         upper[self.upper_indices[0], self.upper_indices[1]] = self.upper_entries
-        upper[self.diag_indices[0], self.diag_indices[1]] = torch.exp(
-            self.log_upper_diag
-        )
+        upper[self.diag_indices[0], self.diag_indices[1]] = torch.exp(self.log_upper_diag)
         return upper
 
-    def forward_no_cache(self, inputs: torch.Tensor):
+    def forward_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N + KDN)
             logabsdet = O(D)
@@ -77,7 +77,7 @@ class QRLinear(Linear):
 
         return outputs, logabsdet
 
-    def inverse_no_cache(self, inputs: torch.Tensor):
+    def inverse_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Cost:
             output = O(D^2N + KDN)
             logabsdet = O(D)
@@ -88,18 +88,14 @@ class QRLinear(Linear):
         """
         upper = self._create_upper()
         outputs = inputs - self.bias
-        outputs, _ = self.orthogonal.inverse(
-            outputs
-        )  # Ignore logabsdet since we know it's zero.
-        outputs = cast(
-            torch.Tensor, torch.linalg.solve_triangular(upper, outputs.t(), upper=True)
-        )
+        outputs, _ = self.orthogonal.inverse(outputs)  # Ignore logabsdet since we know it's zero.
+        outputs = cast(torch.Tensor, torch.linalg.solve_triangular(upper, outputs.t(), upper=True))
         outputs = outputs.t()
         logabsdet = -self.logabsdet()
         logabsdet = logabsdet * outputs.new_ones(outputs.shape[0])
         return outputs, logabsdet
 
-    def weight(self):
+    def weight(self) -> torch.Tensor:
         """Cost:
             weight = O(KD^2)
         where:
@@ -119,13 +115,11 @@ class QRLinear(Linear):
         """
         upper = self._create_upper()
         identity = torch.eye(self.n_features, self.n_features)
-        upper_inv = cast(
-            torch.Tensor, torch.linalg.solve_triangular(upper, identity, upper=True)
-        )
+        upper_inv = cast(torch.Tensor, torch.linalg.solve_triangular(upper, identity, upper=True))
         weight_inv, _ = self.orthogonal(upper_inv)
         return weight_inv
 
-    def logabsdet(self):
+    def logabsdet(self) -> torch.Tensor:
         """Cost:
             logabsdet = O(D)
         where:

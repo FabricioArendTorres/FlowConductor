@@ -11,12 +11,16 @@ from flowcon.transforms.base import Transform
 class IdentityTransform(Transform):
     """Transform that leaves input unchanged."""
 
-    def forward(self, inputs: Tensor, context: Tensor | None = None):
+    def forward(
+        self, inputs: Tensor, context: Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         batch_size = inputs.size(0)
         logabsdet = inputs.new_zeros(batch_size)
         return inputs, logabsdet
 
-    def inverse(self, inputs: Tensor, context: Tensor | None = None):
+    def inverse(
+        self, inputs: Tensor, context: Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self(inputs, context)
 
 
@@ -52,9 +56,7 @@ class PointwiseAffineTransform(Transform):
             # numerically accurate than \sum_1^n log_abs_scale.
             return self._log_abs_scale * torch.Size(batch_shape).numel()
 
-    def forward(
-        self, inputs: Tensor, context: Tensor | None = None
-    ) -> tuple[Tensor, Tensor]:
+    def forward(self, inputs: Tensor, context: Tensor | None = None) -> tuple[Tensor, Tensor]:
         batch_size, *batch_shape = inputs.size()
 
         # RuntimeError here means shift/scale not broadcastable to input.
@@ -63,9 +65,7 @@ class PointwiseAffineTransform(Transform):
 
         return outputs, logabsdet
 
-    def inverse(
-        self, inputs: Tensor, context: Tensor | None = None
-    ) -> tuple[Tensor, Tensor]:
+    def inverse(self, inputs: Tensor, context: Tensor | None = None) -> tuple[Tensor, Tensor]:
         batch_size, *batch_shape = inputs.size()
         outputs = (inputs - self._shift) / self._scale
         logabsdet = -self._batch_logabsdet(batch_shape).expand(batch_size)

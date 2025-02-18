@@ -23,13 +23,13 @@ class LinearCache(nn.Module):
     Makes use of buffers to support torch.compile.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.register_buffer("weight", torch.empty(0), persistent=False)
         self.register_buffer("inverse", torch.empty(0), persistent=False)
         self.register_buffer("logabsdet", torch.empty(0), persistent=False)
 
-    def reset_cache(self):
+    def reset_cache(self) -> None:
         """
         Resets cached values.
         """
@@ -50,10 +50,10 @@ class LinearCache(nn.Module):
 class Linear(Transform):
     """Abstract base class for linear transforms that parameterize a weight matrix."""
 
-    def __init__(self, n_features: int, using_cache: bool = False):
+    def __init__(self, n_features: int, using_cache: bool = False) -> None:
+        super().__init__()
         if not check.is_positive_int(n_features):
             raise TypeError("Number of features must be a positive integer.")
-        super().__init__()
 
         self.n_features = n_features
         self.bias = nn.Parameter(torch.zeros(n_features))
@@ -108,7 +108,7 @@ class Linear(Transform):
         elif self.cache.is_logabsdet_empty():
             self.cache.logabsdet = self.logabsdet()
 
-    def train(self, mode: bool = True):
+    def train(self, mode: bool = True) -> Linear:
         if mode:
             # If training again, invalidate cache.
             self.cache.reset_cache()
@@ -307,7 +307,8 @@ class NaiveLinear(Linear):
         Returns
         -------
         Tuple[torch.Tensor, torch.Tensor]
-            Inverse of the Weight matrix, tensor of shape [self.num_features, self.num_features].
+            Inverse of the Weight matrix, tensor of shape
+            [self.num_features, self.num_features].
             Logabsdet of the inverse transform, scalar tensor.
         """
         # If both weight inverse and logabsdet are needed, it's cheaper to compute both together.
@@ -318,7 +319,7 @@ class NaiveLinear(Linear):
         logabsdet = torch.sum(torch.log(torch.abs(torch.diag(lu))))
         return weight_inv, logabsdet
 
-    def logabsdet(self):
+    def logabsdet(self) -> torch.Tensor:
         """Cost:
             logabsdet = O(D^3)
         where:
