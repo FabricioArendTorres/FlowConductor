@@ -7,19 +7,19 @@ import torch
 from torch.nn import functional as F
 
 from flowcon.nn.nets import MLP, ResidualNet
-from flowcon.transforms.adaptive_sigmoids import SumOfSigmoids
 from flowcon.transforms.base import Transform
 from flowcon.transforms.linear.orthogonal import (
     ParametrizedHouseHolder,
     batchwise_householder_transforms_nodet,
 )
-from flowcon.transforms.splines import rational_quadratic
-from flowcon.transforms.splines.linear import linear_spline
-from flowcon.transforms.splines.rational_quadratic import (
+from flowcon.transforms.monotonic.adaptive_sigmoids import SumOfSigmoids
+from flowcon.transforms.monotonic.MonotonicNormalizer import *
+from flowcon.transforms.monotonic.splines import rational_quadratic
+from flowcon.transforms.monotonic.splines.linear import linear_spline
+from flowcon.transforms.monotonic.splines.rational_quadratic import (
     rational_quadratic_spline,
     unconstrained_rational_quadratic_spline,
 )
-from flowcon.transforms.UMNN import *
 from flowcon.utils import torchutils
 
 
@@ -141,9 +141,7 @@ class AffineConditionalTransform(ConditionalTransform):
         return 2
 
     def _forward_given_params(self, inputs, conditional_params):
-        unconstrained_scale, shift = self._unconstrained_scale_and_shift(
-            conditional_params
-        )
+        unconstrained_scale, shift = self._unconstrained_scale_and_shift(conditional_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         scale = F.softplus(unconstrained_scale) + self._epsilon
         log_scale = torch.log(scale)
@@ -152,9 +150,7 @@ class AffineConditionalTransform(ConditionalTransform):
         return outputs, logabsdet
 
     def _inverse_given_params(self, inputs, conditional_params):
-        unconstrained_scale, shift = self._unconstrained_scale_and_shift(
-            conditional_params
-        )
+        unconstrained_scale, shift = self._unconstrained_scale_and_shift(conditional_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         scale = F.softplus(unconstrained_scale) + self._epsilon
         log_scale = torch.log(scale)
@@ -314,9 +310,7 @@ class ConditionalLUTransform(ConditionalTransform):
             torch.arange(1, self.features + 1, dtype=torch.int32).unsqueeze(0),
             requires_grad=False,
         )
-        self.scale_non_diag = torch.nn.Parameter(
-            -2 * torch.ones(()), requires_grad=True
-        )
+        self.scale_non_diag = torch.nn.Parameter(-2 * torch.ones(()), requires_grad=True)
 
     def _output_dim_multiplier(self):
         return self.features
@@ -325,9 +319,7 @@ class ConditionalLUTransform(ConditionalTransform):
         lower, upper = self._create_lower_upper(conditional_params)
         outputs = upper @ inputs.unsqueeze(-1)
         outputs = (lower @ outputs).view(inputs.shape)
-        logabsdet = (
-            upper.diagonal(0, -1, -2).log().sum(-1)
-        )  # ...#inputs.new_ones(inputs.shape[0])
+        logabsdet = upper.diagonal(0, -1, -2).log().sum(-1)  # ...#inputs.new_ones(inputs.shape[0])
         return outputs, logabsdet
 
     def _inverse_given_params(self, inputs, conditional_params):
@@ -338,9 +330,7 @@ class ConditionalLUTransform(ConditionalTransform):
             inputs.unsqueeze(-1),
         )
 
-        logabsdet = (
-            -upper.diagonal(0, -1, -2).log().sum(-1)
-        )  # ...#inputs.new_ones(inputs.shape[0])
+        logabsdet = -upper.diagonal(0, -1, -2).log().sum(-1)  # ...#inputs.new_ones(inputs.shape[0])
         return outputs.view(inputs.shape), logabsdet
 
     def _unconstrained_entries(self, conditional_params):
@@ -405,29 +395,21 @@ class ConditionalRotationTransform(ConditionalTransform):
         m2 = -torch.sin(theta)
         m3 = -m2
         m4 = m1
-        matrix = torch.concatenate([m1, m2, m3, m4], -1).view(
-            -1, self.features, self.features
-        )
+        matrix = torch.concatenate([m1, m2, m3, m4], -1).view(-1, self.features, self.features)
         return matrix
 
     def _forward_given_params(self, inputs: torch.Tensor, conditional_params):
         matrix = self.build_matrix(conditional_params)
 
         outputs = (matrix @ inputs.unsqueeze(-1)).squeeze()
-        logabsdet = inputs.new_zeros(
-            inputs.shape[0]
-        )  # ...#inputs.new_ones(inputs.shape[0])
+        logabsdet = inputs.new_zeros(inputs.shape[0])  # ...#inputs.new_ones(inputs.shape[0])
         return outputs, logabsdet
 
     def _inverse_given_params(self, inputs, conditional_params):
         matrix = self.build_matrix(conditional_params)
 
-        outputs = (
-            torch.transpose(matrix, dim0=-2, dim1=-1) @ inputs.unsqueeze(-1)
-        ).squeeze()
-        logabsdet = inputs.new_zeros(
-            inputs.shape[0]
-        )  # ...#inputs.new_ones(inputs.shape[0])
+        outputs = (torch.transpose(matrix, dim0=-2, dim1=-1) @ inputs.unsqueeze(-1)).squeeze()
+        logabsdet = inputs.new_zeros(inputs.shape[0])  # ...#inputs.new_ones(inputs.shape[0])
         return outputs, logabsdet
 
 
@@ -518,54 +500,41 @@ class ConditionalSVDTransform(ConditionalTransform):
 
         multiplier_bias = 1 if self.use_bias else 0
 
-        return (
-            multiplier_orthogonal_matrices
-            + multiplier_diagonal_matrix
-            + multiplier_bias
-        )
+        return multiplier_orthogonal_matrices + multiplier_diagonal_matrix + multiplier_bias
 
     def _forward_given_params(self, inputs, conditional_params):
-        householder_U, diag_entries_S, householder_Vt, bias = self._get_matrices(
-            conditional_params
-        )
+        householder_U, diag_entries_S, householder_Vt, bias = self._get_matrices(conditional_params)
 
         VtX, _ = householder_Vt.forward(inputs)
         SVtX = VtX * diag_entries_S
         USVtX, _ = householder_U.forward(SVtX)
         outputs = USVtX + bias if self.use_bias else USVtX
 
-        logabsdet = diag_entries_S.log().sum(
-            -1
-        )  # |det(SVD)| = product of singular values
+        logabsdet = diag_entries_S.log().sum(-1)  # |det(SVD)| = product of singular values
 
         return outputs, logabsdet
 
     def _inverse_given_params(self, inputs, conditional_params):
-        householder_U, diag_entries_S, householder_Vt, bias = self._get_matrices(
-            conditional_params
-        )
+        householder_U, diag_entries_S, householder_Vt, bias = self._get_matrices(conditional_params)
 
         y = inputs - bias if self.use_bias else inputs
         Uty, _ = householder_U.inverse(y)
         SinvUty = Uty / diag_entries_S
         outputs, _ = householder_Vt.inverse(SinvUty)
 
-        logabsdet = -diag_entries_S.log().sum(
-            -1
-        )  # |det(SVD)| = product of singular values
+        logabsdet = -diag_entries_S.log().sum(-1)  # |det(SVD)| = product of singular values
 
         return outputs.squeeze(), logabsdet
 
     def _get_matrices(self, conditional_params):
-        q_vectors_U, q_vectors_V, diag_entries_S_unconstrained, bias = (
-            self._unconstrained_params(conditional_params)
+        q_vectors_U, q_vectors_V, diag_entries_S_unconstrained, bias = self._unconstrained_params(
+            conditional_params
         )
         householder_U = ParametrizedHouseHolder(q_vectors_U)
         householder_Vt = ParametrizedHouseHolder(q_vectors_V)
         if self.lipschitz_constant is not None:
             diag_entries_S = (
-                torch.sigmoid(diag_entries_S_unconstrained)
-                * (self.lipschitz_constant - self.eps)
+                torch.sigmoid(diag_entries_S_unconstrained) * (self.lipschitz_constant - self.eps)
                 + self.eps
             )
         else:
@@ -641,9 +610,7 @@ class ConditionalUMNNTransform(ConditionalTransform):
             dropout_probability=dropout_probability,
             use_batch_norm=use_batch_norm,
         )
-        self.transformer = MonotonicNormalizer(
-            integrand_net_layers, cond_size, nb_steps, solver
-        )
+        self.transformer = MonotonicNormalizer(integrand_net_layers, cond_size, nb_steps, solver)
 
     def _output_dim_multiplier(self):
         return self.cond_size
@@ -897,10 +864,7 @@ class ConditionalPlanarTransform(ConditionalTransform):
         )
 
     def _num_parameters(self):
-        return (
-            self.features * self._output_dim_multiplier()
-            + self._constant_dim_addition()
-        )
+        return self.features * self._output_dim_multiplier() + self._constant_dim_addition()
 
     def _output_dim_multiplier(self):
         return 2
@@ -992,9 +956,7 @@ class ConditionalSylvesterTransform(ConditionalTransform):
             torch.arange(self.features - 1, -1, -1), requires_grad=False
         )
         self.triu_mask = torch.nn.Parameter(
-            torch.triu(
-                torch.ones(self.features, self.features).unsqueeze(0), diagonal=1
-            ),
+            torch.triu(torch.ones(self.features, self.features).unsqueeze(0), diagonal=1),
             requires_grad=False,
         )
         self.identity = torch.nn.Parameter(
@@ -1043,8 +1005,7 @@ class ConditionalSylvesterTransform(ConditionalTransform):
         # calc logabsdet
         deriv_act = dh_dx(preact).squeeze()
         R_sq_diag = (
-            torch.diagonal(triu_R1, dim1=-2, dim2=-1)
-            * torch.diagonal(triu_R2, dim1=-2, dim2=-1)
+            torch.diagonal(triu_R1, dim1=-2, dim2=-1) * torch.diagonal(triu_R2, dim1=-2, dim2=-1)
         ).squeeze()  # (n, d)
         diag = R_sq_diag.new_ones(inputs.shape[-1]) + deriv_act * R_sq_diag
         logabsdet = torch.log(diag).sum(-1)
@@ -1084,9 +1045,7 @@ class ConditionalSylvesterTransform(ConditionalTransform):
 
     @staticmethod
     @torch.jit.script
-    def _create_upper(
-        full_matr_r, diag_vals, triu_mask
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _create_upper(full_matr_r, diag_vals, triu_mask) -> Tuple[torch.Tensor, torch.Tensor]:
         masked_1 = full_matr_r * triu_mask
         masked_2 = torch.transpose(full_matr_r, dim0=-2, dim1=-1) * triu_mask
 

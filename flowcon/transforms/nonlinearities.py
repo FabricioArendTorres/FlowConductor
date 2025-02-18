@@ -5,7 +5,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from flowcon.transforms import splines
+import flowcon.transforms.monotonic.splines as splines
 from flowcon.transforms.base import (
     InputOutsideDomain,
     Inverse,
@@ -65,9 +65,7 @@ class LogTanh(Transform):
         self.inv_cut_point = np.tanh(cut_point)
 
         self.alpha = (1 - np.tanh(np.tanh(cut_point))) / cut_point
-        self.beta = np.exp(
-            (np.tanh(cut_point) - self.alpha * np.log(cut_point)) / self.alpha
-        )
+        self.beta = np.exp((np.tanh(cut_point) - self.alpha * np.log(cut_point)) / self.alpha)
 
     def forward(self, inputs, context=None):
         mask_right = inputs > self.cut_point
@@ -101,12 +99,8 @@ class LogTanh(Transform):
 
         logabsdet = torch.zeros_like(inputs)
         logabsdet[mask_middle] = -torch.log(1 - inputs[mask_middle] ** 2)
-        logabsdet[mask_right] = (
-            -np.log(self.alpha * self.beta) + inputs[mask_right] / self.alpha
-        )
-        logabsdet[mask_left] = (
-            -np.log(self.alpha * self.beta) - inputs[mask_left] / self.alpha
-        )
+        logabsdet[mask_right] = -np.log(self.alpha * self.beta) + inputs[mask_right] / self.alpha
+        logabsdet[mask_left] = -np.log(self.alpha * self.beta) - inputs[mask_left] / self.alpha
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
 
         return outputs, logabsdet
@@ -186,9 +180,7 @@ class Softplus(Transform):
 
     def inverse(self, inputs, context=None):
         inputs = inputs - self.eps
-        outputs = torch.where(
-            inputs > self.softplus.threshold, inputs, inputs.expm1().log()
-        )
+        outputs = torch.where(inputs > self.softplus.threshold, inputs, inputs.expm1().log())
         logabsdet = -torch.log(-torch.expm1(-inputs)).sum(-1)
         return outputs, logabsdet
 
@@ -219,9 +211,7 @@ class CauchyCDF(Transform):
 
     def forward(self, inputs, context=None):
         outputs = (1 / np.pi) * torch.atan(inputs) + 0.5
-        logabsdet = torchutils.sum_except_batch(
-            -np.log(np.pi) - torch.log(1 + inputs**2)
-        )
+        logabsdet = torchutils.sum_except_batch(-np.log(np.pi) - torch.log(1 + inputs**2))
         return outputs, logabsdet
 
     def inverse(self, inputs, context=None):
@@ -229,9 +219,7 @@ class CauchyCDF(Transform):
             raise InputOutsideDomain()
 
         outputs = torch.tan(np.pi * (inputs - 0.5))
-        logabsdet = -torchutils.sum_except_batch(
-            -np.log(np.pi) - torch.log(1 + outputs**2)
-        )
+        logabsdet = -torchutils.sum_except_batch(-np.log(np.pi) - torch.log(1 + outputs**2))
         return outputs, logabsdet
 
 
@@ -317,9 +305,7 @@ class PiecewiseQuadraticCDF(Transform):
         batch_size = inputs.shape[0]
 
         unnormalized_widths = _share_across_batch(self.unnormalized_widths, batch_size)
-        unnormalized_heights = _share_across_batch(
-            self.unnormalized_heights, batch_size
-        )
+        unnormalized_heights = _share_across_batch(self.unnormalized_heights, batch_size)
 
         if self.tails is None:
             spline_fn = splines.quadratic_spline
@@ -373,15 +359,9 @@ class PiecewiseCubicCDF(Transform):
         batch_size = inputs.shape[0]
 
         unnormalized_widths = _share_across_batch(self.unnormalized_widths, batch_size)
-        unnormalized_heights = _share_across_batch(
-            self.unnormalized_heights, batch_size
-        )
-        unnorm_derivatives_left = _share_across_batch(
-            self.unnorm_derivatives_left, batch_size
-        )
-        unnorm_derivatives_right = _share_across_batch(
-            self.unnorm_derivatives_right, batch_size
-        )
+        unnormalized_heights = _share_across_batch(self.unnormalized_heights, batch_size)
+        unnorm_derivatives_left = _share_across_batch(self.unnorm_derivatives_left, batch_size)
+        unnorm_derivatives_right = _share_across_batch(self.unnorm_derivatives_right, batch_size)
 
         if self.tails is None:
             spline_fn = splines.cubic_spline
@@ -439,9 +419,7 @@ class PiecewiseRationalQuadraticCDF(Transform):
             self.unnormalized_heights = nn.Parameter(torch.zeros(*shape, num_bins))
 
             constant = np.log(np.exp(1 - min_derivative) - 1)
-            num_derivatives = (
-                (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
-            )
+            num_derivatives = (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
             self.unnormalized_derivatives = nn.Parameter(
                 constant * torch.ones(*shape, num_derivatives)
             )
@@ -449,23 +427,15 @@ class PiecewiseRationalQuadraticCDF(Transform):
             self.unnormalized_widths = nn.Parameter(torch.rand(*shape, num_bins))
             self.unnormalized_heights = nn.Parameter(torch.rand(*shape, num_bins))
 
-            num_derivatives = (
-                (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
-            )
-            self.unnormalized_derivatives = nn.Parameter(
-                torch.rand(*shape, num_derivatives)
-            )
+            num_derivatives = (num_bins - 1) if self.tails == "linear" else (num_bins + 1)
+            self.unnormalized_derivatives = nn.Parameter(torch.rand(*shape, num_derivatives))
 
     def _spline(self, inputs, inverse=False):
         batch_size = inputs.shape[0]
 
         unnormalized_widths = _share_across_batch(self.unnormalized_widths, batch_size)
-        unnormalized_heights = _share_across_batch(
-            self.unnormalized_heights, batch_size
-        )
-        unnormalized_derivatives = _share_across_batch(
-            self.unnormalized_derivatives, batch_size
-        )
+        unnormalized_heights = _share_across_batch(self.unnormalized_heights, batch_size)
+        unnormalized_derivatives = _share_across_batch(self.unnormalized_derivatives, batch_size)
 
         if self.tails is None:
             spline_fn = splines.rational_quadratic_spline
@@ -508,9 +478,7 @@ class ExtendedSoftplus(torch.nn.Module):
         self.features = features
         super(ExtendedSoftplus, self).__init__()
         if shift is None:
-            self.shift = torch.nn.Parameter(
-                torch.ones(1, features) * 3, requires_grad=True
-            )
+            self.shift = torch.nn.Parameter(torch.ones(1, features) * 3, requires_grad=True)
             # self.log_scale = torch.nn.Parameter(torch.zeros(1, features), requires_grad=True)
         elif torch.is_tensor(shift):
             self.shift = shift.reshape(-1, features)

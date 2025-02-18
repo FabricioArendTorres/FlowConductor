@@ -1,27 +1,30 @@
-import torch
 import unittest
+
+import torch
 from parameterized import parameterized_class
 
 from flowcon.nn.nets import activations
 from flowcon.nn.nets.invertible_densenet import DenseNet
-from flowcon.transforms.lipschitz.iresblock import iResBlock
+from flowcon.transforms.residual.iresblock import iResBlock
 from tests.transforms.transform_test import TransformTest
 
 torch.set_default_dtype(torch.float32)
 
 
-@parameterized_class(('batch_size', 'features', 'n_sigmoids'), [
-    (10, 2, 3),
-    (2, 4, 3),
-    (60, 4, 30),
-    (16, 3, 340),
-    (10, 20, 10),
-    (1, 3, 1),
-    (1, 1, 1),
-    (10, 1, 3),
-])
+@parameterized_class(
+    ("batch_size", "features", "n_sigmoids"),
+    [
+        (10, 2, 3),
+        (2, 4, 3),
+        (60, 4, 30),
+        (16, 3, 340),
+        (10, 20, 10),
+        (1, 3, 1),
+        (1, 1, 1),
+        (10, 1, 3),
+    ],
+)
 class TestLipschitzLayer(TransformTest):
-
     def setUp(self) -> None:
         torch.manual_seed(1234)
 
@@ -29,14 +32,18 @@ class TestLipschitzLayer(TransformTest):
 
         self.inputs = torch.randn(self.batch_size, self.features)
 
-        densenet_builder = DenseNet.factory(dimension=self.features,
-                                            densenet_depth=3,
-                                            activation_function=activations.Sin(),
-                                            lip_coeff=self.coef, )
-        self.transform = iResBlock(densenet_builder.build_network(),
-                                   brute_force=True,
-                                   exact_trace=True,
-                                   unbiased_estimator=True)
+        densenet_builder = DenseNet.factory(
+            dimension=self.features,
+            densenet_depth=3,
+            activation_function=activations.Sin(),
+            lip_coeff=self.coef,
+        )
+        self.transform = iResBlock(
+            densenet_builder.build_network(),
+            brute_force=True,
+            exact_trace=True,
+            unbiased_estimator=True,
+        )
         self.eps = 5e-4
 
     def test_forward(self):
@@ -54,5 +61,5 @@ class TestLipschitzLayer(TransformTest):
         self.assert_forward_inverse_are_consistent(self.transform, self.inputs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

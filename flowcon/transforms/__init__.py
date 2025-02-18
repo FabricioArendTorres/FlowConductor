@@ -2,38 +2,38 @@
 
 from flowcon.transforms.base import Transform, Sequential, Inverse
 from flowcon.transforms.linear import linear, lu, orthogonal, qr, standard, svd
+from flowcon.transforms.monotonic import adaptive_sigmoids
 from flowcon.transforms.reshape import FlattenTransform
+from .monotonic import splines
 
 from flowcon.transforms import (
     base,
     autoregressive,
-    no_analytic_inv,
     conv,
     coupling,
     nonlinearities,
     normalization,
     permutations,
     reshape,
-    adaptive_sigmoids,
     conditional,
     unitvector,
     matrix,
-    lipschitz,
+    residual,
 )
 
 
 __all__ = [
     "adaptive_sigmoids",
+    "splines",
     "autoregressive",
     "base",
     "conditional",
     "conv",
     "coupling",
     "linear",
-    "lipschitz",
+    "residual",
     "lu",
     "matrix",
-    "no_analytic_inv",
     "nonlinearities",
     "normalization",
     "orthogonal",

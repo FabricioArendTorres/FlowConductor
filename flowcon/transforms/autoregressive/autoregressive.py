@@ -4,22 +4,22 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from flowcon.transforms.base import Transform
 from flowcon.transforms import made as made_module
-from flowcon.transforms.splines.cubic import cubic_spline
-from flowcon.transforms.splines.linear import linear_spline
-from flowcon.transforms.splines.quadratic import (
+from flowcon.transforms.base import Transform
+from flowcon.transforms.monotonic.adaptive_sigmoids import SumOfSigmoids
+from flowcon.transforms.monotonic.MonotonicNormalizer import *
+from flowcon.transforms.monotonic.splines import rational_quadratic
+from flowcon.transforms.monotonic.splines.cubic import cubic_spline
+from flowcon.transforms.monotonic.splines.linear import linear_spline
+from flowcon.transforms.monotonic.splines.quadratic import (
     quadratic_spline,
     unconstrained_quadratic_spline,
 )
-from flowcon.transforms.splines import rational_quadratic
-from flowcon.transforms.splines.rational_quadratic import (
+from flowcon.transforms.monotonic.splines.rational_quadratic import (
     rational_quadratic_spline,
     unconstrained_rational_quadratic_spline,
 )
 from flowcon.utils import torchutils
-from flowcon.transforms.UMNN import *
-from flowcon.transforms.adaptive_sigmoids import SumOfSigmoids
 
 
 class AutoregressiveTransform(Transform):
@@ -47,9 +47,7 @@ class AutoregressiveTransform(Transform):
         logabsdet = None
         for _ in range(num_inputs):
             autoregressive_params = self.autoregressive_net(outputs, context)
-            outputs, logabsdet = self._elementwise_inverse(
-                inputs, autoregressive_params
-            )
+            outputs, logabsdet = self._elementwise_inverse(inputs, autoregressive_params)
         return outputs, logabsdet
 
     def _output_dim_multiplier(self):
@@ -64,16 +62,16 @@ class AutoregressiveTransform(Transform):
 
 class MaskedAffineAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            features,
-            hidden_features,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
+        self,
+        features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
     ):
         self.features = features
         made = made_module.MADE(
@@ -95,9 +93,7 @@ class MaskedAffineAutoregressiveTransform(AutoregressiveTransform):
         return 2
 
     def _elementwise_forward(self, inputs, autoregressive_params):
-        unconstrained_scale, shift = self._unconstrained_scale_and_shift(
-            autoregressive_params
-        )
+        unconstrained_scale, shift = self._unconstrained_scale_and_shift(autoregressive_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         scale = F.softplus(unconstrained_scale) + self._epsilon
         log_scale = torch.log(scale)
@@ -106,9 +102,7 @@ class MaskedAffineAutoregressiveTransform(AutoregressiveTransform):
         return outputs, logabsdet
 
     def _elementwise_inverse(self, inputs, autoregressive_params):
-        unconstrained_scale, shift = self._unconstrained_scale_and_shift(
-            autoregressive_params
-        )
+        unconstrained_scale, shift = self._unconstrained_scale_and_shift(autoregressive_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         scale = F.softplus(unconstrained_scale) + self._epsilon
         log_scale = torch.log(scale)
@@ -128,18 +122,19 @@ class MaskedAffineAutoregressiveTransform(AutoregressiveTransform):
         shift = autoregressive_params[..., 1]
         return unconstrained_scale, shift
 
+
 class MaskedShiftAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            features,
-            hidden_features,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
+        self,
+        features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
     ):
         self.features = features
         made = made_module.MADE(
@@ -155,16 +150,14 @@ class MaskedShiftAutoregressiveTransform(AutoregressiveTransform):
             use_batch_norm=use_batch_norm,
         )
         self._epsilon = 1e-3
-        self.shift_scale = 1.
+        self.shift_scale = 1.0
         super(MaskedShiftAutoregressiveTransform, self).__init__(made)
 
     def _output_dim_multiplier(self):
         return 1
 
     def _elementwise_forward(self, inputs, autoregressive_params):
-        shift = self._unconstrained_shift(
-            autoregressive_params
-        )
+        shift = self._unconstrained_shift(autoregressive_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         # scale = F.softplus(unconstrained_scale) + self._epsilon
         # log_scale = torch.log(scale)
@@ -174,13 +167,11 @@ class MaskedShiftAutoregressiveTransform(AutoregressiveTransform):
         return outputs, logabsdet
 
     def _elementwise_inverse(self, inputs, autoregressive_params):
-        shift = self._unconstrained_shift(
-            autoregressive_params
-        )
+        shift = self._unconstrained_shift(autoregressive_params)
         # scale = torch.sigmoid(unconstrained_scale + 2.0) + self._epsilon
         # scale = F.softplus(unconstrained_scale) + self._epsilon
         # log_scale = torch.log(scale)
-        outputs = (inputs - shift) # / scale
+        outputs = inputs - shift  # / scale
         logabsdet = torch.zeros(inputs.shape[0], device=inputs.device)
         return outputs, logabsdet
 
@@ -189,9 +180,7 @@ class MaskedShiftAutoregressiveTransform(AutoregressiveTransform):
         # unconstrained_scale = autoregressive_params[..., :split_idx]
         # shift = autoregressive_params[..., split_idx:]
         # return unconstrained_scale, shift
-        shift = autoregressive_params.view(
-            -1, self.features
-        )
+        shift = autoregressive_params.view(-1, self.features)
         # unconstrained_scale = autoregressive_params[..., 0]
         return shift * self.shift_scale
 
@@ -199,33 +188,33 @@ class MaskedShiftAutoregressiveTransform(AutoregressiveTransform):
 class MaskedUMNNAutoregressiveTransform(AutoregressiveTransform):
     """An unconstrained monotonic neural networks autoregressive layer that transforms the variables.
 
-        Reference:
-        > A. Wehenkel and G. Louppe, Unconstrained Monotonic Neural Networks, NeurIPS2019.
+    Reference:
+    > A. Wehenkel and G. Louppe, Unconstrained Monotonic Neural Networks, NeurIPS2019.
 
-        ---- Specific arguments ----
-        integrand_net_layers: the layers dimension to put in the integrand network.
-        cond_size: The embedding size for the conditioning factors.
-        nb_steps: The number of integration steps.
-        solver: The quadrature algorithm - CC or CCParallel. Both implements Clenshaw-Curtis quadrature with
-        Leibniz rule for backward computation. CCParallel pass all the evaluation points (nb_steps) at once, it is faster
-        but requires more memory.
-        """
+    ---- Specific arguments ----
+    integrand_net_layers: the layers dimension to put in the integrand network.
+    cond_size: The embedding size for the conditioning factors.
+    nb_steps: The number of integration steps.
+    solver: The quadrature algorithm - CC or CCParallel. Both implements Clenshaw-Curtis quadrature with
+    Leibniz rule for backward computation. CCParallel pass all the evaluation points (nb_steps) at once, it is faster
+    but requires more memory.
+    """
 
     def __init__(
-            self,
-            features,
-            hidden_features,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
-            integrand_net_layers=[50, 50, 50],
-            cond_size=20,
-            nb_steps=20,
-            solver="CCParallel",
+        self,
+        features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+        integrand_net_layers=[50, 50, 50],
+        cond_size=20,
+        nb_steps=20,
+        solver="CCParallel",
     ):
         self.features = features
         self.cond_size = cond_size
@@ -249,36 +238,41 @@ class MaskedUMNNAutoregressiveTransform(AutoregressiveTransform):
         return self.cond_size
 
     def _elementwise_forward(self, inputs, autoregressive_params):
-        z, jac = self.transformer(inputs, autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1))
+        z, jac = self.transformer(
+            inputs, autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1)
+        )
         log_det_jac = jac.log().sum(1)
         return z, log_det_jac
 
     def _elementwise_inverse(self, inputs, autoregressive_params):
-        x = self.transformer.inverse_transform(inputs,
-                                               autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1))
-        z, jac = self.transformer(x, autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1))
+        x = self.transformer.inverse_transform(
+            inputs, autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1)
+        )
+        z, jac = self.transformer(
+            x, autoregressive_params.reshape(inputs.shape[0], inputs.shape[1], -1)
+        )
         log_det_jac = -jac.log().sum(1)
         return x, log_det_jac
 
 
 #
 
+
 class MaskedSumOfSigmoidsTransform(AutoregressiveTransform):
-    """An unconstrained monotonic neural networks autoregressive layer that transforms the variables.
-        """
+    """An unconstrained monotonic neural networks autoregressive layer that transforms the variables."""
 
     def __init__(
-            self,
-            features,
-            hidden_features,
-            n_sigmoids=30,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
+        self,
+        features,
+        hidden_features,
+        n_sigmoids=30,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
     ):
         self.features = features
         self.n_sigmoids = n_sigmoids
@@ -301,9 +295,13 @@ class MaskedSumOfSigmoidsTransform(AutoregressiveTransform):
         return 3 * self.n_sigmoids + 1
 
     def _elementwise_forward(self, inputs, autoregressive_params):
-        transformer = SumOfSigmoids(n_sigmoids=self.n_sigmoids, features=self.features,
-                                    raw_params=autoregressive_params.view(inputs.shape[0], self.features,
-                                                                            self._output_dim_multiplier()))
+        transformer = SumOfSigmoids(
+            n_sigmoids=self.n_sigmoids,
+            features=self.features,
+            raw_params=autoregressive_params.view(
+                inputs.shape[0], self.features, self._output_dim_multiplier()
+            ),
+        )
 
         z, logabsdet = transformer(inputs)
         return z - 0.5, logabsdet
@@ -311,26 +309,30 @@ class MaskedSumOfSigmoidsTransform(AutoregressiveTransform):
     def _elementwise_inverse(self, inputs, autoregressive_params):
         # self.transformer.set_raw_params(self.features, autoregressive_params.reshape(inputs.shape[0], -1))
         inputs = inputs + 0.5
-        transformer = SumOfSigmoids(n_sigmoids=self.n_sigmoids, features=self.features,
-                                    raw_params=autoregressive_params.view(inputs.shape[0], self.features,
-                                                                            self._output_dim_multiplier()))
+        transformer = SumOfSigmoids(
+            n_sigmoids=self.n_sigmoids,
+            features=self.features,
+            raw_params=autoregressive_params.view(
+                inputs.shape[0], self.features, self._output_dim_multiplier()
+            ),
+        )
         x, logabsdet = transformer.inverse(inputs)
         return x, logabsdet
 
 
 class MaskedPiecewiseLinearAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            num_bins,
-            features,
-            hidden_features,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
+        self,
+        num_bins,
+        features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
     ):
         self.num_bins = num_bins
         self.features = features
@@ -373,22 +375,22 @@ class MaskedPiecewiseLinearAutoregressiveTransform(AutoregressiveTransform):
 
 class MaskedPiecewiseQuadraticAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            features,
-            hidden_features,
-            context_features=None,
-            num_bins=10,
-            num_blocks=2,
-            tails=None,
-            tail_bound=1.0,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
-            min_bin_width=rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
-            min_bin_height=rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
-            min_derivative=rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+        self,
+        features,
+        hidden_features,
+        context_features=None,
+        num_bins=10,
+        num_blocks=2,
+        tails=None,
+        tail_bound=1.0,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+        min_bin_width=rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative=rational_quadratic.DEFAULT_MIN_DERIVATIVE,
     ):
         self.num_bins = num_bins
         self.min_bin_width = min_bin_width
@@ -425,7 +427,7 @@ class MaskedPiecewiseQuadraticAutoregressiveTransform(AutoregressiveTransform):
         )
 
         unnormalized_widths = transform_params[..., : self.num_bins]
-        unnormalized_heights = transform_params[..., self.num_bins:]
+        unnormalized_heights = transform_params[..., self.num_bins :]
 
         if hasattr(self.autoregressive_net, "hidden_features"):
             unnormalized_widths /= np.sqrt(self.autoregressive_net.hidden_features)
@@ -447,7 +449,7 @@ class MaskedPiecewiseQuadraticAutoregressiveTransform(AutoregressiveTransform):
             inverse=inverse,
             min_bin_width=self.min_bin_width,
             min_bin_height=self.min_bin_height,
-            **spline_kwargs
+            **spline_kwargs,
         )
 
         return outputs, torchutils.sum_except_batch(logabsdet)
@@ -461,17 +463,17 @@ class MaskedPiecewiseQuadraticAutoregressiveTransform(AutoregressiveTransform):
 
 class MaskedPiecewiseCubicAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            num_bins,
-            features,
-            hidden_features,
-            context_features=None,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
+        self,
+        num_bins,
+        features,
+        hidden_features,
+        context_features=None,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
     ):
         self.num_bins = num_bins
         self.features = features
@@ -500,8 +502,8 @@ class MaskedPiecewiseCubicAutoregressiveTransform(AutoregressiveTransform):
         )
 
         unnormalized_widths = transform_params[..., : self.num_bins]
-        unnormalized_heights = transform_params[..., self.num_bins: 2 * self.num_bins]
-        derivatives = transform_params[..., 2 * self.num_bins:]
+        unnormalized_heights = transform_params[..., self.num_bins : 2 * self.num_bins]
+        derivatives = transform_params[..., 2 * self.num_bins :]
         unnorm_derivatives_left = derivatives[..., 0][..., None]
         unnorm_derivatives_right = derivatives[..., 1][..., None]
 
@@ -528,22 +530,22 @@ class MaskedPiecewiseCubicAutoregressiveTransform(AutoregressiveTransform):
 
 class MaskedPiecewiseRationalQuadraticAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
-            self,
-            features,
-            hidden_features,
-            context_features=None,
-            num_bins=10,
-            tails=None,
-            tail_bound=1.0,
-            num_blocks=2,
-            use_residual_blocks=True,
-            random_mask=False,
-            activation=F.relu,
-            dropout_probability=0.0,
-            use_batch_norm=False,
-            min_bin_width=rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
-            min_bin_height=rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
-            min_derivative=rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+        self,
+        features,
+        hidden_features,
+        context_features=None,
+        num_bins=10,
+        tails=None,
+        tail_bound=1.0,
+        num_blocks=2,
+        use_residual_blocks=True,
+        random_mask=False,
+        activation=F.relu,
+        dropout_probability=0.0,
+        use_batch_norm=False,
+        min_bin_width=rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height=rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative=rational_quadratic.DEFAULT_MIN_DERIVATIVE,
     ):
         self.num_bins = num_bins
         self.min_bin_width = min_bin_width
@@ -583,8 +585,8 @@ class MaskedPiecewiseRationalQuadraticAutoregressiveTransform(AutoregressiveTran
         )
 
         unnormalized_widths = transform_params[..., : self.num_bins]
-        unnormalized_heights = transform_params[..., self.num_bins: 2 * self.num_bins]
-        unnormalized_derivatives = transform_params[..., 2 * self.num_bins:]
+        unnormalized_heights = transform_params[..., self.num_bins : 2 * self.num_bins]
+        unnormalized_derivatives = transform_params[..., 2 * self.num_bins :]
 
         if hasattr(self.autoregressive_net, "hidden_features"):
             unnormalized_widths /= np.sqrt(self.autoregressive_net.hidden_features)
@@ -609,7 +611,7 @@ class MaskedPiecewiseRationalQuadraticAutoregressiveTransform(AutoregressiveTran
             min_bin_height=self.min_bin_height,
             min_derivative=self.min_derivative,
             enable_identity_init=True,
-            **spline_kwargs
+            **spline_kwargs,
         )
 
         return outputs, torchutils.sum_except_batch(logabsdet)

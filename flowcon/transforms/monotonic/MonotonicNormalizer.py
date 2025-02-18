@@ -1,7 +1,6 @@
 import torch
-from UMNN import NeuralIntegral, ParallelNeuralIntegral
 import torch.nn as nn
-from flowcon.transforms.no_analytic_inv.base import  MonotonicTransform
+from UMNN import NeuralIntegral, ParallelNeuralIntegral  # type: ignore
 
 
 def _flatten(sequence):
@@ -15,7 +14,7 @@ class ELUPlus(nn.Module):
         self.elu = nn.ELU()
 
     def forward(self, x):
-        return self.elu(x) + 1.
+        return self.elu(x) + 1.0
 
 
 class IntegrandNet(nn.Module):
@@ -24,7 +23,7 @@ class IntegrandNet(nn.Module):
         l1 = [1 + cond_in] + hidden
         l2 = hidden + [1]
         layers = []
-        for h1, h2 in zip(l1, l2):
+        for h1, h2 in zip(l1, l2, strict=False):
             layers += [nn.Linear(h1, h2), nn.ReLU()]
         layers.pop()
         layers.append(ELUPlus())
@@ -54,12 +53,29 @@ class MonotonicNormalizer(nn.Module):
         z0 = h[:, :, 0]
         h = h.permute(0, 2, 1).contiguous().view(x.shape[0], -1)
         if self.solver == "CC":
-            z = NeuralIntegral.apply(x0, xT, self.integrand_net, _flatten(self.integrand_net.parameters()),
-                                     h, self.nb_steps) + z0
+            z = (
+                NeuralIntegral.apply(
+                    x0,
+                    xT,
+                    self.integrand_net,
+                    _flatten(self.integrand_net.parameters()),
+                    h,
+                    self.nb_steps,
+                )
+                + z0
+            )
         elif self.solver == "CCParallel":
-            z = ParallelNeuralIntegral.apply(x0, xT, self.integrand_net,
-                                             _flatten(self.integrand_net.parameters()),
-                                             h, self.nb_steps) + z0
+            z = (
+                ParallelNeuralIntegral.apply(
+                    x0,
+                    xT,
+                    self.integrand_net,
+                    _flatten(self.integrand_net.parameters()),
+                    h,
+                    self.nb_steps,
+                )
+                + z0
+            )
         else:
             return None
         return z, self.integrand_net(x, h)
@@ -80,5 +96,3 @@ class MonotonicNormalizer(nn.Module):
             z_max = left * z_middle + right * z_max
             z_min = right * z_middle + left * z_min
         return (x_max + x_min) / 2
-
-

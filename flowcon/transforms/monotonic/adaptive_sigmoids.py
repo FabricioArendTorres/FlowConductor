@@ -1,13 +1,13 @@
-import abc
-
-import torch
-import torch.nn as nn
-import numpy as np
 from abc import abstractmethod
 
-from flowcon.transforms.no_analytic_inv.base import MonotonicTransform
+import numpy as np
+import torch
+import torch.nn as nn
+
 from flowcon.transforms.base import Transform
-from flowcon.transforms.nonlinearities import ExtendedSoftplus, Sigmoid, Softplus
+from flowcon.transforms.nonlinearities import ExtendedSoftplus
+
+from .base import MonotonicTransform
 
 
 class SumOfSigmoids(MonotonicTransform):
@@ -19,12 +19,19 @@ class SumOfSigmoids(MonotonicTransform):
 
     [1] Negri, Marcello Massimo, Fabricio Arend Torres, and Volker Roth. "Conditional Matrix Flows for Gaussian Graphical Models." Advances in Neural Information Processing Systems 36 (2024).
     """
-    PREACT_SCALE_MIN = .1
-    PREACT_SCALE_MAX = 10.
+
+    PREACT_SCALE_MIN = 0.1
+    PREACT_SCALE_MAX = 10.0
     PREACT_SHIFT_MAX = 10
 
-    def __init__(self, features, n_sigmoids=10, iterations_bisection_inverse=50, lim_bisection_inverse=120,
-                 raw_params: torch.Tensor = None):
+    def __init__(
+        self,
+        features,
+        n_sigmoids=10,
+        iterations_bisection_inverse=50,
+        lim_bisection_inverse=120,
+        raw_params: torch.Tensor = None,
+    ):
         """
         Initialize the SumOfSigmoids transformation.
 
@@ -54,18 +61,27 @@ class SumOfSigmoids(MonotonicTransform):
         self.n_sigmoids = n_sigmoids
         self.features = features
 
-        super(SumOfSigmoids, self).__init__(num_iterations=iterations_bisection_inverse, lim=lim_bisection_inverse)
+        super(SumOfSigmoids, self).__init__(
+            num_iterations=iterations_bisection_inverse, lim=lim_bisection_inverse
+        )
         if raw_params is None:
-            self.shift_preact = nn.Parameter(torch.randn(1, features, self.n_sigmoids), requires_grad=True)
-            self.log_scale_preact = nn.Parameter(torch.zeros(1, features, self.n_sigmoids), requires_grad=True)
-            self.raw_softmax = nn.Parameter((torch.ones(1, features, self.n_sigmoids, requires_grad=False)))
+            self.shift_preact = nn.Parameter(
+                torch.randn(1, features, self.n_sigmoids), requires_grad=True
+            )
+            self.log_scale_preact = nn.Parameter(
+                torch.zeros(1, features, self.n_sigmoids), requires_grad=True
+            )
+            self.raw_softmax = nn.Parameter(
+                (torch.ones(1, features, self.n_sigmoids, requires_grad=False))
+            )
             self.extended_softplus = ExtendedSoftplus(features=features)
         else:
             assert raw_params.shape[1:] == (features, 3 * self.n_sigmoids + 1)
             self.set_raw_params(features, raw_params)
 
-        self.log_scale_postact = nn.Parameter(torch.log(torch.ones(1, device=self.shift_preact.device)),
-                                              requires_grad=False)
+        self.log_scale_postact = nn.Parameter(
+            torch.log(torch.ones(1, device=self.shift_preact.device)), requires_grad=False
+        )
         self.eps = 1e-6
 
     def get_raw_params(self):
@@ -79,28 +95,38 @@ class SumOfSigmoids(MonotonicTransform):
             A concatenated tensor of all raw parameters, including shifts, log scales for
             the sigmoid functions, softmax weights, and the shift from the extended softplus.
         """
-        return torch.cat((self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
-                          self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
-                          self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
-                          self.extended_softplus.shift.reshape(-1, self.features, 1),
-                          # self.extended_softplus.log_scale.reshape(-1, self.features, 1)
-                          ), dim=-1)
+        return torch.cat(
+            (
+                self.shift_preact.reshape(-1, self.features, self.n_sigmoids),
+                self.log_scale_preact.reshape(-1, self.features, self.n_sigmoids),
+                self.raw_softmax.reshape(-1, self.features, self.n_sigmoids),
+                self.extended_softplus.shift.reshape(-1, self.features, 1),
+                # self.extended_softplus.log_scale.reshape(-1, self.features, 1)
+            ),
+            dim=-1,
+        )
 
     def set_raw_params(self, features, raw_params):
         # 3 = shift, scale, softmax for sigmoids
         # 2 = log_scale, log_shift for extended softplus
-        vals = torch.split(raw_params, [self.n_sigmoids, self.n_sigmoids, self.n_sigmoids, 1], dim=-1)
+        vals = torch.split(
+            raw_params, [self.n_sigmoids, self.n_sigmoids, self.n_sigmoids, 1], dim=-1
+        )
         self.shift_preact, self.log_scale_preact, self.raw_softmax = vals[:3]
         self.extended_softplus = ExtendedSoftplus(features=features, shift=vals[3])
 
     def get_sigmoid_params(self, features, n_features_x_sigmoids, unconstrained_params):
-        shift_preact = unconstrained_params[:, :features * self.n_sigmoids]
+        shift_preact = unconstrained_params[:, : features * self.n_sigmoids]
         shift_preact = shift_preact.view(-1, features, self.n_sigmoids)
 
-        log_scale_preact = unconstrained_params[:, n_features_x_sigmoids: 2 * n_features_x_sigmoids]
+        log_scale_preact = unconstrained_params[
+            :, n_features_x_sigmoids : 2 * n_features_x_sigmoids
+        ]
         log_scale_preact = log_scale_preact.view(-1, features, self.n_sigmoids)
 
-        raw_softmax_preact = unconstrained_params[:, 2 * n_features_x_sigmoids: 3 * n_features_x_sigmoids]
+        raw_softmax_preact = unconstrained_params[
+            :, 2 * n_features_x_sigmoids : 3 * n_features_x_sigmoids
+        ]
         raw_softmax_preact = raw_softmax_preact.view(-1, features, self.n_sigmoids)
 
         return shift_preact, log_scale_preact, raw_softmax_preact
@@ -123,8 +149,11 @@ class SumOfSigmoids(MonotonicTransform):
         pre_act = scale_preact * (inputs.unsqueeze(-1) - shift_preact)
 
         sigmoids_expanded = scale_postact * torch.sigmoid(pre_act)
-        log_jac_sigmoid_expanded = torch.log(scale_postact) + torch.log(scale_preact) + self.sigmoid_log_derivative(
-            pre_act)
+        log_jac_sigmoid_expanded = (
+            torch.log(scale_postact)
+            + torch.log(scale_preact)
+            + self.sigmoid_log_derivative(pre_act)
+        )
         tmp = sigmoids_expanded.sum(-1) / (scale_postact.sum(-1))
 
         return tmp, torch.logsumexp(log_jac_sigmoid_expanded, -1)
@@ -135,7 +164,9 @@ class SumOfSigmoids(MonotonicTransform):
         scale_postact = torch.exp(self.log_scale_postact) * soft_max
 
         scale_preact = torch.sigmoid(self.log_scale_preact)
-        scale_preact = scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
+        scale_preact = (
+            scale_preact * (self.PREACT_SCALE_MAX - self.PREACT_SCALE_MIN) + self.PREACT_SCALE_MIN
+        )
 
         shift_preact = torch.tanh(self.shift_preact) * self.PREACT_SHIFT_MAX
 
@@ -149,7 +180,7 @@ class DeepSigmoidModule(Transform):
         out = e_x / e_x.sum(dim=dim, keepdim=True)
         return out
 
-    def __init__(self, n_sigmoids=4, mollify=0., eps=1e-4, num_inverse_iterations=100, lim=10):
+    def __init__(self, n_sigmoids=4, mollify=0.0, eps=1e-4, num_inverse_iterations=100, lim=10):
         super(DeepSigmoidModule, self).__init__()
 
         self.n_sigmoids = n_sigmoids
@@ -163,8 +194,7 @@ class DeepSigmoidModule(Transform):
         self.softplus_ = nn.Softplus()
         self.softplus = lambda x: self.softplus_(x) + self.eps
         self.sigmoid_ = nn.Sigmoid()
-        self.sigmoid = lambda x: self.sigmoid_(x) * (
-                1 - self.delta) + 0.5 * self.delta
+        self.sigmoid = lambda x: self.sigmoid_(x) * (1 - self.delta) + 0.5 * self.delta
         self.logsigmoid = lambda x: -self.softplus(-x)
         self.log = lambda x: torch.log(x * 1e2) - np.log(1e2)
         self.logit = lambda x: self.log(x) - self.log(1 - x)
@@ -192,21 +222,26 @@ class DeepSigmoidModule(Transform):
         return outputs, logdet
 
     def raw_scales(self, dsparams):
-        return dsparams[..., 0 * self.n_sigmoids:1 * self.n_sigmoids]
+        return dsparams[..., 0 * self.n_sigmoids : 1 * self.n_sigmoids]
 
     def raw_shifts(self, dsparams):
-        return dsparams[..., 1 * self.n_sigmoids:2 * self.n_sigmoids]
+        return dsparams[..., 1 * self.n_sigmoids : 2 * self.n_sigmoids]
 
     def raw_weights(self, dsparams):
-        return dsparams[..., 2 * self.n_sigmoids:3 * self.n_sigmoids]
+        return dsparams[..., 2 * self.n_sigmoids : 3 * self.n_sigmoids]
 
     def _forward_logabsdet(self, a, dsparams, ndim, pre_sigm, x_pre_clipped):
-        logj = torch.nn.functional.log_softmax(self.raw_weights(dsparams), dim=-1) + \
-               self.logsigmoid(pre_sigm) + \
-               self.logsigmoid(-pre_sigm) + self.log(a)
+        logj = (
+            torch.nn.functional.log_softmax(self.raw_weights(dsparams), dim=-1)
+            + self.logsigmoid(pre_sigm)
+            + self.logsigmoid(-pre_sigm)
+            + self.log(a)
+        )
 
         logj = torch.logsumexp(logj, -1)
-        logabsdet_ = logj + np.log(1 - self.eps) - (self.log(x_pre_clipped) + self.log(-x_pre_clipped + 1))
+        logabsdet_ = (
+            logj + np.log(1 - self.eps) - (self.log(x_pre_clipped) + self.log(-x_pre_clipped + 1))
+        )
         return logabsdet_.sum(-1)
 
     def mollify(self, a_, b_):
@@ -226,10 +261,17 @@ class DeepSigmoid(DeepSigmoidModule):
         _b_preact = torch.zeros(self.features, self.n_sigmoids)  # shift
         _w_preact = torch.ones(self.features, self.n_sigmoids)  # softmax
 
-        self.dsparams = torch.nn.Parameter(torch.concatenate([_a_preact + 1e-5 * torch.randn_like(_a_preact),
-                                                              _b_preact + 1e-5 * torch.randn_like(_b_preact),
-                                                              _w_preact + 1e-3 * torch.randn_like(_w_preact)], -1),
-                                           requires_grad=True)
+        self.dsparams = torch.nn.Parameter(
+            torch.concatenate(
+                [
+                    _a_preact + 1e-5 * torch.randn_like(_a_preact),
+                    _b_preact + 1e-5 * torch.randn_like(_b_preact),
+                    _w_preact + 1e-3 * torch.randn_like(_w_preact),
+                ],
+                -1,
+            ),
+            requires_grad=True,
+        )
 
     def forward(self, inputs, context=None) -> torch.Tensor:
         return self.forward_given_params(inputs=inputs, dsparams=self.dsparams)

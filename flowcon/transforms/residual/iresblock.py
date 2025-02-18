@@ -36,7 +36,7 @@ import torch
 # from flowcon.nn.nets.invertible_densenet import *
 from flowcon.nn.nets.invertible_densenet import DenseNet, _DenseNet
 from flowcon.transforms.base import Transform
-from flowcon.transforms.lipschitz.util import (
+from flowcon.transforms.residual.util import (
     BiasedParameterGenerator,
     ParameterGenerator,
     UnbiasedParameterGenerator,
@@ -199,9 +199,7 @@ class iResBlock(Transform):
             self.densenet_factory = DenseNet.factory(**kwargs)
             return self
 
-        def set_logabsdet_estimator(
-            self, brute_force=False, unbiased_estimator=True, **options
-        ):
+        def set_logabsdet_estimator(self, brute_force=False, unbiased_estimator=True, **options):
             self.args_iResBlock = dict(
                 brute_force=brute_force,
                 unbiased_estimator=unbiased_estimator,
@@ -216,9 +214,7 @@ class iResBlock(Transform):
             assert self.densenet_factory is not None, (
                 "DenseNet arguments not set. Call set_densenet."
             )
-            return iResBlock(
-                contractive_network=self.densenet_factory(), **self.args_iResBlock
-            )
+            return iResBlock(contractive_network=self.densenet_factory(), **self.args_iResBlock)
 
 
 class DeterminantEstimator(torch.nn.Module):
@@ -262,9 +258,7 @@ class DeterminantEstimator(torch.nn.Module):
         self.parameter_generator = parameter_generator
 
     def logabsdet_and_g(self, x, context=None, training=False, **kwargs):
-        coeff_fn, n_power_series = self.parameter_generator.sample_parameters(
-            training=training
-        )
+        coeff_fn, n_power_series = self.parameter_generator.sample_parameters(training=training)
         g, logabsdet = self._g_and_logabsdet(
             coeff_fn=coeff_fn, n_power_series=n_power_series, x=x, context=context
         )
@@ -346,9 +340,7 @@ class ApproxTraceDeterminantEstimator(DeterminantEstimator):
             )
 
     def logabsdet_and_g(self, x, context=None, training=False, **kwargs):
-        coeff_fn, n_power_series = self.parameter_generator.sample_parameters(
-            training=training
-        )
+        coeff_fn, n_power_series = self.parameter_generator.sample_parameters(training=training)
         return self._g_and_logabsdet(
             coeff_fn=coeff_fn, n_power_series=n_power_series, x=x, context=context
         )
@@ -359,9 +351,7 @@ class ApproxTraceDeterminantEstimator(DeterminantEstimator):
         vareps = torch.randn_like(x)
         x = x.requires_grad_(True)
         g = self.nnet(x, context)
-        logdetgrad = self.trace_estimator(
-            g, x, n_power_series, vareps, coeff_fn, self.training
-        )
+        logdetgrad = self.trace_estimator(g, x, n_power_series, vareps, coeff_fn, self.training)
         return g, logdetgrad
 
     @staticmethod
@@ -369,9 +359,7 @@ class ApproxTraceDeterminantEstimator(DeterminantEstimator):
         vjp = vareps
         logdetgrad = torch.tensor(0.0).to(x)
         for k in range(1, n_power_series + 1):
-            vjp = torch.autograd.grad(
-                g, x, vjp, create_graph=training, retain_graph=True
-            )[0]
+            vjp = torch.autograd.grad(g, x, vjp, create_graph=training, retain_graph=True)[0]
             tr = torch.sum(vjp.view(x.shape[0], -1) * vareps.view(x.shape[0], -1), 1)
             delta = (-1) ** (k + 1) / k * coeff_fn(k) * tr
             logdetgrad = logdetgrad + delta
@@ -386,7 +374,5 @@ class ApproxTraceDeterminantEstimator(DeterminantEstimator):
                 vjp = torch.autograd.grad(g, x, vjp, retain_graph=True)[0]
                 neumann_vjp = neumann_vjp + (-1) ** k * coeff_fn(k) * vjp
         vjp_jac = torch.autograd.grad(g, x, neumann_vjp, create_graph=training)[0]
-        logdetgrad = torch.sum(
-            vjp_jac.view(x.shape[0], -1) * vareps.view(x.shape[0], -1), 1
-        )
+        logdetgrad = torch.sum(vjp_jac.view(x.shape[0], -1) * vareps.view(x.shape[0], -1), 1)
         return logdetgrad

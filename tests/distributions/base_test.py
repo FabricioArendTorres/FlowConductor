@@ -11,7 +11,7 @@ class TestInitialization:
     def test_no_forward(self):
         dist = BaseDistribution(1)
         with pytest.raises(NotImplementedError):
-            dist.forward(None)
+            dist.forward(None)  # type: ignore
 
     def test_positive_dimension(self):
         with pytest.raises(TypeError):
