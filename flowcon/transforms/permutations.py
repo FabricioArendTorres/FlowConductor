@@ -23,33 +23,37 @@ class Permutation(Transform):
         self.register_buffer("_permutation", permutation)
 
     @property
-    def _inverse_permutation(self):
+    def _inverse_permutation(self) -> torch.Tensor:
         return torch.argsort(self._permutation)
 
     @staticmethod
-    def _permute(inputs, permutation, dim):
+    def _permute(
+        inputs: torch.Tensor, permutation: torch.Tensor, dim: int
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if dim >= inputs.ndimension():
             raise ValueError(f"No dimension {dim} in inputs.")
         if inputs.shape[dim] != len(permutation):
-            raise ValueError(
-                f"Dimension {dim} in inputs must be of size {len(permutation)}."
-            )
+            raise ValueError(f"Dimension {dim} in inputs must be of size {len(permutation)}.")
         batch_size = inputs.shape[0]
         outputs = torch.index_select(inputs, dim, permutation)
         logabsdet = inputs.new_zeros(batch_size)
         return outputs, logabsdet
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._permute(inputs, self._permutation, self._dim)
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._permute(inputs, self._inverse_permutation, self._dim)
 
 
 class RandomPermutation(Permutation):
     """Permutes using a random, but fixed, permutation. Only works with 1D inputs."""
 
-    def __init__(self, features, dim=1):
+    def __init__(self, features: int, dim: int = 1):
         if not check.is_positive_int(features):
             raise ValueError("Number of features must be a positive integer.")
         super().__init__(torch.randperm(features), dim)
@@ -58,14 +62,14 @@ class RandomPermutation(Permutation):
 class ReversePermutation(Permutation):
     """Reverses the elements of the input. Only works with 1D inputs."""
 
-    def __init__(self, features, dim=1):
+    def __init__(self, features: int, dim: int = 1):
         if not check.is_positive_int(features):
             raise ValueError("Number of features must be a positive integer.")
         super().__init__(torch.arange(features - 1, -1, -1), dim)
 
 
 class FillTriangular(Transform):
-    def __init__(self, features: int = None, matrix_dimension: int = None):
+    def __init__(self, features: int | None = None, matrix_dimension: int | None = None):
         super().__init__()
 
         if (features is not None) and (matrix_dimension is None):
@@ -75,17 +79,13 @@ class FillTriangular(Transform):
             self.features = self.calc_n_ltri(matrix_dimension)
             self.matrix_dim = matrix_dimension
         else:
-            raise ValueError(
-                "Provide either 'features' or 'full_matrix_dimension', but not both."
-            )
+            raise ValueError("Provide either 'features' or 'full_matrix_dimension', but not both.")
 
         self.lower_indices = np.tril_indices(self.matrix_dim, k=0)
 
     @staticmethod
-    def calc_matrix_dimension(n_ltri_entries):
-        assert n_ltri_entries > 0, (
-            f"Dimension must be positive, but is {n_ltri_entries}"
-        )
+    def calc_matrix_dimension(n_ltri_entries: int) -> int:
+        assert n_ltri_entries > 0, f"Dimension must be positive, but is {n_ltri_entries}"
         temp = 1 + 8 * n_ltri_entries
         assert np.square(np.floor(np.sqrt(temp))) == temp, (
             "invalid dimension: can't be mapped to lower triangular matrix"
@@ -94,10 +94,12 @@ class FillTriangular(Transform):
         return matrix_dim
 
     @staticmethod
-    def calc_n_ltri(matrix_dim):
+    def calc_n_ltri(matrix_dim: int) -> int:
         return int((matrix_dim * (matrix_dim + 1)) / 2)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         assert inputs.shape[-1] == self.features
 
         mb = inputs.shape[0]
@@ -108,7 +110,9 @@ class FillTriangular(Transform):
 
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         assert inputs.shape[-2:] == (self.matrix_dim, self.matrix_dim)
 
         outputs = inputs[:, self.lower_indices[0], self.lower_indices[1]]
