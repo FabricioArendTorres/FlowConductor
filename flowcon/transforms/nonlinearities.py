@@ -1,5 +1,7 @@
 """Implementations of invertible non-linearities."""
 
+from __future__ import annotations
+
 import numpy as np
 import torch
 from numpy.typing import ArrayLike
