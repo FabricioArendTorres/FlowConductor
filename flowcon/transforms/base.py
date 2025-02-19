@@ -1,15 +1,12 @@
 """Basic definitions for the transforms module."""
 
+from __future__ import annotations
+
 from typing import (
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
     Any,
-    Union,
+    Callable,
     Generator,
+    Iterable,
     cast,
 )
 
@@ -35,13 +32,13 @@ class InputOutsideDomain(Exception):
 class Transform(nn.Module):
     """Base class for all transform objects."""
 
-    def __init__(self, *args: Tuple[Any, ...], **kwargs: Dict[str, Any]):
+    def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]):
         super().__init__(*args, **kwargs)
         self._inverted = False
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         A function that bijectively transforms the inputs,
         and returns the transformed input as well as the logabsdet of the transformation.
@@ -52,13 +49,14 @@ class Transform(nn.Module):
         inputs : torch.Tensor
             Input values that should be transformed.
         context : torch.Tensor, optional
-            Context for conditioning the transforms applied to the inputs, if applicable, by default None
+            Context for conditioning the transforms applied to the inputs, if applicable,
+            by default None
         """
         raise NotImplementedError()
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         A function that bijectively transforms the inputs,
         and returns the transformed input as well as the logabsdet of the transformation.
@@ -71,11 +69,12 @@ class Transform(nn.Module):
         inputs : torch.Tensor
             Input values that should be transformed.
         context : torch.Tensor, optional
-            Context for conditioning the transforms applied to the inputs, if applicable, by default None
+            Context for conditioning the transforms applied to the inputs, if applicable,
+            by default None
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             (outputs, total_logabsdet)
 
         Raises
@@ -126,12 +125,12 @@ class Sequential(Transform):
         inputs: torch.Tensor,
         funcs: Iterable[
             Callable[
-                [torch.Tensor, Union[torch.Tensor, None]],
-                Tuple[torch.Tensor, torch.Tensor],
+                [torch.Tensor, torch.Tensor | None],
+                tuple[torch.Tensor, torch.Tensor],
             ]
         ],
-        context: Union[torch.Tensor, None],
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        context: torch.Tensor | None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Applies a sequence of functions to the inputs, accumulating log determinants.
 
@@ -146,7 +145,7 @@ class Sequential(Transform):
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             Transformed output and accumulated log determinant.
         """
         batch_size = inputs.shape[0]
@@ -158,8 +157,8 @@ class Sequential(Transform):
         return outputs, total_logabsdet
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Apply the sequence of transforms in forward order.
 
@@ -167,20 +166,20 @@ class Sequential(Transform):
         ----------
         inputs : torch.Tensor
             Input tensor.
-        context : Optional[torch.Tensor], default=None
+        context : torch.Tensor | None, default=None
             Optional conditioning tensor.
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             Transformed output and accumulated log absolute determinant ln|det(JT(x))|.
         """
         funcs = self._transforms
         return self._cascade(inputs, funcs, context)
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Apply the sequence of transforms in reverse order.
 
@@ -188,12 +187,12 @@ class Sequential(Transform):
         ----------
         inputs : torch.Tensor
             Input tensor.
-        context : Optional[torch.Tensor], default=None
+        context : torch.Tensor | None, default=None
             Optional conditioning tensor.
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             Inverted output and accumulated log determinant ln|det(JT^{-1}(x))|
         """
         inverted_funcs = (transform.inverse for transform in reversed(self._transforms))
@@ -228,14 +227,14 @@ class MultiscaleSequential(Transform):
             raise TypeError("Split dimension must be a positive integer.")
 
         super().__init__()
-        self._transforms = cast(List[Transform], nn.ModuleList())
-        self._output_shapes: List[Tuple[int, ...]] = []
+        self._transforms = cast(list[Transform], nn.ModuleList())
+        self._output_shapes: list[tuple[int, ...]] = []
         self._num_transforms = num_transforms
         self._split_dim = split_dim
 
     def add_transform(
-        self, transform: Transform, transform_output_shape: Tuple[int, ...]
-    ) -> Optional[Tuple[int, ...]]:
+        self, transform: Transform, transform_output_shape: tuple[int, ...]
+    ) -> tuple[int, ...] | None:
         """
         Add a transform. Must be called exactly `num_transforms` times.
 
@@ -243,12 +242,12 @@ class MultiscaleSequential(Transform):
         ----------
         transform : Transform
             The `Transform` object to be added.
-        transform_output_shape : Tuple[int, ...]
+        transform_output_shape : tuple[int, ...]
             shape of transform's outputs, excl. the first batch dimension.
 
         Returns
         -------
-        Optional[Tuple[int, ...]]
+        Optional[tuple[int, ...]]
             Input shape for the next transform, or None if adding the last transform.
 
         """
@@ -269,9 +268,7 @@ class MultiscaleSequential(Transform):
 
         if len(self._transforms) != self._num_transforms:  # Unless last transform.
             output_shape = list(transform_output_shape)
-            output_shape[self._split_dim - 1] = (
-                output_shape[self._split_dim - 1] + 1
-            ) // 2
+            output_shape[self._split_dim - 1] = (output_shape[self._split_dim - 1] + 1) // 2
             output_shape = tuple(output_shape)
 
             hidden_shape = list(transform_output_shape)
@@ -286,8 +283,8 @@ class MultiscaleSequential(Transform):
         return hidden_shape
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if self._split_dim >= inputs.dim():
             raise ValueError("No split_dim in inputs.")
         if self._num_transforms != len(self._transforms):
@@ -302,9 +299,7 @@ class MultiscaleSequential(Transform):
 
             for i, transform in enumerate(self._transforms[:-1]):
                 transform_outputs, logabsdet = transform(hiddens, context)
-                outputs, hiddens = torch.chunk(
-                    transform_outputs, chunks=2, dim=self._split_dim
-                )
+                outputs, hiddens = torch.chunk(transform_outputs, chunks=2, dim=self._split_dim)
                 assert outputs.shape[1:] == self._output_shapes[i]
                 yield outputs, logabsdet
 
@@ -322,7 +317,9 @@ class MultiscaleSequential(Transform):
         all_outputs = torch.cat(all_outputs, dim=-1)
         return all_outputs, total_logabsdet
 
-    def inverse(self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() != 2:
             raise ValueError("Expecting NxD inputs")
         if self._num_transforms != len(self._transforms):
@@ -337,7 +334,7 @@ class MultiscaleSequential(Transform):
         split_indices = np.cumsum([np.prod(shape) for shape in self._output_shapes])
         split_indices = np.insert(split_indices, 0, 0)
 
-        split_inputs: List[torch.Tensor] = []
+        split_inputs: list[torch.Tensor] = []
         for i in range(len(self._output_shapes)):
             flat_input = inputs[:, split_indices[i] : split_indices[i + 1]]
             split_inputs.append(flat_input.view(-1, *self._output_shapes[i]))
@@ -350,7 +347,7 @@ class MultiscaleSequential(Transform):
         total_logabsdet += logabsdet
 
         for inv_transform, input_chunk in zip(
-            rev_inv_transforms[1:], rev_split_inputs[1:]
+            rev_inv_transforms[1:], rev_split_inputs[1:], strict=False
         ):
             tmp_concat_inputs = torch.cat([input_chunk, hiddens], dim=self._split_dim)
             hiddens, logabsdet = inv_transform(tmp_concat_inputs, context)
@@ -384,13 +381,13 @@ class Inverse(Transform):
         self._inverted = not transform._inverted
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._transform.inverse(inputs, context)
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._transform(inputs, context)
 
 
@@ -418,11 +415,11 @@ class RemoveContext(Transform):
         self._inverted = not transform._inverted
 
     def forward(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._transform.inverse(inputs, None)
 
     def inverse(
-        self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._transform(inputs, None)
