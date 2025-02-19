@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Any, Mapping, cast
 
 import torch
+from torch.nn.modules.module import _IncompatibleKeys
 
 import flowcon.utils.typechecks as check
 from flowcon.transforms.base import Transform
@@ -47,8 +48,12 @@ class FlattenTransform(Transform):
         self.register_buffer(
             "_locked", torch.tensor([0], dtype=torch.uint8)
         )  # Stored as tensor for compilation
+        self._locked: torch.Tensor
+        self._cached_shape: torch.Tensor
 
-    def forward(self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Flattens the input tensor and caches its original shape.
 
@@ -66,28 +71,29 @@ class FlattenTransform(Transform):
         logabsdet : torch.Tensor
             A tensor of zeros with shape ``(n,)``.
         """
-        assert len(inputs.shape) >= 2, (
-            f"Invalid {inputs.shape=}. Must have at least 2 axes."
-        )
+        assert len(inputs.shape) >= 2, f"Invalid {inputs.shape=}. Must have at least 2 axes."
         if self._locked == 0:  # Avoid .item() for torch.compile compatibility
-            shape_tensor = torch.tensor(
-                inputs.shape[1:], dtype=torch.long, device=inputs.device
-            )
+            shape_tensor = torch.tensor(inputs.shape[1:], dtype=torch.long, device=inputs.device)
             self._cached_shape = shape_tensor  # Store shape as tensor
-            self._locked.fill_(1)  # Lock further modifications
+            self._locked.fill_(1)
 
         try:
-            outputs = inputs.reshape(inputs.shape[0], torch.prod(self._cached_shape))
+            channel_shape = cast(int, torch.prod(self._cached_shape))
+            outputs = inputs.reshape(inputs.shape[0], channel_shape)
         except RuntimeError:
             # reraise, otherwise we get a rather cryptic error
             raise RuntimeError(
-                f"Input with {inputs[1:].shape=} is incompatible with cached shape {self._cached_shape=}."
-                + "This layer is immutable, you have to instantiate a new layer if you want to change shapes."
+                f"Input with {inputs[1:].shape=} is incompatible"
+                + f"with cached shape {self._cached_shape=}."
+                + "This layer is immutable, you have to instantiate a new layer if"
+                + "you want to change shapes."
             ) from RuntimeError
         logabsdet = inputs.new_zeros(inputs.shape[0])
         return outputs, logabsdet
 
-    def inverse(self, inputs: torch.Tensor, context: Optional[torch.Tensor] = None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Restores the original shape of a flattened tensor.
 
@@ -116,7 +122,9 @@ class FlattenTransform(Transform):
         logabsdet = inputs.new_zeros(inputs.shape[0])
         return outputs, logabsdet
 
-    def load_state_dict(self, state_dict, strict=True):
+    def load_state_dict(
+        self, state_dict: Mapping[str, Any], strict: bool = True, assign: bool = False
+    ) -> _IncompatibleKeys:
         """
         Sidesteps the issue of having a dynamic inference of the shape
         for storing and restoring from / to a state_dict.
@@ -130,7 +138,7 @@ class FlattenTransform(Transform):
         """
         if "_cached_shape" in state_dict and state_dict["_cached_shape"].numel() > 0:
             self._cached_shape = state_dict["_cached_shape"]
-        super().load_state_dict(state_dict, strict)
+        return super().load_state_dict(state_dict, strict, assign=assign)
 
 
 class SqueezeTransform(Transform):
@@ -144,7 +152,7 @@ class SqueezeTransform(Transform):
     > L. Dinh et al., Density estimation using Real NVP, ICLR 2017.
     """
 
-    def __init__(self, factor=2):
+    def __init__(self, factor: int = 2):
         super(SqueezeTransform, self).__init__()
 
         if not check.is_int(factor) or factor <= 1:
@@ -152,10 +160,12 @@ class SqueezeTransform(Transform):
 
         self.factor = factor
 
-    def get_output_shape(self, c, h, w):
+    def get_output_shape(self, c: int, h: int, w: int) -> tuple[int, ...]:
         return (c * self.factor * self.factor, h // self.factor, w // self.factor)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() != 4:
             raise ValueError("Expecting inputs with 4 dimensions")
 
@@ -177,7 +187,9 @@ class SqueezeTransform(Transform):
 
         return inputs, inputs.new_zeros(batch_size)
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() != 4:
             raise ValueError("Expecting inputs with 4 dimensions")
 
@@ -186,12 +198,8 @@ class SqueezeTransform(Transform):
         if c < 4 or c % 4 != 0:
             raise ValueError("Invalid number of channel dimensions.")
 
-        inputs = inputs.view(
-            batch_size, c // self.factor**2, self.factor, self.factor, h, w
-        )
+        inputs = inputs.view(batch_size, c // self.factor**2, self.factor, self.factor, h, w)
         inputs = inputs.permute(0, 1, 4, 2, 5, 3).contiguous()
-        inputs = inputs.view(
-            batch_size, c // self.factor**2, h * self.factor, w * self.factor
-        )
+        inputs = inputs.view(batch_size, c // self.factor**2, h * self.factor, w * self.factor)
 
         return inputs, inputs.new_zeros(batch_size)
