@@ -7,7 +7,7 @@ from torch.nn import functional as F
 from flowcon.transforms import made as made_module
 from flowcon.transforms.base import Transform
 from flowcon.transforms.monotonic.adaptive_sigmoids import SumOfSigmoids
-from flowcon.transforms.monotonic.MonotonicNormalizer import *
+from flowcon.transforms.monotonic.MonotonicNormalizer import MonotonicNormalizer
 from flowcon.transforms.monotonic.splines.util import rational_quadratic
 from flowcon.transforms.monotonic.splines.util.cubic import cubic_spline
 from flowcon.transforms.monotonic.splines.util.linear import linear_spline
@@ -32,38 +32,46 @@ class AutoregressiveTransform(Transform):
     forward transform, where D is the dimensionality of the input to the transform.
     """
 
-    def __init__(self, autoregressive_net):
+    def __init__(self, autoregressive_net: made_module.MADE):
         super(AutoregressiveTransform, self).__init__()
         self.autoregressive_net = autoregressive_net
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         autoregressive_params = self.autoregressive_net(inputs, context)
         outputs, logabsdet = self._elementwise_forward(inputs, autoregressive_params)
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         num_inputs = int(np.prod(inputs.shape[1:]))
         outputs = torch.zeros_like(inputs)
-        logabsdet = None
+        logabsdet = torch.empty(1)
         for _ in range(num_inputs):
             autoregressive_params = self.autoregressive_net(outputs, context)
             outputs, logabsdet = self._elementwise_inverse(inputs, autoregressive_params)
         return outputs, logabsdet
 
-    def _output_dim_multiplier(self):
+    def _output_dim_multiplier(self) -> int:
         raise NotImplementedError()
 
-    def _elementwise_forward(self, inputs, autoregressive_params):
+    def _elementwise_forward(
+        self, inputs: torch.Tensor, autoregressive_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         raise NotImplementedError()
 
-    def _elementwise_inverse(self, inputs, autoregressive_params):
+    def _elementwise_inverse(
+        self, inputs: torch.Tensor, autoregressive_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         raise NotImplementedError()
 
 
 class MaskedAffineAutoregressiveTransform(AutoregressiveTransform):
     def __init__(
         self,
-        features,
+        features: int,
         hidden_features,
         context_features=None,
         num_blocks=2,
