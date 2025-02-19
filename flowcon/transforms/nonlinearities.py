@@ -2,6 +2,7 @@
 
 import numpy as np
 import torch
+from numpy.typing import ArrayLike
 from torch import nn
 from torch.nn import functional as F
 
@@ -15,13 +16,17 @@ from flowcon.utils import torchutils
 
 
 class Exp(Transform):
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = torch.exp(inputs)
         logabsdet = torchutils.sum_except_batch(inputs, num_batch_dims=1)
 
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if torch.min(inputs) <= 0.0:
             raise InputOutsideDomain()
 
@@ -32,13 +37,17 @@ class Exp(Transform):
 
 
 class Tanh(Transform):
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = torch.tanh(inputs)
         logabsdet = torch.log(1 - outputs**2)
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if torch.min(inputs) <= -1 or torch.max(inputs) >= 1:
             raise InputOutsideDomain()
         outputs = 0.5 * torch.log((1 + inputs) / (1 - inputs))
@@ -55,7 +64,7 @@ class LogTanh(Transform):
     x). alpha and beta are set to match the value and the first derivative of tanh at
     cut_point."""
 
-    def __init__(self, cut_point=1):
+    def __init__(self, cut_point: int = 1):
         if cut_point <= 0:
             raise ValueError("Cut point must be positive.")
         super().__init__()
@@ -66,7 +75,9 @@ class LogTanh(Transform):
         self.alpha = (1 - np.tanh(np.tanh(cut_point))) / cut_point
         self.beta = np.exp((np.tanh(cut_point) - self.alpha * np.log(cut_point)) / self.alpha)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         mask_right = inputs > self.cut_point
         mask_left = inputs < -self.cut_point
         mask_middle = ~(mask_right | mask_left)
@@ -84,7 +95,9 @@ class LogTanh(Transform):
 
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         mask_right = inputs > self.inv_cut_point
         mask_left = inputs < -self.inv_cut_point
         mask_middle = ~(mask_right | mask_left)
@@ -106,7 +119,7 @@ class LogTanh(Transform):
 
 
 class LeakyReLU(Transform):
-    def __init__(self, negative_slope=1e-2):
+    def __init__(self, negative_slope: float = 1e-2):
         if negative_slope <= 0:
             raise ValueError("Slope must be positive.")
         super().__init__()
@@ -116,32 +129,40 @@ class LeakyReLU(Transform):
             torch.log(torch.as_tensor(self.negative_slope))
         )  # .to(device)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = F.leaky_relu(inputs, negative_slope=self.negative_slope)
-        mask = (inputs < 0).type(torch.Tensor).to(inputs.device)
+        mask = torch.as_tensor(inputs < 0, device=inputs.device)
         logabsdet = self.log_negative_slope * mask
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = F.leaky_relu(inputs, negative_slope=(1 / self.negative_slope))
-        mask = (inputs < 0).type(torch.Tensor).to(inputs.device)
+        mask = torch.as_tensor(inputs < 0, device=inputs.device)
         logabsdet = -self.log_negative_slope * mask
         logabsdet = torchutils.sum_except_batch(logabsdet, num_batch_dims=1)
         return outputs, logabsdet
 
 
 class Sigmoid(Transform):
-    def __init__(self, temperature=1, eps=1e-6, learn_temperature=False):
+    def __init__(self, temperature: float = 1, eps: float = 1e-6, learn_temperature: bool = False):
         super().__init__()
         self.eps = eps
-        if learn_temperature:
-            self.temperature = nn.Parameter(torch.Tensor([temperature]))
-        else:
-            temperature = torch.Tensor([temperature])
-            self.register_buffer("temperature", temperature)
+        # if learn_temperature:
+        self.temperature = nn.Parameter(
+            torch.Tensor([temperature]), requires_gradient=learn_temperature
+        )
+        # else:
+        #     temperature = torch.Tensor([temperature])
+        #     self.register_buffer("temperature", temperature)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         inputs = self.temperature * inputs
         outputs = torch.sigmoid(inputs)
         logabsdet = torchutils.sum_except_batch(
@@ -149,7 +170,9 @@ class Sigmoid(Transform):
         )
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if torch.min(inputs) < 0 or torch.max(inputs) > 1:
             raise InputOutsideDomain()
 
@@ -165,19 +188,23 @@ class Sigmoid(Transform):
 
 
 class Softplus(Transform):
-    def __init__(self, threshold=20, eps=0.0):
+    def __init__(self, threshold: int = 20, eps: float = 0.0):
         super().__init__()
 
         self.eps = eps
         self.softplus = torch.nn.Softplus(beta=1, threshold=threshold)
         self.log_sigmoid = torch.nn.LogSigmoid()
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = self.softplus(inputs) + self.eps
         logabsdet = self.log_sigmoid(inputs).sum(-1)
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         inputs = inputs - self.eps
         outputs = torch.where(inputs > self.softplus.threshold, inputs, inputs.expm1().log())
         logabsdet = -torch.log(-torch.expm1(-inputs)).sum(-1)
@@ -185,7 +212,7 @@ class Softplus(Transform):
 
 
 class Logit(Inverse):
-    def __init__(self, temperature=1, eps=1e-6):
+    def __init__(self, temperature: float = 1, eps: float = 1e-6):
         super().__init__(Sigmoid(temperature=temperature, eps=eps))
 
 
@@ -193,27 +220,37 @@ class GatedLinearUnit(Transform):
     def __init__(self):
         super().__init__()
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        assert context is not None
         gate = torch.sigmoid(context)
         # return inputs * (1 + gate), torch.log(torch.ones_like(gate) + gate).reshape(-1)
         return inputs * gate, torch.log(gate).reshape(-1)
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        assert context is not None
         gate = torch.sigmoid(context)
         # return inputs / (1 + gate), - torch.log(torch.ones_like(gate) + gate).reshape(-1)
         return inputs / gate, -torch.log(gate).reshape(-1)
 
 
 class CauchyCDF(Transform):
-    def __init__(self, location=None, scale=None, features=None):
+    def __init__(self):
         super().__init__()
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         outputs = (1 / np.pi) * torch.atan(inputs) + 0.5
         logabsdet = torchutils.sum_except_batch(-np.log(np.pi) - torch.log(1 + inputs**2))
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if torch.min(inputs) < 0 or torch.max(inputs) > 1:
             raise InputOutsideDomain()
 
@@ -223,12 +260,12 @@ class CauchyCDF(Transform):
 
 
 class CauchyCDFInverse(Inverse):
-    def __init__(self, location=None, scale=None, features=None):
-        super().__init__(CauchyCDF(location=location, scale=scale, features=features))
+    def __init__(self):
+        super().__init__(CauchyCDF())
 
 
 class CompositeCDFTransform(Sequential):
-    def __init__(self, squashing_transform, cdf_transform):
+    def __init__(self, squashing_transform: Transform, cdf_transform: Transform):
         super().__init__(
             [
                 squashing_transform,
@@ -247,51 +284,43 @@ class ExtendedSoftplus(torch.nn.Module):
     Linear outside of origin, flat around origin.
     """
 
-    def __init__(self, features, shift=None):
+    def __init__(self, features: int, shift: torch.Tensor | ArrayLike | None = None):
         self.features = features
         super(ExtendedSoftplus, self).__init__()
         if shift is None:
             self.shift = torch.nn.Parameter(torch.ones(1, features) * 3, requires_grad=True)
-            # self.log_scale = torch.nn.Parameter(torch.zeros(1, features), requires_grad=True)
-        elif torch.is_tensor(shift):
+        elif isinstance(shift, torch.Tensor):
             self.shift = shift.reshape(-1, features)
-            # self.log_scale = log_scale.reshape(-1, features)
         else:
             self.shift = torch.nn.Parameter(torch.tensor(shift), requires_grad=True)
-            # self.log_scale = torch.nn.Parameter(torch.tensor(log_scale), requires_grad=True)
 
         self._softplus = torch.nn.Softplus()
 
-    # def get_shift_and_scale(self):
-    #     # return self._softplus(self.shift), torch.exp(self.log_scale)
-    #     return self.shift, torch.exp(self.log_scale) + 1e-3
-    #     # return 5, torch.exp(self.log_scale)
-
-    def get_shift(self):
+    def get_shift(self) -> torch.Tensor:
         return self._softplus(self.shift) + 1e-1
 
-    def softplus(self, x, shift):
+    def softplus(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         return self._softplus(x - shift)
 
-    def softminus(self, x, shift):
+    def softminus(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         return -self._softplus(-(x + shift))
 
-    def diag_jacobian_pos(self, x, shift):
+    def diag_jacobian_pos(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         # (b e^(b x))/(e^(a b) + e^(b x))
         return torch.exp(x) / (torch.exp(shift) + torch.exp(x))
 
-    def log_diag_jacobian_pos(self, x, shift):
+    def log_diag_jacobian_pos(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         # -log(e^(a b) + e^(b x)) + b x + log(b)
         log_jac = -torch.logaddexp(shift, x) + x
         return log_jac
 
-    def diag_jacobian_neg(self, x, shift):
+    def diag_jacobian_neg(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         return torch.sigmoid(-(shift + x))
 
-    def log_diag_jacobian_neg(self, x, shift):
+    def log_diag_jacobian_neg(self, x: torch.Tensor, shift: torch.Tensor) -> torch.Tensor:
         return -self._softplus(shift + x)
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         # inputs = inputs.requires_grad_()
         shift = self.get_shift()
         outputs = self.softplus(inputs, shift) + self.softminus(inputs, shift)
