@@ -1,7 +1,10 @@
+from numbers import Real
+from typing import cast
+
 import torch
 import torchtestcase
 
-from flowcon.transforms import splines
+from flowcon.transforms.monotonic.splines.util import linear_spline, unconstrained_linear_spline
 
 
 class LinearSplineTest(torchtestcase.TorchTestCase):
@@ -12,15 +15,13 @@ class LinearSplineTest(torchtestcase.TorchTestCase):
         unnormalized_pdf = torch.randn(*shape, num_bins)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.linear_spline(
-                inputs=inputs, unnormalized_pdf=unnormalized_pdf, inverse=inverse
-            )
+            return linear_spline(inputs=inputs, unnormalized_pdf=unnormalized_pdf, inverse=inverse)
 
         inputs = torch.rand(*shape)
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -33,7 +34,7 @@ class UnconstrainedLinearSplineTest(torchtestcase.TorchTestCase):
         unnormalized_pdf = torch.randn(*shape, num_bins)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_linear_spline(
+            return unconstrained_linear_spline(
                 inputs=inputs, unnormalized_pdf=unnormalized_pdf, inverse=inverse
             )
 
@@ -41,7 +42,7 @@ class UnconstrainedLinearSplineTest(torchtestcase.TorchTestCase):
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -53,14 +54,19 @@ class UnconstrainedLinearSplineTest(torchtestcase.TorchTestCase):
         unnormalized_pdf = torch.randn(*shape, num_bins)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_linear_spline(
-                inputs=inputs, unnormalized_pdf=unnormalized_pdf, inverse=inverse, tail_bound=tail_bound
+            return unconstrained_linear_spline(
+                inputs=inputs,
+                unnormalized_pdf=unnormalized_pdf,
+                inverse=inverse,
+                tail_bound=tail_bound,
             )
 
-        inputs = torch.sign(torch.randn(*shape)) * (tail_bound + torch.rand(*shape))  # Now *all* inputs are outside [-tail_bound, tail_bound].
+        inputs = torch.sign(torch.randn(*shape)) * (
+            tail_bound + torch.rand(*shape)
+        )  # Now *all* inputs are outside [-tail_bound, tail_bound].
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))

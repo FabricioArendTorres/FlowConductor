@@ -1,5 +1,5 @@
 import torch
-import torchtestcase
+import torchtestcase  # type: ignore
 
 from flowcon.transforms import base
 from flowcon.utils import torchutils
@@ -39,9 +39,7 @@ class TransformTest(torchtestcase.TorchTestCase):
     def assert_jacobian_correct(self, transform: base.Transform, inputs: torch.Tensor):
         inputs = inputs.requires_grad_(True)
         outputs, logabsdet = transform.forward(inputs)
-        _, ref_logabsdet = torch.linalg.slogdet(
-            torchutils.batch_jacobian(outputs, inputs)
-        )
+        _, ref_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(outputs, inputs))
 
         self.assert_tensor_is_good(logabsdet, shape=inputs.shape[:1])
         self.assert_tensor_is_good(ref_logabsdet, shape=inputs.shape[:1])
@@ -56,18 +54,14 @@ class TransformTest(torchtestcase.TorchTestCase):
     ):
         inputs = inputs.requires_grad_(True)
         outputs, logabsdet = transform.forward(inputs, context)
-        _, ref_logabsdet = torch.linalg.slogdet(
-            torchutils.batch_jacobian(outputs, inputs)
-        )
+        _, ref_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(outputs, inputs))
 
         self.assert_tensor_is_good(logabsdet, shape=inputs.shape[:1])
         self.assert_tensor_is_good(ref_logabsdet, shape=inputs.shape[:1])
 
         self.assert_tensor_equal(logabsdet, ref_logabsdet, msg="Jacobian mismatch.")
 
-    def assert_inverse_jacobian_correct(
-        self, transform: base.Transform, outputs: torch.Tensor
-    ):
+    def assert_inverse_jacobian_correct(self, transform: base.Transform, outputs: torch.Tensor):
         outputs = outputs.detach().requires_grad_(True)
         inputs_reconstructed, inv_logabsdet = transform.inverse(outputs)
         _, ref_inv_logabsdet = torch.linalg.slogdet(
@@ -81,9 +75,7 @@ class TransformTest(torchtestcase.TorchTestCase):
             msg=f"Jacobian mismatch by max abs error={(inv_logabsdet - ref_inv_logabsdet).abs().max():.2e}.",
         )
 
-    def assertNotEqual(
-        self, first: torch.Tensor, second: torch.Tensor, msg: str | None = None
-    ):
+    def assertNotEqual(self, first: torch.Tensor, second: torch.Tensor, msg: str | None = None):
         if (self._eps and (first - second).abs().max().item() < self._eps) or (
             not self._eps and torch.equal(first, second)
         ):
@@ -93,9 +85,7 @@ class TransformTest(torchtestcase.TorchTestCase):
 class ConditionalTransformTest(TransformTest):
     """Base test for all transforms."""
 
-    def assert_conditional_forward_inverse_are_consistent(
-        self, transform, inputs, context
-    ):
+    def assert_conditional_forward_inverse_are_consistent(self, transform, inputs, context):
         inverse = base.Inverse(transform)
         identity = base.Sequential([inverse, transform])
         outputs, logabsdet = identity(inputs, context)

@@ -14,9 +14,9 @@ from flowcon.transforms.linear.orthogonal import (
 )
 from flowcon.transforms.monotonic.adaptive_sigmoids import SumOfSigmoids
 from flowcon.transforms.monotonic.MonotonicNormalizer import *
-from flowcon.transforms.monotonic.splines import rational_quadratic
-from flowcon.transforms.monotonic.splines.linear import linear_spline
-from flowcon.transforms.monotonic.splines.rational_quadratic import (
+from flowcon.transforms.monotonic.splines.util import rational_quadratic
+from flowcon.transforms.monotonic.splines.util.linear import linear_spline
+from flowcon.transforms.monotonic.splines.util.rational_quadratic import (
     rational_quadratic_spline,
     unconstrained_rational_quadratic_spline,
 )

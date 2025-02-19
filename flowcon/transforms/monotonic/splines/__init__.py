@@ -1,10 +1,15 @@
-from .cubic import cubic_spline, unconstrained_cubic_spline
-from .linear import linear_spline, unconstrained_linear_spline
-from .quadratic import (
-    quadratic_spline,
-    unconstrained_quadratic_spline,
+from . import util
+from .splines import (
+    PiecewiseCubicCDF,
+    PiecewiseLinearCDF,
+    PiecewiseQuadraticCDF,
+    PiecewiseRationalQuadraticCDF,
 )
-from .rational_quadratic import (
-    rational_quadratic_spline,
-    unconstrained_rational_quadratic_spline,
-)
+
+__all__ = [
+    "PiecewiseCubicCDF",
+    "PiecewiseLinearCDF",
+    "PiecewiseQuadraticCDF",
+    "PiecewiseRationalQuadraticCDF",
+    "util",
+]

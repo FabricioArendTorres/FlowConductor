@@ -1,7 +1,13 @@
+from numbers import Real
+from typing import cast
+
 import torch
 import torchtestcase
 
-from flowcon.transforms import splines
+from flowcon.transforms.monotonic.splines.util import (
+    quadratic_spline,
+    unconstrained_quadratic_spline,
+)
 
 
 class QuadraticSplineTest(torchtestcase.TorchTestCase):
@@ -13,7 +19,7 @@ class QuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_heights = torch.randn(*shape, num_bins + 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.quadratic_spline(
+            return quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -24,7 +30,7 @@ class QuadraticSplineTest(torchtestcase.TorchTestCase):
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -38,7 +44,7 @@ class UnconstrainedQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_heights = torch.randn(*shape, num_bins - 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_quadratic_spline(
+            return unconstrained_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -49,7 +55,7 @@ class UnconstrainedQuadraticSplineTest(torchtestcase.TorchTestCase):
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -62,7 +68,7 @@ class UnconstrainedQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_heights = torch.randn(*shape, num_bins - 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_quadratic_spline(
+            return unconstrained_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -70,10 +76,12 @@ class UnconstrainedQuadraticSplineTest(torchtestcase.TorchTestCase):
                 tail_bound=tail_bound,
             )
 
-        inputs = torch.sign(torch.randn(*shape)) * (tail_bound + torch.rand(*shape))  # Now *all* inputs are outside [-tail_bound, tail_bound].
+        inputs = torch.sign(torch.randn(*shape)) * (
+            tail_bound + torch.rand(*shape)
+        )  # Now *all* inputs are outside [-tail_bound, tail_bound].
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))

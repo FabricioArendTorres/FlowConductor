@@ -1,7 +1,14 @@
-import torch
-import torchtestcase
+from numbers import Real
+from typing import cast
 
-from flowcon.transforms import splines
+import torch
+import torchtestcase  # type: ignore
+
+# from flowcon.transforms import splines
+from flowcon.transforms.monotonic.splines.util import (
+    rational_quadratic_spline,
+    unconstrained_rational_quadratic_spline,
+)
 
 
 class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
@@ -13,8 +20,10 @@ class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_heights = torch.randn(*shape, num_bins)
         unnormalized_derivatives = torch.randn(*shape, num_bins + 1)
 
-        def call_spline_fn(inputs, inverse=False):
-            return splines.rational_quadratic_spline(
+        def call_spline_fn(
+            inputs: torch.Tensor, inverse: bool = False
+        ) -> tuple[torch.Tensor, torch.Tensor]:
+            return rational_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -26,7 +35,7 @@ class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -39,7 +48,7 @@ class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_derivatives = torch.zeros(*shape, num_bins + 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.rational_quadratic_spline(
+            return rational_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -51,7 +60,7 @@ class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         inputs = torch.rand(*shape)
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
 
-        self.eps = 1e-6
+        self.eps = cast(Real, 1e-6)
         self.assertEqual(inputs, outputs)
         self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
 
@@ -60,6 +69,7 @@ class RationalQuadraticSplineTest(torchtestcase.TorchTestCase):
 
         self.assertEqual(inputs, outputs)
         self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
+
 
 class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
     def test_forward_inverse_are_consistent(self):
@@ -71,7 +81,7 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_derivatives = torch.randn(*shape, num_bins + 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_rational_quadratic_spline(
+            return unconstrained_rational_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -83,7 +93,7 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -97,7 +107,7 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_derivatives = torch.randn(*shape, num_bins + 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_rational_quadratic_spline(
+            return unconstrained_rational_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -105,11 +115,13 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
                 inverse=inverse,
             )
 
-        inputs = torch.sign(torch.randn(*shape)) * (tail_bound + torch.rand(*shape))  # Now *all* inputs are outside [-tail_bound, tail_bound].
+        inputs = torch.sign(torch.randn(*shape)) * (
+            tail_bound + torch.rand(*shape)
+        )  # Now *all* inputs are outside [-tail_bound, tail_bound].
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
-        self.eps = 1e-3
+        self.eps = cast(Real, 1e-3)
         self.assertEqual(inputs, inputs_inv)
         self.assertEqual(logabsdet + logabsdet_inv, torch.zeros_like(logabsdet))
 
@@ -123,7 +135,7 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
         unnormalized_derivatives = torch.zeros(*shape, num_bins + 1)
 
         def call_spline_fn(inputs, inverse=False):
-            return splines.unconstrained_rational_quadratic_spline(
+            return unconstrained_rational_quadratic_spline(
                 inputs=inputs,
                 unnormalized_widths=unnormalized_widths,
                 unnormalized_heights=unnormalized_heights,
@@ -132,10 +144,12 @@ class UnconstrainedRationalQuadraticSplineTest(torchtestcase.TorchTestCase):
                 enable_identity_init=True,
             )
 
-        inputs = torch.sign(torch.randn(*shape)) * (tail_bound + torch.rand(*shape))  # Now *all* inputs are outside [-tail_bound, tail_bound].
+        inputs = torch.sign(torch.randn(*shape)) * (
+            tail_bound + torch.rand(*shape)
+        )  # Now *all* inputs are outside [-tail_bound, tail_bound].
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
 
-        self.eps = 1e-6
+        self.eps = cast(Real, 1e-6)
         self.assertEqual(inputs, outputs)
         self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
 

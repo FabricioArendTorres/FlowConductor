@@ -1,20 +1,25 @@
 """Implementations of various coupling layers."""
 
+from __future__ import annotations
+
 import warnings
+from collections.abc import Callable
+from typing import Any, Iterable
 
 import numpy as np
 import torch
+from numpy.typing import ArrayLike
 from torch.nn.functional import softplus
 
-from flowcon.transforms import splines
 from flowcon.transforms.base import Transform
-from flowcon.transforms.monotonic.MonotonicNormalizer import *
-from flowcon.transforms.nonlinearities import (
+from flowcon.transforms.monotonic import (
     PiecewiseCubicCDF,
     PiecewiseLinearCDF,
     PiecewiseQuadraticCDF,
     PiecewiseRationalQuadraticCDF,
 )
+from flowcon.transforms.monotonic.MonotonicNormalizer import MonotonicNormalizer
+from flowcon.transforms.monotonic.splines.util import cubic, linear, quadratic, rational_quadratic
 from flowcon.utils import torchutils
 
 
@@ -23,7 +28,12 @@ class CouplingTransform(Transform):
     images (NxCxHxW). For images the splitting is done on the channel dimension, using the
     provided 1D mask."""
 
-    def __init__(self, mask, transform_net_create_fn, unconditional_transform=None):
+    def __init__(
+        self,
+        mask: torch.Tensor | ArrayLike,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        unconditional_transform: Callable[[int], Transform] | None = None,
+    ):
         """
         Constructor.
 
@@ -55,19 +65,19 @@ class CouplingTransform(Transform):
         if unconditional_transform is None:
             self.unconditional_transform = None
         else:
-            self.unconditional_transform = unconditional_transform(
-                features=self.num_identity_features
-            )
+            self.unconditional_transform = unconditional_transform(self.num_identity_features)
 
     @property
-    def num_identity_features(self):
+    def num_identity_features(self) -> int:
         return len(self.identity_features)
 
     @property
-    def num_transform_features(self):
+    def num_transform_features(self) -> int:
         return len(self.transform_features)
 
-    def forward(self, inputs, context=None):
+    def forward(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() not in [2, 4]:
             raise ValueError("Inputs must be a 2D or a 4D tensor.")
 
@@ -96,7 +106,9 @@ class CouplingTransform(Transform):
 
         return outputs, logabsdet
 
-    def inverse(self, inputs, context=None):
+    def inverse(
+        self, inputs: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() not in [2, 4]:
             raise ValueError("Inputs must be a 2D or a 4D tensor.")
 
@@ -126,15 +138,19 @@ class CouplingTransform(Transform):
 
         return outputs, logabsdet
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         """Number of features to output for each transform dimension."""
         raise NotImplementedError()
 
-    def _coupling_transform_forward(self, inputs, transform_params):
+    def _coupling_transform_forward(
+        self, inputs: torch.Tensor, transform_params: Any
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass of the coupling transform."""
         raise NotImplementedError()
 
-    def _coupling_transform_inverse(self, inputs, transform_params):
+    def _coupling_transform_inverse(
+        self, inputs: torch.Tensor, transform_params: Any
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Inverse of the coupling transform."""
         raise NotImplementedError()
 
@@ -149,28 +165,32 @@ class UMNNCouplingTransform(CouplingTransform):
         integrand_net_layers: the layers dimension to put in the integrand network.
         cond_size: The embedding size for the conditioning factors.
         nb_steps: The number of integration steps.
-        solver: The quadrature algorithm - CC or CCParallel. Both implements Clenshaw-Curtis quadrature with
-        Leibniz rule for backward computation. CCParallel pass all the evaluation points (nb_steps) at once, it is faster
+        solver: The quadrature algorithm - CC or CCParallel.
+        Both implements Clenshaw-Curtis quadrature with
+        Leibniz rule for backward computation. CCParallel pass all the evaluation points (nb_steps)
+        at once, it is faster
         but requires more memory.
 
     """
 
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        integrand_net_layers=[50, 50, 50],
-        cond_size=20,
-        nb_steps=20,
-        solver="CCParallel",
-        apply_unconditional_transform=False,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        integrand_net_layers: Iterable[int] = [50, 50, 50],
+        cond_size: int = 20,
+        nb_steps: int = 20,
+        solver: str = "CCParallel",
+        apply_unconditional_transform: bool = False,
     ):
         if apply_unconditional_transform:
-            unconditional_transform = lambda features: MonotonicNormalizer(
-                integrand_net_layers, 0, nb_steps, solver
-            )
+
+            def unconditional_transform(features: int) -> Transform:
+                return MonotonicNormalizer(  # type: ignore
+                    integrand_net_layers, 0, nb_steps, solver
+                )
         else:
-            unconditional_transform = None
+            unconditional_transform = None  # type: ignore
         self.cond_size = cond_size
         super().__init__(
             mask,
@@ -180,10 +200,12 @@ class UMNNCouplingTransform(CouplingTransform):
 
         self.transformer = MonotonicNormalizer(integrand_net_layers, cond_size, nb_steps, solver)
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         return self.cond_size
 
-    def _coupling_transform_forward(self, inputs, transform_params):
+    def _coupling_transform_forward(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if len(inputs.shape) == 2:
             z, jac = self.transformer(
                 inputs, transform_params.reshape(inputs.shape[0], inputs.shape[1], -1)
@@ -199,12 +221,14 @@ class UMNNCouplingTransform(CouplingTransform):
             log_det_jac = jac.log().reshape(B, -1).sum(1)
             return z.reshape(B, H, W, C).permute(0, 3, 1, 2), log_det_jac
 
-    def _coupling_transform_inverse(self, inputs, transform_params):
+    def _coupling_transform_inverse(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if len(inputs.shape) == 2:
             x = self.transformer.inverse_transform(
                 inputs, transform_params.reshape(inputs.shape[0], inputs.shape[1], -1)
             )
-            z, jac = self.transformer(
+            _, jac = self.transformer(
                 x, transform_params.reshape(inputs.shape[0], inputs.shape[1], -1)
             )
             log_det_jac = -jac.log().sum(1)
@@ -215,11 +239,19 @@ class UMNNCouplingTransform(CouplingTransform):
                 inputs.permute(0, 2, 3, 1).reshape(-1, inputs.shape[1]),
                 transform_params.permute(0, 2, 3, 1).reshape(-1, 1, transform_params.shape[1]),
             )
-            z, jac = self.transformer(
+            _, jac = self.transformer(
                 x, transform_params.permute(0, 2, 3, 1).reshape(-1, 1, transform_params.shape[1])
             )
             log_det_jac = -jac.log().reshape(B, -1).sum(1)
             return x.reshape(B, H, W, C).permute(0, 3, 1, 2), log_det_jac
+
+
+def DEFAULT_SCALE_ACTIVATION(x: torch.Tensor) -> torch.Tensor:
+    return torch.sigmoid(x + 2) + 1e-3
+
+
+def GENERAL_SCALE_ACTIVATION(x: torch.Tensor) -> torch.Tensor:
+    return (softplus(x) + 1e-3).clamp(0, 3)
 
 
 class AffineCouplingTransform(CouplingTransform):
@@ -228,42 +260,47 @@ class AffineCouplingTransform(CouplingTransform):
     Reference:
     > L. Dinh et al., Density estimation using Real NVP, ICLR 2017.
 
-    The user should supply `scale_activation`, the final activation function in the neural network producing the scale tensor.
+    The user should supply `scale_activation`, the final activation function in the neural network
+    producing the scale tensor.
     Two options are predefined in the class.
     `DEFAULT_SCALE_ACTIVATION` preserves backwards compatibility but only produces scales <= 1.001.
     `GENERAL_SCALE_ACTIVATION` produces scales <= 3, which is more useful in general applications.
     """
 
-    DEFAULT_SCALE_ACTIVATION = lambda x: torch.sigmoid(x + 2) + 1e-3
-    GENERAL_SCALE_ACTIVATION = lambda x: (softplus(x) + 1e-3).clamp(0, 3)
+    # DEFAULT_SCALE_ACTIVATION = lambda x: torch.sigmoid(x + 2) + 1e-3
+    # GENERAL_SCALE_ACTIVATION = lambda x: (softplus(x) + 1e-3).clamp(0, 3)
 
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        unconditional_transform=None,
-        scale_activation=DEFAULT_SCALE_ACTIVATION,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        unconditional_transform: Callable[[int], Transform] | None = None,
+        scale_activation: Callable[[torch.Tensor], torch.Tensor] = DEFAULT_SCALE_ACTIVATION,
     ):
         self.scale_activation = scale_activation
         super().__init__(mask, transform_net_create_fn, unconditional_transform)
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         return 2
 
-    def _scale_and_shift(self, transform_params):
+    def _scale_and_shift(self, transform_params: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         unconstrained_scale = transform_params[:, self.num_transform_features :, ...]
         shift = transform_params[:, : self.num_transform_features, ...]
         scale = self.scale_activation(unconstrained_scale)
         return scale, shift
 
-    def _coupling_transform_forward(self, inputs, transform_params):
+    def _coupling_transform_forward(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         scale, shift = self._scale_and_shift(transform_params)
         log_scale = torch.log(scale)
         outputs = inputs * scale + shift
         logabsdet = torchutils.sum_except_batch(log_scale, num_batch_dims=1)
         return outputs, logabsdet
 
-    def _coupling_transform_inverse(self, inputs, transform_params):
+    def _coupling_transform_inverse(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         scale, shift = self._scale_and_shift(transform_params)
         log_scale = torch.log(scale)
         outputs = (inputs - shift) / scale
@@ -279,23 +316,29 @@ class AdditiveCouplingTransform(AffineCouplingTransform):
     > arXiv:1410.8516, 2014.
     """
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         return 1
 
-    def _scale_and_shift(self, transform_params):
+    def _scale_and_shift(self, transform_params: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         shift = transform_params
         scale = torch.ones_like(shift)
         return scale, shift
 
 
 class PiecewiseCouplingTransform(CouplingTransform):
-    def _coupling_transform_forward(self, inputs, transform_params):
+    def _coupling_transform_forward(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._coupling_transform(inputs, transform_params, inverse=False)
 
-    def _coupling_transform_inverse(self, inputs, transform_params):
+    def _coupling_transform_inverse(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return self._coupling_transform(inputs, transform_params, inverse=True)
 
-    def _coupling_transform(self, inputs, transform_params, inverse=False):
+    def _coupling_transform(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if inputs.dim() == 4:
             b, c, h, w = inputs.shape
             # For images, reshape transform_params from Bx(C*?)xHxW to BxCxHxWx?
@@ -309,7 +352,9 @@ class PiecewiseCouplingTransform(CouplingTransform):
 
         return outputs, torchutils.sum_except_batch(logabsdet)
 
-    def _piecewise_cdf(self, inputs, transform_params, inverse=False):
+    def _piecewise_cdf(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         raise NotImplementedError()
 
 
@@ -321,27 +366,30 @@ class PiecewiseLinearCouplingTransform(PiecewiseCouplingTransform):
 
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        num_bins=10,
-        tails=None,
-        tail_bound=1.0,
-        apply_unconditional_transform=False,
-        img_shape=None,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        num_bins: int = 10,
+        tails: str | None = None,
+        tail_bound: float = 1.0,
+        apply_unconditional_transform: bool = False,
+        img_shape: list[int] | None = None,
     ):
         self.num_bins = num_bins
         self.tails = tails
         self.tail_bound = tail_bound
 
         if apply_unconditional_transform:
-            unconditional_transform = lambda features: PiecewiseLinearCDF(
-                shape=[features] + (img_shape if img_shape else []),
-                num_bins=num_bins,
-                tails=tails,
-                tail_bound=tail_bound,
-            )
+
+            def unconditional_transform(features: int) -> PiecewiseLinearCDF:
+                _shape = img_shape if img_shape else []
+                return PiecewiseLinearCDF(
+                    shape=[features] + _shape,
+                    num_bins=num_bins,
+                    tails=tails,
+                    tail_bound=tail_bound,
+                )
         else:
-            unconditional_transform = None
+            unconditional_transform = None  # type: ignore
 
         super().__init__(
             mask,
@@ -349,18 +397,20 @@ class PiecewiseLinearCouplingTransform(PiecewiseCouplingTransform):
             unconditional_transform=unconditional_transform,
         )
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         return self.num_bins
 
-    def _piecewise_cdf(self, inputs, transform_params, inverse=False):
+    def _piecewise_cdf(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         unnormalized_pdf = transform_params
 
         if self.tails is None:
-            return splines.linear_spline(
+            return linear.linear_spline(
                 inputs=inputs, unnormalized_pdf=unnormalized_pdf, inverse=inverse
             )
         else:
-            return splines.unconstrained_linear_spline(
+            return linear.unconstrained_linear_spline(
                 inputs=inputs,
                 unnormalized_pdf=unnormalized_pdf,
                 inverse=inverse,
@@ -377,15 +427,15 @@ class PiecewiseQuadraticCouplingTransform(PiecewiseCouplingTransform):
 
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        num_bins=10,
-        tails=None,
-        tail_bound=1.0,
-        apply_unconditional_transform=False,
-        img_shape=None,
-        min_bin_width=splines.quadratic.DEFAULT_MIN_BIN_WIDTH,
-        min_bin_height=splines.quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        num_bins: int = 10,
+        tails: str | None = None,
+        tail_bound: float = 1.0,
+        apply_unconditional_transform: bool = False,
+        img_shape: list[int] | None = None,
+        min_bin_width: float = quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height: float = quadratic.DEFAULT_MIN_BIN_HEIGHT,
     ):
         self.num_bins = num_bins
         self.tails = tails
@@ -394,16 +444,19 @@ class PiecewiseQuadraticCouplingTransform(PiecewiseCouplingTransform):
         self.min_bin_height = min_bin_height
 
         if apply_unconditional_transform:
-            unconditional_transform = lambda features: PiecewiseQuadraticCDF(
-                shape=[features] + (img_shape if img_shape else []),
-                num_bins=num_bins,
-                tails=tails,
-                tail_bound=tail_bound,
-                min_bin_width=min_bin_width,
-                min_bin_height=min_bin_height,
-            )
+
+            def unconditional_transform(features: int) -> PiecewiseQuadraticCDF:
+                _shape = img_shape if img_shape else []
+                return PiecewiseQuadraticCDF(
+                    shape=[features] + _shape,
+                    num_bins=num_bins,
+                    tails=tails,
+                    tail_bound=tail_bound,
+                    min_bin_width=min_bin_width,
+                    min_bin_height=min_bin_height,
+                )
         else:
-            unconditional_transform = None
+            unconditional_transform = None  # type: ignore
 
         super().__init__(
             mask,
@@ -417,7 +470,9 @@ class PiecewiseQuadraticCouplingTransform(PiecewiseCouplingTransform):
         else:
             return self.num_bins * 2 + 1
 
-    def _piecewise_cdf(self, inputs, transform_params, inverse=False):
+    def _piecewise_cdf(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         unnormalized_widths = transform_params[..., : self.num_bins]
         unnormalized_heights = transform_params[..., self.num_bins :]
 
@@ -426,10 +481,10 @@ class PiecewiseQuadraticCouplingTransform(PiecewiseCouplingTransform):
             unnormalized_heights /= np.sqrt(self.transform_net.hidden_features)
 
         if self.tails is None:
-            spline_fn = splines.quadratic_spline
+            spline_fn = quadratic.quadratic_spline
             spline_kwargs = {}
         else:
-            spline_fn = splines.unconstrained_quadratic_spline
+            spline_fn = quadratic.unconstrained_quadratic_spline
             spline_kwargs = {"tails": self.tails, "tail_bound": self.tail_bound}
 
         return spline_fn(
@@ -446,15 +501,15 @@ class PiecewiseQuadraticCouplingTransform(PiecewiseCouplingTransform):
 class PiecewiseCubicCouplingTransform(PiecewiseCouplingTransform):
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        num_bins=10,
-        tails=None,
-        tail_bound=1.0,
-        apply_unconditional_transform=False,
-        img_shape=None,
-        min_bin_width=splines.cubic.DEFAULT_MIN_BIN_WIDTH,
-        min_bin_height=splines.cubic.DEFAULT_MIN_BIN_HEIGHT,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        num_bins: int = 10,
+        tails: str | None = None,
+        tail_bound: float = 1.0,
+        apply_unconditional_transform: bool = False,
+        img_shape: list[int] | None = None,
+        min_bin_width: float = cubic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height: float = cubic.DEFAULT_MIN_BIN_HEIGHT,
     ):
         self.num_bins = num_bins
         self.min_bin_width = min_bin_width
@@ -463,16 +518,19 @@ class PiecewiseCubicCouplingTransform(PiecewiseCouplingTransform):
         self.tail_bound = tail_bound
 
         if apply_unconditional_transform:
-            unconditional_transform = lambda features: PiecewiseCubicCDF(
-                shape=[features] + (img_shape if img_shape else []),
-                num_bins=num_bins,
-                tails=tails,
-                tail_bound=tail_bound,
-                min_bin_width=min_bin_width,
-                min_bin_height=min_bin_height,
-            )
+
+            def unconditional_transform(features: int):
+                _shape = img_shape if img_shape else []
+                return PiecewiseCubicCDF(
+                    shape=[features] + _shape,
+                    num_bins=num_bins,
+                    tails=tails,
+                    tail_bound=tail_bound,
+                    min_bin_width=min_bin_width,
+                    min_bin_height=min_bin_height,
+                )
         else:
-            unconditional_transform = None
+            unconditional_transform = None  # type: ignore
 
         super().__init__(
             mask,
@@ -483,7 +541,9 @@ class PiecewiseCubicCouplingTransform(PiecewiseCouplingTransform):
     def _transform_dim_multiplier(self):
         return self.num_bins * 2 + 2
 
-    def _piecewise_cdf(self, inputs, transform_params, inverse=False):
+    def _piecewise_cdf(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         unnormalized_widths = transform_params[..., : self.num_bins]
         unnormalized_heights = transform_params[..., self.num_bins : 2 * self.num_bins]
         unnorm_derivatives_left = transform_params[..., 2 * self.num_bins][..., None]
@@ -494,10 +554,10 @@ class PiecewiseCubicCouplingTransform(PiecewiseCouplingTransform):
             unnormalized_heights /= np.sqrt(self.transform_net.hidden_features)
 
         if self.tails is None:
-            spline_fn = splines.cubic_spline
+            spline_fn = cubic.cubic_spline
             spline_kwargs = {}
         else:
-            spline_fn = splines.unconstrained_cubic_spline
+            spline_fn = cubic.unconstrained_cubic_spline
             spline_kwargs = {"tails": self.tails, "tail_bound": self.tail_bound}
 
         return spline_fn(
@@ -516,16 +576,16 @@ class PiecewiseCubicCouplingTransform(PiecewiseCouplingTransform):
 class PiecewiseRationalQuadraticCouplingTransform(PiecewiseCouplingTransform):
     def __init__(
         self,
-        mask,
-        transform_net_create_fn,
-        num_bins=10,
-        tails=None,
-        tail_bound=1.0,
-        apply_unconditional_transform=False,
-        img_shape=None,
-        min_bin_width=splines.rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
-        min_bin_height=splines.rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
-        min_derivative=splines.rational_quadratic.DEFAULT_MIN_DERIVATIVE,
+        mask: torch.Tensor,
+        transform_net_create_fn: Callable[[int, int], torch.nn.Module],
+        num_bins: int = 10,
+        tails: str | None = None,
+        tail_bound: float = 1.0,
+        apply_unconditional_transform: bool = False,
+        img_shape: list[int] | None = None,
+        min_bin_width: float = rational_quadratic.DEFAULT_MIN_BIN_WIDTH,
+        min_bin_height: float = rational_quadratic.DEFAULT_MIN_BIN_HEIGHT,
+        min_derivative: float = rational_quadratic.DEFAULT_MIN_DERIVATIVE,
     ):
         self.num_bins = num_bins
         self.min_bin_width = min_bin_width
@@ -535,17 +595,19 @@ class PiecewiseRationalQuadraticCouplingTransform(PiecewiseCouplingTransform):
         self.tail_bound = tail_bound
 
         if apply_unconditional_transform:
-            unconditional_transform = lambda features: PiecewiseRationalQuadraticCDF(
-                shape=[features] + (img_shape if img_shape else []),
-                num_bins=num_bins,
-                tails=tails,
-                tail_bound=tail_bound,
-                min_bin_width=min_bin_width,
-                min_bin_height=min_bin_height,
-                min_derivative=min_derivative,
-            )
+
+            def unconditional_transform(features: int) -> PiecewiseRationalQuadraticCDF:
+                return PiecewiseRationalQuadraticCDF(
+                    shape=[features] + (img_shape if img_shape else []),
+                    num_bins=num_bins,
+                    tails=tails,
+                    tail_bound=tail_bound,
+                    min_bin_width=min_bin_width,
+                    min_bin_height=min_bin_height,
+                    min_derivative=min_derivative,
+                )
         else:
-            unconditional_transform = None
+            unconditional_transform = None  # type: ignore
 
         super().__init__(
             mask,
@@ -553,13 +615,15 @@ class PiecewiseRationalQuadraticCouplingTransform(PiecewiseCouplingTransform):
             unconditional_transform=unconditional_transform,
         )
 
-    def _transform_dim_multiplier(self):
+    def _transform_dim_multiplier(self) -> int:
         if self.tails == "linear":
             return self.num_bins * 3 - 1
         else:
             return self.num_bins * 3 + 1
 
-    def _piecewise_cdf(self, inputs, transform_params, inverse=False):
+    def _piecewise_cdf(
+        self, inputs: torch.Tensor, transform_params: torch.Tensor, inverse: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         unnormalized_widths = transform_params[..., : self.num_bins]
         unnormalized_heights = transform_params[..., self.num_bins : 2 * self.num_bins]
         unnormalized_derivatives = transform_params[..., 2 * self.num_bins :]
@@ -574,10 +638,10 @@ class PiecewiseRationalQuadraticCouplingTransform(PiecewiseCouplingTransform):
             warnings.warn("Inputs to the softmax are not scaled down: initialization might be bad.")
 
         if self.tails is None:
-            spline_fn = splines.rational_quadratic_spline
+            spline_fn = rational_quadratic.rational_quadratic_spline
             spline_kwargs = {}
         else:
-            spline_fn = splines.unconstrained_rational_quadratic_spline
+            spline_fn = rational_quadratic.unconstrained_rational_quadratic_spline
             spline_kwargs = {"tails": self.tails, "tail_bound": self.tail_bound}
 
         return spline_fn(

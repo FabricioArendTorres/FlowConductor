@@ -8,14 +8,14 @@ from flowcon.transforms import made as made_module
 from flowcon.transforms.base import Transform
 from flowcon.transforms.monotonic.adaptive_sigmoids import SumOfSigmoids
 from flowcon.transforms.monotonic.MonotonicNormalizer import *
-from flowcon.transforms.monotonic.splines import rational_quadratic
-from flowcon.transforms.monotonic.splines.cubic import cubic_spline
-from flowcon.transforms.monotonic.splines.linear import linear_spline
-from flowcon.transforms.monotonic.splines.quadratic import (
+from flowcon.transforms.monotonic.splines.util import rational_quadratic
+from flowcon.transforms.monotonic.splines.util.cubic import cubic_spline
+from flowcon.transforms.monotonic.splines.util.linear import linear_spline
+from flowcon.transforms.monotonic.splines.util.quadratic import (
     quadratic_spline,
     unconstrained_quadratic_spline,
 )
-from flowcon.transforms.monotonic.splines.rational_quadratic import (
+from flowcon.transforms.monotonic.splines.util.rational_quadratic import (
     rational_quadratic_spline,
     unconstrained_rational_quadratic_spline,
 )

@@ -11,18 +11,18 @@ DEFAULT_MIN_DERIVATIVE = 1e-3
 
 
 def unconstrained_rational_quadratic_spline(
-    inputs,
-    unnormalized_widths,
-    unnormalized_heights,
-    unnormalized_derivatives,
-    inverse=False,
-    tails="linear",
-    tail_bound=1.0,
-    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
-    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
-    min_derivative=DEFAULT_MIN_DERIVATIVE,
-    enable_identity_init=False,
-):
+    inputs: torch.Tensor,
+    unnormalized_widths: torch.Tensor,
+    unnormalized_heights: torch.Tensor,
+    unnormalized_derivatives: torch.Tensor,
+    inverse: bool = False,
+    tails: str | None = "linear",
+    tail_bound: float = 1.0,
+    min_bin_width: float = DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height: float = DEFAULT_MIN_BIN_HEIGHT,
+    min_derivative: float = DEFAULT_MIN_DERIVATIVE,
+    enable_identity_init: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor]:
     inside_interval_mask = (inputs >= -tail_bound) & (inputs <= tail_bound)
     outside_interval_mask = ~inside_interval_mask
 
@@ -64,20 +64,20 @@ def unconstrained_rational_quadratic_spline(
 
 
 def rational_quadratic_spline(
-    inputs,
-    unnormalized_widths,
-    unnormalized_heights,
-    unnormalized_derivatives,
-    inverse=False,
-    left=0.0,
-    right=1.0,
-    bottom=0.0,
-    top=1.0,
-    min_bin_width=DEFAULT_MIN_BIN_WIDTH,
-    min_bin_height=DEFAULT_MIN_BIN_HEIGHT,
-    min_derivative=DEFAULT_MIN_DERIVATIVE,
-    enable_identity_init=False,
-):
+    inputs: torch.Tensor,
+    unnormalized_widths: torch.Tensor,
+    unnormalized_heights: torch.Tensor,
+    unnormalized_derivatives: torch.Tensor,
+    inverse: bool = False,
+    left: float = 0.0,
+    right: float = 1.0,
+    bottom: float = 0.0,
+    top: float = 1.0,
+    min_bin_width: float = DEFAULT_MIN_BIN_WIDTH,
+    min_bin_height: float = DEFAULT_MIN_BIN_HEIGHT,
+    min_derivative: float = DEFAULT_MIN_DERIVATIVE,
+    enable_identity_init: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor]:
     if torch.min(inputs) < left or torch.max(inputs) > right:
         raise InputOutsideDomain()
 
@@ -97,9 +97,9 @@ def rational_quadratic_spline(
     cumwidths[..., -1] = right
     widths = cumwidths[..., 1:] - cumwidths[..., :-1]
 
-    if enable_identity_init: #flow is the identity if initialized with parameters equal to zero
+    if enable_identity_init:  # flow is the identity if initialized with parameters equal to zero
         beta = np.log(2) / (1 - min_derivative)
-    else: #backward compatibility
+    else:  # backward compatibility
         beta = 1
     derivatives = min_derivative + F.softplus(unnormalized_derivatives, beta=beta)
 

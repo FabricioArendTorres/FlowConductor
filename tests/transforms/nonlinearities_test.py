@@ -6,6 +6,7 @@ import torch
 from parameterized import parameterized_class
 
 from flowcon.transforms import nonlinearities as nl
+from flowcon.transforms import splines
 from flowcon.transforms.base import InputOutsideDomain
 from flowcon.transforms.linear import standard
 from flowcon.utils import torchutils
@@ -37,10 +38,10 @@ class TestPiecewiseCDF(TransformTest):
         self.shape = [2, 3, 4]
         self.batch_size = 10
         self.transforms = [
-            nl.PiecewiseLinearCDF(self.shape),
-            nl.PiecewiseQuadraticCDF(self.shape),
-            nl.PiecewiseCubicCDF(self.shape),
-            nl.PiecewiseRationalQuadraticCDF(self.shape),
+            splines.PiecewiseLinearCDF(self.shape),
+            splines.PiecewiseQuadraticCDF(self.shape),
+            splines.PiecewiseCubicCDF(self.shape),
+            splines.PiecewiseRationalQuadraticCDF(self.shape),
         ]
 
     def test_raises_domain_exception(self):
@@ -80,10 +81,10 @@ class TestUnconstrainedPiecewiseCDF(TransformTest):
         shape = [2, 3, 4]
         batch_size = 10
         transforms = [
-            nl.PiecewiseLinearCDF(shape, tails="linear"),
-            nl.PiecewiseQuadraticCDF(shape, tails="linear"),
-            nl.PiecewiseCubicCDF(shape, tails="linear"),
-            nl.PiecewiseRationalQuadraticCDF(shape, tails="linear"),
+            splines.PiecewiseLinearCDF(shape, tails="linear"),
+            splines.PiecewiseQuadraticCDF(shape, tails="linear"),
+            splines.PiecewiseCubicCDF(shape, tails="linear"),
+            splines.PiecewiseRationalQuadraticCDF(shape, tails="linear"),
         ]
 
         for transform in transforms:
@@ -191,9 +192,9 @@ class SoftplusTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(outputs, self.inputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(
+            -1
+        )
 
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -204,9 +205,9 @@ class SoftplusTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(inputs_rec, outputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(
+            -1
+        )
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
 
     def test_forward_inverse_are_consistent(self):

@@ -1,9 +1,13 @@
+from __future__ import annotations
+
+from typing import Iterable, Iterator
+
 import torch
 import torch.nn as nn
 from UMNN import NeuralIntegral, ParallelNeuralIntegral  # type: ignore
 
 
-def _flatten(sequence):
+def _flatten(sequence: Iterator[torch.Tensor]) -> torch.Tensor:
     flat = [p.contiguous().view(-1) for p in sequence]
     return torch.cat(flat) if len(flat) > 0 else torch.tensor([])
 
@@ -13,12 +17,12 @@ class ELUPlus(nn.Module):
         super().__init__()
         self.elu = nn.ELU()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.elu(x) + 1.0
 
 
 class IntegrandNet(nn.Module):
-    def __init__(self, hidden, cond_in):
+    def __init__(self, hidden: list[int], cond_in: int):
         super(IntegrandNet, self).__init__()
         l1 = [1 + cond_in] + hidden
         l2 = hidden + [1]
@@ -29,7 +33,7 @@ class IntegrandNet(nn.Module):
         layers.append(ELUPlus())
         self.net = nn.Sequential(*layers)
 
-    def forward(self, x, h):
+    def forward(self, x: torch.Tensor, h: torch.Tensor) -> torch.Tensor:
         nb_batch, in_d = x.shape
         x = torch.cat((x, h), 1)
         x_he = x.view(nb_batch, -1, in_d).transpose(1, 2).contiguous().view(nb_batch * in_d, -1)
@@ -38,16 +42,26 @@ class IntegrandNet(nn.Module):
 
 
 class MonotonicNormalizer(nn.Module):
-    def __init__(self, integrand_net, cond_size, nb_steps=20, solver="CC"):
+    def __init__(
+        self,
+        integrand_net: IntegrandNet | list[int] | Iterable[int],
+        cond_size: int,
+        nb_steps: int = 20,
+        solver: str = "CC",
+    ):
         super(MonotonicNormalizer, self).__init__()
         if type(integrand_net) is list:
             self.integrand_net = IntegrandNet(integrand_net, cond_size)
-        else:
+        elif type(integrand_net) is IntegrandNet:
             self.integrand_net = integrand_net
+        else:
+            raise TypeError(f"Unknown type of integrand net: {type(integrand_net)}")
         self.solver = solver
         self.nb_steps = nb_steps
 
-    def forward(self, x, h, context=None):
+    def forward(
+        self, x: torch.Tensor, h: torch.Tensor, context: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         x0 = torch.zeros(x.shape).to(x.device)
         xT = x
         z0 = h[:, :, 0]
@@ -77,10 +91,12 @@ class MonotonicNormalizer(nn.Module):
                 + z0
             )
         else:
-            return None
+            raise RuntimeError(f"Unknown solver {self.solver}")
         return z, self.integrand_net(x, h)
 
-    def inverse_transform(self, z, h, context=None):
+    def inverse_transform(
+        self, z: torch.Tensor, h: torch.Tensor, context: torch.Tensor | None = None
+    ):
         # Old inversion by binary search
         x_max = torch.ones_like(z) * 20
         x_min = -torch.ones_like(z) * 20

@@ -14,9 +14,7 @@ def create_coupling_transform(cls, shape, **kwargs):
     if len(shape) == 1:
 
         def create_net(in_features, out_features):
-            return nets.ResidualNet(
-                in_features, out_features, hidden_features=30, num_blocks=5
-            )
+            return nets.ResidualNet(in_features, out_features, hidden_features=30, num_blocks=5)
 
     else:
 
@@ -40,9 +38,7 @@ class AffineCouplingTransformTest(TransformTest):
     def test_forward(self):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AffineCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AffineCouplingTransform, shape)
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
                 self.assert_tensor_is_good(outputs, [batch_size] + shape)
@@ -52,9 +48,7 @@ class AffineCouplingTransformTest(TransformTest):
     def test_inverse(self):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AffineCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AffineCouplingTransform, shape)
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
                 self.assert_tensor_is_good(outputs, [batch_size] + shape)
@@ -65,24 +59,21 @@ class AffineCouplingTransformTest(TransformTest):
         self.eps = 1e-6
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AffineCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AffineCouplingTransform, shape)
             with self.subTest(shape=shape):
                 self.assert_forward_inverse_are_consistent(transform, inputs)
 
     def test_scale_activation_has_an_effect(self):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AffineCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AffineCouplingTransform, shape)
             outputs_default, logabsdet_default = transform(inputs)
-            transform.scale_activation = coupling.AffineCouplingTransform.GENERAL_SCALE_ACTIVATION
+            transform.scale_activation = coupling.GENERAL_SCALE_ACTIVATION
             outputs_general, logabsdet_general = transform(inputs)
             with self.subTest(shape=shape):
                 self.assertNotEqual(outputs_default, outputs_general)
                 self.assertNotEqual(logabsdet_default, logabsdet_general)
+
 
 class AdditiveTransformTest(TransformTest):
     shapes = [[20], [2, 4, 4]]
@@ -90,9 +81,7 @@ class AdditiveTransformTest(TransformTest):
     def test_forward(self):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AdditiveCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AdditiveCouplingTransform, shape)
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
                 self.assert_tensor_is_good(outputs, [batch_size] + shape)
@@ -103,9 +92,7 @@ class AdditiveTransformTest(TransformTest):
     def test_inverse(self):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AdditiveCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AdditiveCouplingTransform, shape)
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
                 self.assert_tensor_is_good(outputs, [batch_size] + shape)
@@ -117,9 +104,7 @@ class AdditiveTransformTest(TransformTest):
         self.eps = 1e-6
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
-            transform, mask = create_coupling_transform(
-                coupling.AdditiveCouplingTransform, shape
-            )
+            transform, mask = create_coupling_transform(coupling.AdditiveCouplingTransform, shape)
             with self.subTest(shape=shape):
                 self.assert_forward_inverse_are_consistent(transform, inputs)
 
@@ -131,10 +116,12 @@ class UMNNTransformTest(TransformTest):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
             transform, mask = create_coupling_transform(
-                coupling.UMNNCouplingTransform, shape, integrand_net_layers=[50, 50, 50],
+                coupling.UMNNCouplingTransform,
+                shape,
+                integrand_net_layers=[50, 50, 50],
                 cond_size=20,
                 nb_steps=20,
-                solver="CC"
+                solver="CC",
             )
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
@@ -146,10 +133,12 @@ class UMNNTransformTest(TransformTest):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
             transform, mask = create_coupling_transform(
-                coupling.UMNNCouplingTransform, shape, integrand_net_layers=[50, 50, 50],
+                coupling.UMNNCouplingTransform,
+                shape,
+                integrand_net_layers=[50, 50, 50],
                 cond_size=20,
                 nb_steps=20,
-                solver="CC"
+                solver="CC",
             )
             outputs, logabsdet = transform(inputs)
             with self.subTest(shape=shape):
@@ -162,10 +151,12 @@ class UMNNTransformTest(TransformTest):
         for shape in self.shapes:
             inputs = torch.randn(batch_size, *shape)
             transform, mask = create_coupling_transform(
-                coupling.UMNNCouplingTransform, shape, integrand_net_layers=[50, 50, 50],
+                coupling.UMNNCouplingTransform,
+                shape,
+                integrand_net_layers=[50, 50, 50],
                 cond_size=20,
                 nb_steps=20,
-                solver="CC"
+                solver="CC",
             )
             with self.subTest(shape=shape):
                 self.assert_forward_inverse_are_consistent(transform, inputs)
@@ -190,9 +181,7 @@ class PiecewiseCouplingTransformTest(TransformTest):
                 with self.subTest(cls=cls, shape=shape):
                     self.assert_tensor_is_good(outputs, [batch_size] + shape)
                     self.assert_tensor_is_good(logabsdet, [batch_size])
-                    self.assertEqual(
-                        outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...]
-                    )
+                    self.assertEqual(outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...])
 
     def test_forward_unconstrained(self):
         batch_size = 10
@@ -204,9 +193,7 @@ class PiecewiseCouplingTransformTest(TransformTest):
                 with self.subTest(cls=cls, shape=shape):
                     self.assert_tensor_is_good(outputs, [batch_size] + shape)
                     self.assert_tensor_is_good(logabsdet, [batch_size])
-                    self.assertEqual(
-                        outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...]
-                    )
+                    self.assertEqual(outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...])
 
     def test_inverse(self):
         for shape in self.shapes:
@@ -217,9 +204,7 @@ class PiecewiseCouplingTransformTest(TransformTest):
                 with self.subTest(cls=cls, shape=shape):
                     self.assert_tensor_is_good(outputs, [batch_size] + shape)
                     self.assert_tensor_is_good(logabsdet, [batch_size])
-                    self.assertEqual(
-                        outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...]
-                    )
+                    self.assertEqual(outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...])
 
     def test_inverse_unconstrained(self):
         for shape in self.shapes:
@@ -230,9 +215,7 @@ class PiecewiseCouplingTransformTest(TransformTest):
                 with self.subTest(cls=cls, shape=shape):
                     self.assert_tensor_is_good(outputs, [batch_size] + shape)
                     self.assert_tensor_is_good(logabsdet, [batch_size])
-                    self.assertEqual(
-                        outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...]
-                    )
+                    self.assertEqual(outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...])
 
     def test_forward_inverse_are_consistent(self):
         for shape in self.shapes:
@@ -265,9 +248,7 @@ class PiecewiseCouplingTransformTest(TransformTest):
                 with self.subTest(cls=cls, shape=shape):
                     self.assert_tensor_is_good(outputs, [batch_size] + shape)
                     self.assert_tensor_is_good(logabsdet, [batch_size])
-                    self.assertNotEqual(
-                        outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...]
-                    )
+                    self.assertNotEqual(outputs[:, mask <= 0, ...], inputs[:, mask <= 0, ...])
 
 
 if __name__ == "__main__":

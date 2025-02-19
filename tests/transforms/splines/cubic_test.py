@@ -1,7 +1,7 @@
 import torch
 import torchtestcase
 
-from flowcon.transforms import splines
+from flowcon.transforms.monotonic.splines import util as splines
 
 
 class CubicSplineTest(torchtestcase.TorchTestCase):
@@ -79,10 +79,12 @@ class UnconstrainedCubicSplineTest(torchtestcase.TorchTestCase):
                 unnorm_derivatives_left=unnorm_derivatives_left,
                 unnorm_derivatives_right=unnorm_derivatives_right,
                 inverse=inverse,
-                tail_bound=tail_bound
+                tail_bound=tail_bound,
             )
 
-        inputs = torch.sign(torch.randn(*shape)) * (tail_bound + torch.rand(*shape))  # Now *all* inputs are outside [-tail_bound, tail_bound].
+        inputs = torch.sign(torch.randn(*shape)) * (
+            tail_bound + torch.rand(*shape)
+        )  # Now *all* inputs are outside [-tail_bound, tail_bound].
         outputs, logabsdet = call_spline_fn(inputs, inverse=False)
         inputs_inv, logabsdet_inv = call_spline_fn(outputs, inverse=True)
 
