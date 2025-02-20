@@ -156,7 +156,7 @@ class Sigmoid(Transform):
         self.eps = eps
         # if learn_temperature:
         self.temperature = nn.Parameter(
-            torch.Tensor([temperature]), requires_gradient=learn_temperature
+            torch.Tensor([temperature]), requires_grad=learn_temperature
         )
         # else:
         #     temperature = torch.Tensor([temperature])
