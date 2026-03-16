@@ -8,7 +8,13 @@
 [![DOI](https://zenodo.org/badge/662701492.svg)](https://doi.org/10.5281/zenodo.13952361)
 
 <a href="https://fabricioarendtorres.github.io/FlowConductor/"><h3>Documentation</h3> </a>
+
 -----
+## Disclaimer - Archived / No maintenance
+While I would love to upkeep and improve this library, I unfortunately find no time for it.
+If there are questions, I will be happy to answer them (via issues), either regarding the underlying math or implementation.
+But for changing things, I'd suggest rolling a fork and going from there.
+
 ## About
 FlowConductor provides a collection of [normalizing flows](https://arxiv.org/abs/1912.02762) in  [PyTorch](https://pytorch.org).
 It's core logic and transformations were originally based on the [nflows package](https://github.com/bayesiains/nflows).
