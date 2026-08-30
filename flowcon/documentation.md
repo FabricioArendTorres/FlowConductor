@@ -13,7 +13,7 @@ The following table provides a rough description.
 Install
 ----
 FlowConductor is installable via `pip` or [uv](https://docs.astral.sh/uv/).
-We recommend setting up your PyTorch version first (CPU or CUDA). CI tests PyTorch 1.13 and later.
+We recommend setting up your PyTorch version first (CPU or CUDA). The library requires PyTorch 2 and Python 3.10+. CI tests that range.
 
 Latest release:
 

@@ -7,9 +7,9 @@
 #   docker build -f docker/Dockerfile --build-arg PYTORCH_TAG=latest -t flowc .
 #
 # Tested tags (pytorch/pytorch):
-#   1.13.1-cuda11.6-cudnn8-runtime
 #   2.1.2-cuda12.1-cudnn8-runtime
-#   2.2.2-cuda12.1-cudnn8-runtime
+#   2.10.0-cuda12.6-cudnn9-runtime
+#   2.13.0-cuda12.6-cudnn9-runtime
 #   latest
 
 ARG PYTORCH_TAG=latest

@@ -21,8 +21,8 @@ The bijective layers we additionally provide includes but are not limited to Pla
 
 ## Install
 
-Install PyTorch first (CPU or CUDA), then install FlowConductor into that environment.
-Dependencies are unpinned so the library stays usable across PyTorch builds.
+Install PyTorch 2 first (CPU or CUDA), then install FlowConductor into that environment.
+Runtime pins stay loose (`torch>=2`, Python 3.10+) so production stacks that lag can still install it.
 CI currently tests the versions listed under Docker below.
 
 ### uv (recommended)
@@ -74,7 +74,7 @@ $ docker build -f docker/Dockerfile --build-arg PYTORCH_TAG=latest -t flowc .
 $ docker run --rm flowc pytest tests
 ```
 
-Tags we test in CI: `1.13.1-cuda11.6-cudnn8-runtime`, `2.1.2-cuda12.1-cudnn8-runtime`, `2.2.2-cuda12.1-cudnn8-runtime`, and `latest`.
+Tags we test in CI: `2.1.2-cuda12.1-cudnn8-runtime`, `2.10.0-cuda12.6-cudnn9-runtime`, `2.13.0-cuda12.6-cudnn9-runtime`, and `latest`.
 
 To work interactively with the repo mounted:
 
@@ -92,7 +92,7 @@ $ pyrefly check
 $ pytest
 ```
 
-The devcontainer is a normal Python 3.10 image with uv. It is not the PyTorch CI image: uv owns the editor venv (CPU torch). Official `pytorch/pytorch` tags are used in CI via `docker/Dockerfile`.
+The devcontainer is a normal Python 3.12 image with uv. It is not the PyTorch CI image: uv owns the editor venv (CPU torch). Official `pytorch/pytorch` tags are used in CI via `docker/Dockerfile`.
 
 ## Package Usage
 

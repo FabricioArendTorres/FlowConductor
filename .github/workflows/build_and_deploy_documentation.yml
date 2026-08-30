@@ -13,13 +13,13 @@ jobs:
       contents: write
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10
         with:
           enable-cache: true
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install project
         env:
@@ -32,13 +32,13 @@ jobs:
           mv docs/flowcon/* docs
           rmdir docs/flowcon
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: generated-site
           path: docs/
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs

@@ -13,10 +13,10 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v10
         with:
           enable-cache: true
 
@@ -34,16 +34,16 @@ jobs:
       max-parallel: 4
       matrix:
         include:
-          - name: 1.13.1
-            tag: 1.13.1-cuda11.6-cudnn8-runtime
           - name: 2.1.2
             tag: 2.1.2-cuda12.1-cudnn8-runtime
-          - name: 2.2.2
-            tag: 2.2.2-cuda12.1-cudnn8-runtime
+          - name: 2.10.0
+            tag: 2.10.0-cuda12.6-cudnn9-runtime
+          - name: 2.13.0
+            tag: 2.13.0-cuda12.6-cudnn9-runtime
           - name: latest
             tag: latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build image
         run: >
@@ -64,7 +64,7 @@ jobs:
           --cov-report=term
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
