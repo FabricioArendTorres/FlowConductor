@@ -9,22 +9,25 @@ from tests.transforms.transform_test import ConditionalTransformTest
 from parameterized import parameterized_class
 
 
-@parameterized_class(('batch_size', 'context_features', 'features'), [
-    (10, 2, 1),
-    (2, 2, 4),
-    (10, 2, 2),
-    (10, 2, 3),
-    (10, 4, 3),
-    (1, 4, 3),
-    (1, 9, 1),
-    (10, 2, 1),
-    (2, 2, 4),
-    (10, 2, 2),
-    (10, 2, 3),
-    (10, 4, 3),
-    (1, 4, 3),
-    (1, 9, 1),
-])
+@parameterized_class(
+    ("batch_size", "context_features", "features"),
+    [
+        (10, 2, 1),
+        (2, 2, 4),
+        (10, 2, 2),
+        (10, 2, 3),
+        (10, 4, 3),
+        (1, 4, 3),
+        (1, 9, 1),
+        (10, 2, 1),
+        (2, 2, 4),
+        (10, 2, 2),
+        (10, 2, 3),
+        (10, 4, 3),
+        (1, 4, 3),
+        (1, 9, 1),
+    ],
+)
 class ConditionalOrthogonalTest(ConditionalTransformTest):
     def setUp(self):
         self.features = 3
@@ -37,8 +40,11 @@ class ConditionalOrthogonalTest(ConditionalTransformTest):
         self.random_context = torch.randn((self.batch_size, self.context_features))
         self.random_input = torch.randn((self.batch_size, self.features))
 
-        self.transform = ConditionalOrthogonalTransform(features=self.features, hidden_features=self.hidden_features,
-                                                        context_features=self.context_features)
+        self.transform = ConditionalOrthogonalTransform(
+            features=self.features,
+            hidden_features=self.hidden_features,
+            context_features=self.context_features,
+        )
 
         self.eps = 1e-5
 
@@ -55,7 +61,6 @@ class ConditionalOrthogonalTest(ConditionalTransformTest):
         for i in range(self.batch_size):
             self.assertEqual(householder_QQT[i], Q_mb[i] @ Q_mb[i].T)
             self.assertEqual(householder_QQT[i], torch.eye(self.features))
-
 
     def test_forward(self):
         outputs, logabsdet = self.transform.forward(self.random_input, self.random_context)
@@ -89,9 +94,10 @@ class ConditionalOrthogonalTest(ConditionalTransformTest):
             self.assertEqual(outputs[i], output_ref)
             self.assertEqual(torchutils.logabsdet(Q_mb[i].T), logabsdet[i])
 
-
     def test_forward_inverse_are_consistent(self):
-        self.assert_conditional_forward_inverse_are_consistent(self.transform, self.random_input, self.random_context)
+        self.assert_conditional_forward_inverse_are_consistent(
+            self.transform, self.random_input, self.random_context
+        )
 
 
 if __name__ == "__main__":

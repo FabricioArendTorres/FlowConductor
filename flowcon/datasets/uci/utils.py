@@ -72,7 +72,7 @@ def disp_imdata(xs, imsize, layout=(1, 1)):
         ii = np.arange(idx[0], idx[0] + num_plots) % num_xs
 
         for ax, i in zip(axs, ii):
-            ax.imshow(xs[i].reshape(imsize), cmap='gray', interpolation='none')
+            ax.imshow(xs[i].reshape(imsize), cmap="gray", interpolation="none")
             ax.set_title(str(i))
 
         fig.canvas.draw()
@@ -82,26 +82,26 @@ def disp_imdata(xs, imsize, layout=(1, 1)):
 
         key = event.key
 
-        if key == 'right':
+        if key == "right":
             # show next page
             idx[0] = (idx[0] + num_plots) % num_xs
             plot_page()
 
-        elif key == 'left':
+        elif key == "left":
             # show previous page
             idx[0] = (idx[0] - num_plots) % num_xs
             plot_page()
 
-        elif key == ' ':
+        elif key == " ":
             # show first page
             idx[0] = 0
             plot_page()
 
-        elif key == 'escape':
+        elif key == "escape":
             # close figure
             plt.close(fig)
 
-    fig.canvas.mpl_connect('key_press_event', on_key_event)
+    fig.canvas.mpl_connect("key_press_event", on_key_event)
     plot_page()
 
 
@@ -138,7 +138,7 @@ def ess_importance(ws):
     sampling or sequential monte carlo). Takes as input the normalized sample weights.
     """
 
-    ess = 1.0 / np.sum(ws ** 2)
+    ess = 1.0 / np.sum(ws**2)
     return ess
 
 
@@ -156,8 +156,9 @@ def ess_mcmc(xs):
     acors = np.zeros_like(xms)
     for i in range(n_dim):
         for lag in range(n_samples):
-            acor = np.sum(xms[:n_samples - lag, i] * xms[lag:, i]) / (n_samples - lag)
-            if acor <= 0.0: break
+            acor = np.sum(xms[: n_samples - lag, i] * xms[lag:, i]) / (n_samples - lag)
+            if acor <= 0.0:
+                break
             acors[lag, i] = acor
 
     act = 1.0 + 2.0 * np.sum(acors[1:], axis=0) / acors[0]
@@ -209,7 +210,6 @@ def plot_pdf_marginals(pdf, lims, gt=None, levels=(0.68, 0.95)):
     """
 
     if pdf.ndim == 1:
-
         fig, ax = plt.subplots(1, 1)
         xx = np.linspace(lims[0], lims[1], 200)
 
@@ -217,10 +217,10 @@ def plot_pdf_marginals(pdf, lims, gt=None, levels=(0.68, 0.95)):
         ax.plot(xx, pp)
         ax.set_xlim(lims)
         ax.set_ylim([0, ax.get_ylim()[1]])
-        if gt is not None: ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
+        if gt is not None:
+            ax.vlines(gt, 0, ax.get_ylim()[1], color="r")
 
     else:
-
         fig, ax = plt.subplots(pdf.ndim, pdf.ndim)
 
         lims = np.asarray(lims)
@@ -228,14 +228,14 @@ def plot_pdf_marginals(pdf, lims, gt=None, levels=(0.68, 0.95)):
 
         for i in range(pdf.ndim):
             for j in range(pdf.ndim):
-
                 if i == j:
                     xx = np.linspace(lims[i, 0], lims[i, 1], 500)
                     pp = pdf.eval(xx, ii=[i], log=False)
                     ax[i, j].plot(xx, pp)
                     ax[i, j].set_xlim(lims[i])
                     ax[i, j].set_ylim([0, ax[i, j].get_ylim()[1]])
-                    if gt is not None: ax[i, j].vlines(gt[i], 0, ax[i, j].get_ylim()[1], color='r')
+                    if gt is not None:
+                        ax[i, j].vlines(gt[i], 0, ax[i, j].get_ylim()[1], color="r")
 
                 else:
                     xx = np.linspace(lims[i, 0], lims[i, 1], 200)
@@ -247,7 +247,8 @@ def plot_pdf_marginals(pdf, lims, gt=None, levels=(0.68, 0.95)):
                     ax[i, j].contour(X, Y, probs2contours(pp, levels), levels)
                     ax[i, j].set_xlim(lims[i])
                     ax[i, j].set_ylim(lims[j])
-                    if gt is not None: ax[i, j].plot(gt[i], gt[j], 'r.', ms=8)
+                    if gt is not None:
+                        ax[i, j].plot(gt[i], gt[j], "r.", ms=8)
 
     plt.show(block=False)
 
@@ -262,15 +263,15 @@ def plot_hist_marginals(data, lims=None, gt=None):
     n_bins = int(np.sqrt(data.shape[0]))
 
     if data.ndim == 1:
-
         fig, ax = plt.subplots(1, 1)
         ax.hist(data, n_bins, density=True)
         ax.set_ylim([0, ax.get_ylim()[1]])
-        if lims is not None: ax.set_xlim(lims)
-        if gt is not None: ax.vlines(gt, 0, ax.get_ylim()[1], color='r')
+        if lims is not None:
+            ax.set_xlim(lims)
+        if gt is not None:
+            ax.vlines(gt, 0, ax.get_ylim()[1], color="r")
 
     else:
-
         n_dim = data.shape[1]
         fig, ax = plt.subplots(n_dim, n_dim)
         ax = np.array([[ax]]) if n_dim == 1 else ax
@@ -281,19 +282,21 @@ def plot_hist_marginals(data, lims=None, gt=None):
 
         for i in range(n_dim):
             for j in range(n_dim):
-
                 if i == j:
                     ax[i, j].hist(data[:, i], n_bins, density=True)
                     ax[i, j].set_ylim([0, ax[i, j].get_ylim()[1]])
-                    if lims is not None: ax[i, j].set_xlim(lims[i])
-                    if gt is not None: ax[i, j].vlines(gt[i], 0, ax[i, j].get_ylim()[1], color='r')
+                    if lims is not None:
+                        ax[i, j].set_xlim(lims[i])
+                    if gt is not None:
+                        ax[i, j].vlines(gt[i], 0, ax[i, j].get_ylim()[1], color="r")
 
                 else:
-                    ax[i, j].plot(data[:, i], data[:, j], 'k.', ms=2)
+                    ax[i, j].plot(data[:, i], data[:, j], "k.", ms=2)
                     if lims is not None:
                         ax[i, j].set_xlim(lims[i])
                         ax[i, j].set_ylim(lims[j])
-                    if gt is not None: ax[i, j].plot(gt[i], gt[j], 'r.', ms=8)
+                    if gt is not None:
+                        ax[i, j].plot(gt[i], gt[j], "r.", ms=8)
 
     plt.show(block=False)
 
@@ -305,7 +308,7 @@ def save(data, file):
     Saves data to a file.
     """
 
-    f = open(file, 'w')
+    f = open(file, "w")
     pickle.dump(data, f)
     f.close()
 
@@ -315,7 +318,7 @@ def load(file):
     Loads data from file.
     """
 
-    f = open(file, 'r')
+    f = open(file, "r")
     data = pickle.load(f)
     f.close()
     return data
@@ -326,7 +329,7 @@ def calc_whitening_transform(xs):
     Calculates the parameters that whiten a dataset.
     """
 
-    assert xs.ndim == 2, 'Data must be a matrix'
+    assert xs.ndim == 2, "Data must be a matrix"
     N = xs.shape[0]
 
     means = np.mean(xs, axis=0)

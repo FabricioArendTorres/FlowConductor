@@ -19,9 +19,7 @@ class MaskedAffineAutoregressiveTransformTest(TransformTest):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 transform = autoregressive.MaskedAffineAutoregressiveTransform(
                     features=features,
                     hidden_features=30,
@@ -49,9 +47,7 @@ class MaskedAffineAutoregressiveTransformTest(TransformTest):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 transform = autoregressive.MaskedAffineAutoregressiveTransform(
                     features=features,
                     hidden_features=30,
@@ -80,9 +76,7 @@ class MaskedAffineAutoregressiveTransformTest(TransformTest):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 transform = autoregressive.MaskedAffineAutoregressiveTransform(
                     features=features,
                     hidden_features=30,
@@ -132,9 +126,7 @@ class MaskedAdaptiveSigmoidAutoregressiveTransformTest(TransformTest):
 
         self.assert_forward_inverse_are_consistent(transform, inputs)
 
-        _, ref_logabsdet = torch.linalg.slogdet(
-            torchutils.batch_jacobian(outputs, inputs)
-        )
+        _, ref_logabsdet = torch.linalg.slogdet(torchutils.batch_jacobian(outputs, inputs))
         self.assert_jacobian_correct(transform, inputs)
 
 

@@ -25,9 +25,7 @@ class ShapeTest(torchtestcase.TorchTestCase):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 model = made.MADE(
                     features=features,
                     hidden_features=hidden_features,
@@ -56,9 +54,7 @@ class ShapeTest(torchtestcase.TorchTestCase):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 model = made.MADE(
                     features=features,
                     hidden_features=hidden_features,
@@ -86,9 +82,7 @@ class ConnectivityTest(torchtestcase.TorchTestCase):
             (False, True),
             (True, False),
         ]:
-            with self.subTest(
-                use_residual_blocks=use_residual_blocks, random_mask=random_mask
-            ):
+            with self.subTest(use_residual_blocks=use_residual_blocks, random_mask=random_mask):
                 model = made.MADE(
                     features=features,
                     hidden_features=hidden_features,

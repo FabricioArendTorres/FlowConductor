@@ -42,8 +42,8 @@ class LULinearTest(ConditionalTransformTest):
 
     def test_batch_matrices(self):
         random_context = torch.randn((self.batch_size, self.context_features))
-        conditional_params, lower, upper, weight, weight_inverse = (
-            self.calc_intermediate_vals(random_context)
+        conditional_params, lower, upper, weight, weight_inverse = self.calc_intermediate_vals(
+            random_context
         )
         for i in range(self.batch_size):
             self.assertEqual(lower[i].shape, (self.features, self.features))
@@ -53,8 +53,8 @@ class LULinearTest(ConditionalTransformTest):
     def test_forward(self):
         inputs = torch.randn(self.batch_size, self.features)
         random_context = torch.randn((self.batch_size, self.context_features))
-        conditional_params, lower, upper, weight, weight_inverse = (
-            self.calc_intermediate_vals(random_context)
+        conditional_params, lower, upper, weight, weight_inverse = self.calc_intermediate_vals(
+            random_context
         )
 
         outputs, logabsdet = self.transform.forward(inputs, context=random_context)
@@ -72,8 +72,8 @@ class LULinearTest(ConditionalTransformTest):
     def test_inverse(self):
         inputs = torch.randn(self.batch_size, self.features)
         random_context = torch.randn((self.batch_size, self.context_features))
-        conditional_params, lower, upper, weight, weight_inverse = (
-            self.calc_intermediate_vals(random_context)
+        conditional_params, lower, upper, weight, weight_inverse = self.calc_intermediate_vals(
+            random_context
         )
 
         outputs, logabsdet = self.transform.inverse(inputs, random_context)

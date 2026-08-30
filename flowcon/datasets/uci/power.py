@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 def load_power():
     def load_data():
-        file = os.path.join(utils.get_data_root(), 'power', 'data.npy')
+        file = os.path.join(utils.get_data_root(), "power", "data.npy")
         return np.load(file)
 
     def load_data_split_with_noise():
@@ -60,14 +60,10 @@ def load_power():
 
 def save_splits():
     train, val, test = load_power()
-    splits = (
-        ('train', train),
-        ('val', val),
-        ('test', test)
-    )
+    splits = (("train", train), ("val", val), ("test", test))
     for split in splits:
         name, data = split
-        file = os.path.join(utils.get_data_root(), 'power', '{}.npy'.format(name))
+        file = os.path.join(utils.get_data_root(), "power", "{}.npy".format(name))
         np.save(file, data)
 
 
@@ -77,8 +73,8 @@ def print_shape_info():
 
 
 class PowerDataset(Dataset):
-    def __init__(self, split='train', frac=None):
-        path = os.path.join(utils.get_data_root(), 'power', '{}.npy'.format(split))
+    def __init__(self, split="train", frac=None):
+        path = os.path.join(utils.get_data_root(), "power", "{}.npy".format(split))
         self.data = np.load(path).astype(np.float32)
         self.n, self.dim = self.data.shape
         if frac is not None:
@@ -92,7 +88,7 @@ class PowerDataset(Dataset):
 
 
 def main():
-    dataset = PowerDataset(split='train')
+    dataset = PowerDataset(split="train")
     print(type(dataset.data))
     print(dataset.data.shape)
     print(dataset.data.min(), dataset.data.max())
@@ -100,5 +96,5 @@ def main():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

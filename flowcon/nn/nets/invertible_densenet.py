@@ -15,30 +15,32 @@ from flowcon.nn.nets.lipschitz_dense import LipschitzDenseLayer
 from flowcon.nn.nets import MLP
 
 ACTIVATION_FNS = {
-    'relu': torch.nn.ReLU,
-    'tanh': torch.nn.Tanh,
-    'elu': torch.nn.ELU,
-    'selu': torch.nn.SELU,
-    'fullsort': activations.FullSort,
-    'maxmin': activations.MaxMin,
-    'swish': activations.Swish,
-    'LeakyLSwish': activations.LeakyLSwish,
-    'CLipSwish': activations.CLipSwish,
-    'lcube': activations.LipschitzCube,
-    'csin': activations.CSin,
+    "relu": torch.nn.ReLU,
+    "tanh": torch.nn.Tanh,
+    "elu": torch.nn.ELU,
+    "selu": torch.nn.SELU,
+    "fullsort": activations.FullSort,
+    "maxmin": activations.MaxMin,
+    "swish": activations.Swish,
+    "LeakyLSwish": activations.LeakyLSwish,
+    "CLipSwish": activations.CLipSwish,
+    "lcube": activations.LipschitzCube,
+    "csin": activations.CSin,
 }
 
 logger = logging.getLogger()
 
+
 class _DenseNet(torch.nn.Module):
-    def __init__(self,
-                 dimension,
-                 densenet_depth: int = 2,
-                 densenet_growth: int = 16,
-                 activation_function: Union[str, Callable] = "CLipSwish",
-                 lip_coeff: float = 0.98,
-                 n_lipschitz_iters: int = 5
-                 ):
+    def __init__(
+        self,
+        dimension,
+        densenet_depth: int = 2,
+        densenet_growth: int = 16,
+        activation_function: Union[str, Callable] = "CLipSwish",
+        lip_coeff: float = 0.98,
+        n_lipschitz_iters: int = 5,
+    ):
         super().__init__()
 
         self.dimension = dimension
@@ -52,34 +54,47 @@ class _DenseNet(torch.nn.Module):
         assert lip_coeff > 0, "lip_coeff must be > 0"
 
         if isinstance(activation_function, str):
-            assert activation_function in ACTIVATION_FNS.keys(), f"Activation function {activation_function} not found."
+            assert activation_function in ACTIVATION_FNS.keys(), (
+                f"Activation function {activation_function} not found."
+            )
             self.activation = ACTIVATION_FNS[activation_function]()
         else:
             self.activation = activation_function
 
-        self.output_channels = self.calc_output_channels(self.activation,
-                                                         self.densenet_growth)
+        self.output_channels = self.calc_output_channels(self.activation, self.densenet_growth)
 
     def spectral_normalization(self, network):
-        return scaled_spectral_norm(network,
-                                    n_power_iterations=self.n_lipschitz_iters,
-                                    domain=2, codomain=2, coeff=self.lip_coeff)
+        return scaled_spectral_norm(
+            network,
+            n_power_iterations=self.n_lipschitz_iters,
+            domain=2,
+            codomain=2,
+            coeff=self.lip_coeff,
+        )
 
-    def build_densenet(self, total_in_channels, densenet_depth, densenet_growth, learnable_concat=True,
-                       include_last_layer=True) -> Tuple[ExtendedSequential, int]:
+    def build_densenet(
+        self,
+        total_in_channels,
+        densenet_depth,
+        densenet_growth,
+        learnable_concat=True,
+        include_last_layer=True,
+    ) -> Tuple[ExtendedSequential, int]:
         nnet = []
         for i in range(densenet_depth):
             part_net = []
 
             part_net.append(
-                self.spectral_normalization(torch.nn.Linear(total_in_channels, self.output_channels))
+                self.spectral_normalization(
+                    torch.nn.Linear(total_in_channels, self.output_channels)
+                )
             )
             part_net.append(self.activation)
             nnet.append(
                 LipschitzDenseLayer(
                     ExtendedSequential(*part_net),
                     learnable_concat=learnable_concat,
-                    lip_coeff=self.lip_coeff
+                    lip_coeff=self.lip_coeff,
                 )
             )
 
@@ -97,20 +112,23 @@ class _DenseNet(torch.nn.Module):
     @staticmethod
     def calc_output_channels(activation, densenet_growth):
         # Change growth size for CLipSwish:
-        if hasattr(activation, "_does_concat") and activation._does_concat: #isinstance(activation, activations.CLipSwish) or isinstance(activation, activations.CSin):
+        if (
+            hasattr(activation, "_does_concat") and activation._does_concat
+        ):  # isinstance(activation, activations.CLipSwish) or isinstance(activation, activations.CSin):
             assert densenet_growth % 2 == 0, "Select an even densenet growth size for CLipSwish!"
             output_channels = densenet_growth // 2
         else:
             output_channels = densenet_growth
         return output_channels
 
-
     @classmethod
-    def factory(cls,
-                condition_input=False,
-                condition_lastlayer=False,
-                condition_multiplicative=False,
-                **kwargs):
+    def factory(
+        cls,
+        condition_input=False,
+        condition_lastlayer=False,
+        condition_multiplicative=False,
+        **kwargs,
+    ):
 
         if not (condition_input or condition_lastlayer or condition_multiplicative):
             lipschitz_network = DenseNet
@@ -129,7 +147,9 @@ class _DenseNet(torch.nn.Module):
         elif (condition_multiplicative and condition_input) and not condition_lastlayer:
             lipschitz_network = MultiplicativeAndInputConditionalDenseNet
         else:
-            raise NotImplementedError("This combination of conditions for a Lipschitz Network is not implemented .")
+            raise NotImplementedError(
+                "This combination of conditions for a Lipschitz Network is not implemented ."
+            )
 
         return lambda: lipschitz_network(**kwargs)
 
@@ -143,26 +163,32 @@ class DenseNet(_DenseNet):
     Provides a Lipschitz contiuous network g(x)  with a fixed lipschitz constant.
     """
 
-    def __init__(self,
-                 dimension,
-                 densenet_depth: int = 2,
-                 densenet_growth: int = 16,
-                 activation_function: Union[str, Callable] = "CLipSwish",
-                 lip_coeff: float = 0.98,
-                 n_lipschitz_iters: int = 5,
-                 **kwargs):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        densenet_depth: int = 2,
+        densenet_growth: int = 16,
+        activation_function: Union[str, Callable] = "CLipSwish",
+        lip_coeff: float = 0.98,
+        n_lipschitz_iters: int = 5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
 
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for {}: {}".format(self.__class__.__name__, pformat(kwargs)))
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(self.dimension,
-                                                                            self.densenet_depth,
-                                                                            self.densenet_growth)
+            logger.warning(
+                "Unused kwargs for {}: {}".format(self.__class__.__name__, pformat(kwargs))
+            )
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
+            self.dimension, self.densenet_depth, self.densenet_growth
+        )
 
     def forward(self, x, context=None):
         assert context is None, "Context not supported for this Class."
@@ -176,23 +202,32 @@ class InputConditionalDenseNet(_DenseNet):
     the network f provides an embedding of the context.
     """
 
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        densenet_depth,
+        densenet_growth=16,
+        c_embed_hidden_sizes=(128, 128, 10),
+        activation_function=activations.Swish,
+        lip_coeff=0.98,
+        n_lipschitz_iters=5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for class '{}': \n {}".format(self.__class__.__name__, pformat(kwargs)))
+            logger.warning(
+                "Unused kwargs for class '{}': \n {}".format(
+                    self.__class__.__name__, pformat(kwargs)
+                )
+            )
 
         self.context_features = context_features
         self.c_embed_hidden_sizes = c_embed_hidden_sizes
@@ -202,11 +237,15 @@ class InputConditionalDenseNet(_DenseNet):
             total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
             densenet_growth=densenet_growth,
             densenet_depth=densenet_depth,
-            include_last_layer=True)
+            include_last_layer=True,
+        )
 
-        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                                         hidden_sizes=self.c_embed_hidden_sizes,
-                                         activation=torch.nn.SiLU())
+        self.context_embedding_net = MLP(
+            (self.context_features,),
+            (self.c_embed_hidden_sizes[-1],),
+            hidden_sizes=self.c_embed_hidden_sizes,
+            activation=torch.nn.SiLU(),
+        )
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
@@ -222,24 +261,33 @@ class MultiplicativeAndInputConditionalDenseNet(_DenseNet):
     The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.
     """
 
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 m_embed_hidden_sizes=(128, 128),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        densenet_depth,
+        densenet_growth=16,
+        c_embed_hidden_sizes=(128, 128, 10),
+        m_embed_hidden_sizes=(128, 128),
+        activation_function=activations.Swish,
+        lip_coeff=0.98,
+        n_lipschitz_iters=5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for class '{}': \n {}".format(self.__class__.__name__, pformat(kwargs)))
+            logger.warning(
+                "Unused kwargs for class '{}': \n {}".format(
+                    self.__class__.__name__, pformat(kwargs)
+                )
+            )
 
         self.context_features = context_features
         self.c_embed_hidden_sizes = c_embed_hidden_sizes
@@ -250,15 +298,22 @@ class MultiplicativeAndInputConditionalDenseNet(_DenseNet):
             total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
             densenet_growth=densenet_growth,
             densenet_depth=densenet_depth,
-            include_last_layer=True)
+            include_last_layer=True,
+        )
 
-        self.factor_net = MLP((self.context_features,), (1,),
-                              hidden_sizes=self.m_embed_hidden_sizes,
-                              activation=torch.nn.SiLU())
+        self.factor_net = MLP(
+            (self.context_features,),
+            (1,),
+            hidden_sizes=self.m_embed_hidden_sizes,
+            activation=torch.nn.SiLU(),
+        )
 
-        self.embedding = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                             hidden_sizes=self.c_embed_hidden_sizes,
-                             activation=torch.nn.SiLU())
+        self.embedding = MLP(
+            (self.context_features,),
+            (self.c_embed_hidden_sizes[-1],),
+            hidden_sizes=self.c_embed_hidden_sizes,
+            activation=torch.nn.SiLU(),
+        )
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
@@ -275,24 +330,33 @@ class MultiplicativeConditionalDenseNet(_DenseNet):
     The network h(x;c) is an InputConditionalDenseNet and Lipschitz Continuous w.r.t. x, and φ(c) \in (0,1), making g Lipschitz Continuous w.r.t. x.
     """
 
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 c_embed_hidden_sizes=(128, 128, 10),
-                 m_embed_hidden_sizes=(128, 128),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        densenet_depth,
+        densenet_growth=16,
+        c_embed_hidden_sizes=(128, 128, 10),
+        m_embed_hidden_sizes=(128, 128),
+        activation_function=activations.Swish,
+        lip_coeff=0.98,
+        n_lipschitz_iters=5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for class '{}': \n {}".format(self.__class__.__name__, pformat(kwargs)))
+            logger.warning(
+                "Unused kwargs for class '{}': \n {}".format(
+                    self.__class__.__name__, pformat(kwargs)
+                )
+            )
 
         self.context_features = context_features
         self.c_embed_hidden_sizes = c_embed_hidden_sizes
@@ -303,11 +367,15 @@ class MultiplicativeConditionalDenseNet(_DenseNet):
             total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
             densenet_growth=densenet_growth,
             densenet_depth=densenet_depth,
-            include_last_layer=True)
+            include_last_layer=True,
+        )
 
-        self.factor_net = MLP((self.context_features,), (1,),
-                              hidden_sizes=self.m_embed_hidden_sizes,
-                              activation=torch.nn.SiLU())
+        self.factor_net = MLP(
+            (self.context_features,),
+            (1,),
+            hidden_sizes=self.m_embed_hidden_sizes,
+            activation=torch.nn.SiLU(),
+        )
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
@@ -317,12 +385,14 @@ class MultiplicativeConditionalDenseNet(_DenseNet):
 
 
 class LastLayerAttention(torch.nn.Module):
-    def __init__(self,
-                 dimension,
-                 context_features,
-                 value_dim,
-                 hidden_sizes=(64, 64),
-                 activation=activations.Swish()):
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        value_dim,
+        hidden_sizes=(64, 64),
+        activation=activations.Swish(),
+    ):
         super().__init__()
         self.dimension = dimension
         self.context_features = context_features
@@ -332,13 +402,19 @@ class LastLayerAttention(torch.nn.Module):
         self.value_dim = value_dim
         self.activation = activation
 
-        self.bias_net = MLP((self.context_features,), (self.dimension,),
-                            hidden_sizes=self.hidden_sizes,
-                            activation=self.activation)
+        self.bias_net = MLP(
+            (self.context_features,),
+            (self.dimension,),
+            hidden_sizes=self.hidden_sizes,
+            activation=self.activation,
+        )
 
-        self.weight_network = MLP((self.context_features,), (self.dimension, self.value_dim),
-                                  hidden_sizes=self.hidden_sizes,
-                                  activation=self.activation)
+        self.weight_network = MLP(
+            (self.context_features,),
+            (self.dimension, self.value_dim),
+            hidden_sizes=self.hidden_sizes,
+            activation=self.activation,
+        )
 
     def attention(self, context, values):
         presoftmax = self.weight_network(context)  # .view(-1, self.dimension, self.num_heads)
@@ -358,37 +434,50 @@ class LastLayerConditionalDenseNet(_DenseNet):
     We further pass each row through a softmax (making A row stochastic), such that the Lipschitz constant of remains unchanged.
     """
 
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 last_layer_hidden_sizes=(64, 64),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        densenet_depth,
+        densenet_growth=16,
+        last_layer_hidden_sizes=(64, 64),
+        activation_function=activations.Swish,
+        lip_coeff=0.98,
+        n_lipschitz_iters=5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for class '{}': \n {}".format(self.__class__.__name__, pformat(kwargs)))
+            logger.warning(
+                "Unused kwargs for class '{}': \n {}".format(
+                    self.__class__.__name__, pformat(kwargs)
+                )
+            )
 
         self.context_features = context_features
         self.last_layer_hidden_sizes = last_layer_hidden_sizes
 
         self.bn = torch.nn.BatchNorm1d(self.context_features)
-        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(total_in_channels=self.dimension,
-                                                                            densenet_growth=densenet_growth,
-                                                                            densenet_depth=densenet_depth,
-                                                                            include_last_layer=False)
+        self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
+            total_in_channels=self.dimension,
+            densenet_growth=densenet_growth,
+            densenet_depth=densenet_depth,
+            include_last_layer=False,
+        )
 
-        self.custom_attention = LastLayerAttention(dimension=self.dimension,
-                                                   context_features=self.context_features,
-                                                   value_dim=self.densenet_final_layer_dim,
-                                                   hidden_sizes=self.last_layer_hidden_sizes)
+        self.custom_attention = LastLayerAttention(
+            dimension=self.dimension,
+            context_features=self.context_features,
+            value_dim=self.densenet_final_layer_dim,
+            hidden_sizes=self.last_layer_hidden_sizes,
+        )
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
@@ -403,47 +492,61 @@ class MixedConditionalDenseNet(_DenseNet):
     i.e. both the first and last layer of the densenet are conditional.
     """
 
-    def __init__(self, dimension, context_features,
-                 densenet_depth,
-                 densenet_growth=16,
-                 last_layer_hidden_sizes=(64, 64),
-                 c_embed_hidden_sizes=(32, 32, 10),
-                 activation_function=activations.Swish,
-                 lip_coeff=0.98,
-                 n_lipschitz_iters=5,
-                 **kwargs
-                 ):
-        super().__init__(dimension=dimension,
-                         densenet_depth=densenet_depth,
-                         densenet_growth=densenet_growth,
-                         activation_function=activation_function,
-                         lip_coeff=lip_coeff,
-                         n_lipschitz_iters=n_lipschitz_iters)
+    def __init__(
+        self,
+        dimension,
+        context_features,
+        densenet_depth,
+        densenet_growth=16,
+        last_layer_hidden_sizes=(64, 64),
+        c_embed_hidden_sizes=(32, 32, 10),
+        activation_function=activations.Swish,
+        lip_coeff=0.98,
+        n_lipschitz_iters=5,
+        **kwargs,
+    ):
+        super().__init__(
+            dimension=dimension,
+            densenet_depth=densenet_depth,
+            densenet_growth=densenet_growth,
+            activation_function=activation_function,
+            lip_coeff=lip_coeff,
+            n_lipschitz_iters=n_lipschitz_iters,
+        )
 
         if len(kwargs) > 0:
-            logger.warning("Unused kwargs for class '{}': \n {}".format(self.__class__.__name__, pformat(kwargs)))
+            logger.warning(
+                "Unused kwargs for class '{}': \n {}".format(
+                    self.__class__.__name__, pformat(kwargs)
+                )
+            )
 
         self.context_features = context_features
         self.c_embed_hidden_sizes = c_embed_hidden_sizes
         self.last_layer_hidden_sizes = last_layer_hidden_sizes
 
-        self.output_channels = self.calc_output_channels(self.activation,
-                                                         self.densenet_growth)
+        self.output_channels = self.calc_output_channels(self.activation, self.densenet_growth)
         self.bn = torch.nn.BatchNorm1d(self.context_features)
         self.dense_net, self.densenet_final_layer_dim = self.build_densenet(
             total_in_channels=self.dimension + self.c_embed_hidden_sizes[-1],
             densenet_growth=densenet_growth,
             densenet_depth=densenet_depth,
-            include_last_layer=False)
+            include_last_layer=False,
+        )
 
-        self.custom_attention = LastLayerAttention(dimension=self.dimension,
-                                                   context_features=self.context_features,
-                                                   value_dim=self.densenet_final_layer_dim,
-                                                   hidden_sizes=self.last_layer_hidden_sizes)
+        self.custom_attention = LastLayerAttention(
+            dimension=self.dimension,
+            context_features=self.context_features,
+            value_dim=self.densenet_final_layer_dim,
+            hidden_sizes=self.last_layer_hidden_sizes,
+        )
 
-        self.context_embedding_net = MLP((self.context_features,), (self.c_embed_hidden_sizes[-1],),
-                                         hidden_sizes=self.c_embed_hidden_sizes,
-                                         activation=torch.nn.SiLU())
+        self.context_embedding_net = MLP(
+            (self.context_features,),
+            (self.c_embed_hidden_sizes[-1],),
+            hidden_sizes=self.c_embed_hidden_sizes,
+            activation=torch.nn.SiLU(),
+        )
 
     def forward(self, inputs, context=None):
         context = self.bn(context)
@@ -452,6 +555,7 @@ class MixedConditionalDenseNet(_DenseNet):
         values_weights = self.dense_net(concat_inputs).unsqueeze(-1)
         weights = self.custom_attention.attention(context, values_weights)
         return weights
+
 
 # class SirenLayer(nn.Module):
 #     def __init__(self, dim_in, dim_out, w0=1., c=6., is_first=False, use_bias=True, activation=None):

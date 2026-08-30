@@ -38,15 +38,11 @@ class Uniform(BaseDistribution):
 
         assert len(low.shape) == 1 and low.shape[0] == self.dim
         assert len(high.shape) == 1 and high.shape[0] == self.dim
-        assert torch.all(low < high), (
-            "All elements in 'low' must be smaller than 'high'"
-        )
+        assert torch.all(low < high), "All elements in 'low' must be smaller than 'high'"
 
         self.register_buffer("_low", low.reshape(1, self.dim))
         self.register_buffer("_high", high.reshape(1, self.dim))
-        self.register_buffer(
-            "_log_norm_const", -torch.log(high - low).sum(dim=0).reshape(1)
-        )
+        self.register_buffer("_log_norm_const", -torch.log(high - low).sum(dim=0).reshape(1))
 
     def log_prob(self, inputs: torch.Tensor) -> torch.Tensor:
         assert inputs.shape[1] == self.dim
@@ -65,7 +61,5 @@ class Uniform(BaseDistribution):
         return log_prob
 
     def _sample(self, num_samples: int) -> torch.Tensor:
-        rand = torch.rand(
-            (num_samples, self.dim), dtype=self._low.dtype, device=self._low.device
-        )
+        rand = torch.rand((num_samples, self.dim), dtype=self._low.dtype, device=self._low.device)
         return self._low + rand * (self._high - self._low)

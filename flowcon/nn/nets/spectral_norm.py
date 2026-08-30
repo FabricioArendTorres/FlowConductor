@@ -4,14 +4,16 @@ from typing import Optional
 from torch.nn.utils.parametrize import register_parametrization
 
 
-def scaled_spectral_norm(module: torch.nn.modules.Module,
-                         domain,
-                         codomain,
-                         coeff=0.97,
-                         name: str = 'weight',
-                         n_power_iterations: int = 1,
-                         eps: float = 1e-12,
-                         dim: Optional[int] = None) -> torch.nn.modules.Module:
+def scaled_spectral_norm(
+    module: torch.nn.modules.Module,
+    domain,
+    codomain,
+    coeff=0.97,
+    name: str = "weight",
+    n_power_iterations: int = 1,
+    eps: float = 1e-12,
+    dim: Optional[int] = None,
+) -> torch.nn.modules.Module:
     r"""Applies spectral normalization to a parameter in the given module.
     Calls custom normalization modules instead of default pytorch ones.
     """
@@ -22,28 +24,32 @@ def scaled_spectral_norm(module: torch.nn.modules.Module,
         )
 
     if dim is None:
-        if isinstance(module, (torch.nn.ConvTranspose1d,
-                               torch.nn.ConvTranspose2d,
-                               torch.nn.ConvTranspose3d)):
+        if isinstance(
+            module, (torch.nn.ConvTranspose1d, torch.nn.ConvTranspose2d, torch.nn.ConvTranspose3d)
+        ):
             dim = 1
         else:
             dim = 0
-    register_parametrization(module, name,
-                             _InducedSpectralNorm(weight, domain, codomain, n_power_iterations, dim, eps, coeff=coeff))
+    register_parametrization(
+        module,
+        name,
+        _InducedSpectralNorm(weight, domain, codomain, n_power_iterations, dim, eps, coeff=coeff),
+    )
     return module
 
 
 # noinspection PyProtectedMember
 class _ScaledSpectralNorm(torch.nn.utils.parametrizations._SpectralNorm):
-    def __init__(self,
-                 weight: torch.Tensor,
-                 domain,
-                 codomain,
-                 n_power_iterations: int = 2000,
-                 dim: int = 0,
-                 eps: float = 1e-12,
-                 coeff=0.97
-                 ) -> None:
+    def __init__(
+        self,
+        weight: torch.Tensor,
+        domain,
+        codomain,
+        n_power_iterations: int = 2000,
+        dim: int = 0,
+        eps: float = 1e-12,
+        coeff=0.97,
+    ) -> None:
 
         self.coeff = coeff
         self.domain = domain
@@ -116,7 +122,7 @@ class _InducedSpectralNorm(_ScaledSpectralNorm):
     def normalize_u(u, codomain, out=None):
         if not torch.is_tensor(codomain) and codomain == 2:
             u = F.normalize(u, p=2, dim=0, out=out)
-        elif codomain == float('inf'):
+        elif codomain == float("inf"):
             u = projmax_(u)
         else:
             uabs = torch.abs(u)
@@ -125,7 +131,7 @@ class _InducedSpectralNorm(_ScaledSpectralNorm):
             uabs = uabs / torch.max(uabs)
             uabs = uabs ** (codomain - 1)
             if codomain == 1:
-                u = uph * uabs / vector_norm(uabs, float('inf'))
+                u = uph * uabs / vector_norm(uabs, float("inf"))
             else:
                 u = uph * uabs / vector_norm(uabs, codomain / (codomain - 1))
         return u
@@ -150,4 +156,4 @@ def projmax_(v):
 
 def vector_norm(x, p):
     x = x.view(-1)
-    return torch.sum(x ** p) ** (1 / p)
+    return torch.sum(x**p) ** (1 / p)

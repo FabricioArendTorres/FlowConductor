@@ -208,17 +208,13 @@ class RemoveContextTransformTest(transform_test.ConditionalTransformTest):
 
     def test_nocontext_passed(self):
         # the testing logic is in the mock class
-        outputs, logabsdet = self.transform.forward(
-            self.random_input, context=self.random_context
-        )
+        outputs, logabsdet = self.transform.forward(self.random_input, context=self.random_context)
         outputs_inv, logabsdet_inv = self.transform.inverse(
             self.random_input, context=self.random_context
         )
         with pytest.raises(RuntimeError):
             outputs, logabsdet = self.transform.forward(self.random_input)
-            expected_outputs, expected_logabsdet = self.transform.inverse(
-                self.random_input
-            )
+            expected_outputs, expected_logabsdet = self.transform.inverse(self.random_input)
 
     def test_inverse(self):
         self.assert_conditional_forward_inverse_are_consistent(

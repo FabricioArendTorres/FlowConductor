@@ -8,17 +8,15 @@ from torch.utils import data
 
 def load_bsds300():
     import h5py
-    path = os.path.join(utils.get_data_root(), 'bsds300', 'bsds300.hdf5')
-    file = h5py.File(path, 'r')
-    return file['train'], file['validation'], file['test']
+
+    path = os.path.join(utils.get_data_root(), "bsds300", "bsds300.hdf5")
+    file = h5py.File(path, "r")
+    return file["train"], file["validation"], file["test"]
 
 
 class BSDS300Dataset(data.Dataset):
-    def __init__(self, split='train', frac=None):
-        splits = dict(zip(
-            ('train', 'val', 'test'),
-            load_bsds300()
-        ))
+    def __init__(self, split="train", frac=None):
+        splits = dict(zip(("train", "val", "test"), load_bsds300()))
         self.data = np.array(splits[split]).astype(np.float32)
         self.n, self.dim = self.data.shape
         if frac is not None:
@@ -32,7 +30,7 @@ class BSDS300Dataset(data.Dataset):
 
 
 def main():
-    dataset = BSDS300Dataset(split='train')
+    dataset = BSDS300Dataset(split="train")
     print(type(dataset.data))
     print(dataset.data.shape)
     print(dataset.data.min(), dataset.data.max())
@@ -48,5 +46,5 @@ def main():
     print(len(loader))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

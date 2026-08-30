@@ -49,9 +49,7 @@ def merge_leading_dims(x: torch.Tensor, num_dims: int) -> torch.Tensor:
     if not check.is_positive_int(num_dims):
         raise TypeError("Number of leading dims must be a positive integer.")
     if num_dims > x.dim():
-        raise ValueError(
-            "Number of leading dims can't be greater than total number of dims."
-        )
+        raise ValueError("Number of leading dims can't be greater than total number of dims.")
     new_shape = torch.Size([-1]) + x.shape[num_dims:]
     return torch.reshape(x, new_shape)
 
@@ -164,9 +162,7 @@ def create_random_binary_mask(features: int) -> torch.Tensor:
     mask = torch.zeros(features).byte()
     weights = torch.ones(features).float()
     num_samples = features // 2 if features % 2 == 0 else features // 2 + 1
-    indices = torch.multinomial(
-        input=weights, num_samples=num_samples, replacement=False
-    )
+    indices = torch.multinomial(input=weights, num_samples=num_samples, replacement=False)
     mask[indices] += 1
     return mask
 

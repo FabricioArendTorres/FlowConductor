@@ -16,9 +16,7 @@ from flowcon.transforms.lipschitz import iResBlock
 from flowcon.transforms.normalization import ActNorm
 from flowcon.utils.torchutils import *
 
-logging.basicConfig(
-    format="%(asctime)s  %(message)s", level=logging.INFO, datefmt="%H:%M:%S"
-)
+logging.basicConfig(format="%(asctime)s  %(message)s", level=logging.INFO, datefmt="%H:%M:%S")
 
 logger = logging.getLogger()
 device = "cpu"  # "cuda"
@@ -40,9 +38,7 @@ assert selected_data in [
 def main():
     flow = build_flow()
     optimizer = optim.Adam(flow.parameters(), lr=1e-3, weight_decay=1e-3)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, eta_min=1e-7, T_max=num_iter
-    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, eta_min=1e-7, T_max=num_iter)
 
     # create data
     train_dataset = load_plane_dataset(selected_data, int(1e7), return_label=True)
@@ -134,9 +130,7 @@ def plot_model(flow: Flow, dataset: PlaneDataset):
             zgrid = flow.log_prob(xyinput, condition).exp().reshape(100, 100)
             zgrids.append(zgrid)
     for i, zgrid in enumerate(zgrids):
-        ax[i].contourf(
-            tensor_to_np(xgrid), tensor_to_np(ygrid), tensor_to_np(zgrid), cmap="Blues"
-        )
+        ax[i].contourf(tensor_to_np(xgrid), tensor_to_np(ygrid), tensor_to_np(zgrid), cmap="Blues")
         ax[i].set_ylim(-4, 4)
         ax[i].set_xlim(-4, 4)
     flow.train()

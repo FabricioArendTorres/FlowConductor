@@ -12,10 +12,12 @@ def load_hepmass():
 
     def load_data(path):
 
-        data_train = pd.read_csv(filepath_or_buffer=os.path.join(path, '1000_train.csv'),
-                                 index_col=False)
-        data_test = pd.read_csv(filepath_or_buffer=os.path.join(path, '1000_test.csv'),
-                                index_col=False)
+        data_train = pd.read_csv(
+            filepath_or_buffer=os.path.join(path, "1000_train.csv"), index_col=False
+        )
+        data_test = pd.read_csv(
+            filepath_or_buffer=os.path.join(path, "1000_test.csv"), index_col=False
+        )
 
         return data_train, data_test
 
@@ -57,10 +59,12 @@ def load_hepmass():
             if max_count > 5:
                 features_to_remove.append(i)
             i += 1
-        data_train = data_train[:, np.array(
-            [i for i in range(data_train.shape[1]) if i not in features_to_remove])]
-        data_test = data_test[:, np.array(
-            [i for i in range(data_test.shape[1]) if i not in features_to_remove])]
+        data_train = data_train[
+            :, np.array([i for i in range(data_train.shape[1]) if i not in features_to_remove])
+        ]
+        data_test = data_test[
+            :, np.array([i for i in range(data_test.shape[1]) if i not in features_to_remove])
+        ]
 
         N = data_train.shape[0]
         N_validate = int(N * 0.1)
@@ -70,26 +74,22 @@ def load_hepmass():
         return data_train, data_validate, data_test
 
     return load_data_no_discrete_normalised_as_array(
-        path=os.path.join(utils.get_data_root(), 'hepmass')
+        path=os.path.join(utils.get_data_root(), "hepmass")
     )
 
 
 def save_splits():
     train, val, test = load_hepmass()
-    splits = (
-        ('train', train),
-        ('val', val),
-        ('test', test)
-    )
+    splits = (("train", train), ("val", val), ("test", test))
     for split in splits:
         name, data = split
-        file = os.path.join(utils.get_data_root(), 'hepmass', '{}.npy'.format(name))
+        file = os.path.join(utils.get_data_root(), "hepmass", "{}.npy".format(name))
         np.save(file, data)
 
 
 class HEPMASSDataset(Dataset):
-    def __init__(self, split='train', frac=None):
-        path = os.path.join(utils.get_data_root(), 'hepmass', '{}.npy'.format(split))
+    def __init__(self, split="train", frac=None):
+        path = os.path.join(utils.get_data_root(), "hepmass", "{}.npy".format(split))
         self.data = np.load(path).astype(np.float32)
         self.n, self.dim = self.data.shape
         if frac is not None:
@@ -103,7 +103,7 @@ class HEPMASSDataset(Dataset):
 
 
 def main():
-    dataset = HEPMASSDataset(split='train')
+    dataset = HEPMASSDataset(split="train")
     print(type(dataset.data))
     print(dataset.data.shape)
     print(dataset.data.min(), dataset.data.max())
@@ -111,5 +111,5 @@ def main():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

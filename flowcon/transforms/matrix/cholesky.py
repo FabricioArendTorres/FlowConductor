@@ -13,9 +13,7 @@ class CholeskyOuterProduct(Transform):
         self.eye = nn.Parameter(
             torch.diag_embed(torch.ones(self.N)).unsqueeze(0), requires_grad=False
         )
-        self.powers = nn.Parameter(
-            torch.arange(self.N, 0, -1).unsqueeze(0), requires_grad=False
-        )
+        self.powers = nn.Parameter(torch.arange(self.N, 0, -1).unsqueeze(0), requires_grad=False)
         self.checkargs = checkargs
 
     def forward(self, inputs, context=None):

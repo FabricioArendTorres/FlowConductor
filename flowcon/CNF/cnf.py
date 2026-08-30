@@ -8,7 +8,16 @@ __all__ = ["CNF"]
 
 
 class CNF(nn.Module):
-    def __init__(self, odefunc, T=1.0, train_T=False, regularization_fns=None, solver='dopri5', atol=1e-5, rtol=1e-5):
+    def __init__(
+        self,
+        odefunc,
+        T=1.0,
+        train_T=False,
+        regularization_fns=None,
+        solver="dopri5",
+        atol=1e-5,
+        rtol=1e-5,
+    ):
         super(CNF, self).__init__()
         if train_T:
             self.register_parameter("sqrt_end_time", nn.Parameter(torch.sqrt(torch.tensor(T))))
@@ -57,7 +66,7 @@ class CNF(nn.Module):
                 rtol=self.rtol,
                 method=self.solver,
                 options=self.solver_options,
-                adjoint_options={"norm": "seminorm"}
+                adjoint_options={"norm": "seminorm"},
                 # step_size = self.solver_options["step_size"]
             )
         else:
@@ -68,7 +77,7 @@ class CNF(nn.Module):
                 atol=self.test_atol,
                 rtol=self.test_rtol,
                 method=self.test_solver,
-                adjoint_options={"norm": "seminorm"}
+                adjoint_options={"norm": "seminorm"},
                 # step_size=self.solver_options["step_size"]
             )
 
@@ -93,8 +102,9 @@ class CNF(nn.Module):
 
 
 class CompactCNF(nn.Module):
-    def __init__(self, dynamics_network, solver='dopri5', atol=1e-5, rtol=1e-5,
-                 divergence_fn="approximate"):
+    def __init__(
+        self, dynamics_network, solver="dopri5", atol=1e-5, rtol=1e-5, divergence_fn="approximate"
+    ):
         super(CompactCNF, self).__init__()
         assert divergence_fn in ("brute_force", "approximate")
 
@@ -116,7 +126,7 @@ class CompactCNF(nn.Module):
         elif divergence_fn == "approximate":
             self.divergence_fn = divergence_approx
 
-        self.register_buffer("_num_evals", torch.tensor(0.))
+        self.register_buffer("_num_evals", torch.tensor(0.0))
         self.before_odeint()
 
     def before_odeint(self, e=None):
@@ -186,7 +196,7 @@ class CompactCNF(nn.Module):
                 rtol=self.rtol,
                 method=self.solver,
                 options=self.solver_options,
-                adjoint_options={"norm": "seminorm"}
+                adjoint_options={"norm": "seminorm"},
                 # step_size = self.solver_options["step_size"]
             )
         else:
@@ -197,7 +207,7 @@ class CompactCNF(nn.Module):
                 atol=self.test_atol,
                 rtol=self.test_rtol,
                 method=self.test_solver,
-                adjoint_options={"norm": "seminorm"}
+                adjoint_options={"norm": "seminorm"},
                 # step_size=self.solver_options["step_size"]
             )
 
@@ -207,12 +217,12 @@ class CompactCNF(nn.Module):
 
 
 class CompactTimeVariableCNF(nn.Module):
-
     start_time = 0.0
     end_time = 1.0
 
-    def __init__(self, dynamics_network, solver='dopri5', atol=1e-5, rtol=1e-5,
-                 divergence_fn="approximate"):
+    def __init__(
+        self, dynamics_network, solver="dopri5", atol=1e-5, rtol=1e-5, divergence_fn="approximate"
+    ):
         super(CompactTimeVariableCNF, self).__init__()
         assert divergence_fn in ("brute_force", "approximate")
 
@@ -234,7 +244,7 @@ class CompactTimeVariableCNF(nn.Module):
         elif divergence_fn == "approximate":
             self.divergence_fn = divergence_approx
 
-        self.register_buffer("_num_evals", torch.tensor(0.))
+        self.register_buffer("_num_evals", torch.tensor(0.0))
         self.before_odeint()
 
         self.odeint_kwargs = dict(
@@ -243,12 +253,14 @@ class CompactTimeVariableCNF(nn.Module):
                 rtol=self.rtol,
                 method=self.solver,
                 options=self.solver_options,
-                adjoint_options={"norm": "seminorm"}),
+                adjoint_options={"norm": "seminorm"},
+            ),
             test=dict(
                 atol=self.test_atol,
                 rtol=self.test_rtol,
                 method=self.test_solver,
-                adjoint_options={"norm": "seminorm"})
+                adjoint_options={"norm": "seminorm"},
+            ),
         )
 
     def integrate(self, t0, t1, z, logpz=None):
@@ -263,12 +275,9 @@ class CompactTimeVariableCNF(nn.Module):
 
         self.get_odeint_kwargs()
         state_t = odeint(
-            func=self,
-            y0=initial_state,
-            t=integration_times,
-            **self.get_odeint_kwargs()
+            func=self, y0=initial_state, t=integration_times, **self.get_odeint_kwargs()
         )
-        _, _,  z_t, logpz_t = tuple(s[-1] for s in state_t)
+        _, _, z_t, logpz_t = tuple(s[-1] for s in state_t)
 
         return z_t, logpz_t
 
@@ -340,9 +349,13 @@ def sample_gaussian_like(y):
 
 
 def divergence_bf(dx, y, **unused_kwargs):
-    sum_diag = 0.
+    sum_diag = 0.0
     for i in range(y.shape[1]):
-        sum_diag += torch.autograd.grad(dx[:, i].sum(), y, create_graph=True)[0].contiguous()[:, i].contiguous()
+        sum_diag += (
+            torch.autograd.grad(dx[:, i].sum(), y, create_graph=True)[0]
+            .contiguous()[:, i]
+            .contiguous()
+        )
     return sum_diag.contiguous()
 
 

@@ -30,9 +30,7 @@ class TransformDiagonal(Transform):
         super().__init__()
         self.N = N
         self.diag_indices = np.diag_indices(self.N)
-        self.diag_mask = nn.Parameter(
-            torch.diag_embed(torch.ones(1, self.N)), requires_grad=False
-        )
+        self.diag_mask = nn.Parameter(torch.diag_embed(torch.ones(1, self.N)), requires_grad=False)
         self.diag_transform = diag_transformation
 
         # self.transform = CompositeTransform([Sigmoid(), ScalarScale(scale=self.MAX_EXP, trainable=False)])
@@ -64,7 +62,5 @@ class TransformDiagonalSoftplus(TransformDiagonal):
     def __init__(self, N, eps=1e-5):
         super().__init__(
             N=N,
-            diag_transformation=Sequential(
-                [Softplus(), ScalarShift(eps, trainable=False)]
-            ),
+            diag_transformation=Sequential([Softplus(), ScalarShift(eps, trainable=False)]),
         )

@@ -9,7 +9,13 @@ from .squeeze import squeeze, unsqueeze
 
 __all__ = ["ODEnet", "ODEfunc"]
 
-from .util import divergence_approx, sample_rademacher_like, sample_gaussian_like, divergence_bf, Lambda
+from .util import (
+    divergence_approx,
+    sample_rademacher_like,
+    sample_gaussian_like,
+    divergence_bf,
+    Lambda,
+)
 
 NONLINEARITIES = {
     "tanh": nn.Tanh(),
@@ -17,7 +23,7 @@ NONLINEARITIES = {
     "softplus": nn.Softplus(),
     "elu": nn.ELU(),
     "swish": nn.SiLU(),
-    "square": Lambda(lambda x: x ** 2),
+    "square": Lambda(lambda x: x**2),
     "identity": nn.Identity(),
 }
 
@@ -28,8 +34,16 @@ class ODEnet(nn.Module):
     """
 
     def __init__(
-            self, hidden_dims, input_shape, strides, conv, layer_type="concat", nonlinearity="softplus", num_squeeze=0,
-            act_norm=False, scale_output=1
+        self,
+        hidden_dims,
+        input_shape,
+        strides,
+        conv,
+        layer_type="concat",
+        nonlinearity="softplus",
+        num_squeeze=0,
+        act_norm=False,
+        scale_output=1,
     ):
         super(ODEnet, self).__init__()
         self.act_norm = act_norm
@@ -79,7 +93,7 @@ class ODEnet(nn.Module):
             elif stride == -2:
                 layer_kwargs = {"ksize": 4, "stride": 2, "padding": 1, "transpose": True}
             else:
-                raise ValueError('Unsupported stride: {}'.format(stride))
+                raise ValueError("Unsupported stride: {}".format(stride))
 
             layer = base_layer(hidden_shape[0], dim_out, **layer_kwargs)
             layers.append(layer)
@@ -129,7 +143,7 @@ class ODEfunc(nn.Module):
         elif divergence_fn == "approximate":
             self.divergence_fn = divergence_approx
 
-        self.register_buffer("_num_evals", torch.tensor(0.))
+        self.register_buffer("_num_evals", torch.tensor(0.0))
         self.before_odeint()
 
     def before_odeint(self, e=None):
@@ -177,6 +191,9 @@ class ODEfunc(nn.Module):
 
         if self.residual:
             dy = dy - y
-            divergence -= torch.ones_like(divergence) * torch.tensor(np.prod(y.shape[1:]), dtype=torch.float32
-                                                                     ).to(divergence)
-        return tuple([dy, -divergence] + [torch.zeros_like(s_).requires_grad_(True) for s_ in states[2:]])
+            divergence -= torch.ones_like(divergence) * torch.tensor(
+                np.prod(y.shape[1:]), dtype=torch.float32
+            ).to(divergence)
+        return tuple(
+            [dy, -divergence] + [torch.zeros_like(s_).requires_grad_(True) for s_ in states[2:]]
+        )

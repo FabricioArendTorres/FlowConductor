@@ -67,9 +67,7 @@ class TransformDiagonalTest(TransformTest):
     def test_forward(self):
         outputs, logabsdet = self.transform(self.inputs)
 
-        self.assert_tensor_is_good(
-            outputs, [self.batch_size, self.matrix_dim, self.matrix_dim]
-        )
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.matrix_dim, self.matrix_dim])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
         logabsdet_ref = torchutils.logabsdet(
@@ -90,9 +88,7 @@ class TransformDiagonalTest(TransformTest):
             _outputs.view(-1, self.matrix_dim, self.matrix_dim)
         )
 
-        self.assert_tensor_is_good(
-            inputs_rec, [self.batch_size, self.matrix_dim, self.matrix_dim]
-        )
+        self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.matrix_dim, self.matrix_dim])
         self.assert_tensor_is_good(logabsdet_inv, [self.batch_size])
 
         logabsdet_inv_ref = torchutils.logabsdet(

@@ -23,6 +23,9 @@ jobs:
       - name: Ruff
         run: uvx ruff@0.16.5 check flowcon tests examples
 
+      - name: Ruff format
+        run: uvx ruff@0.16.5 format --check
+
       - name: Pyrefly
         run: uvx pyrefly check
 

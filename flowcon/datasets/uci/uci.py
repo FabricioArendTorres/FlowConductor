@@ -23,23 +23,23 @@ def load_uci_dataset(name, split, frac=None):
     from flowcon.datasets.uci.miniboone import MiniBooNEDataset
     from flowcon.datasets.uci.bsds300 import BSDS300Dataset
 
-    if split not in ['train', 'val', 'test']:
-        raise ValueError('Split must be one of \'train\', \'val\' or \'test\'.')
+    if split not in ["train", "val", "test"]:
+        raise ValueError("Split must be one of 'train', 'val' or 'test'.")
 
     if frac is not None and (frac < 0 or frac > 1):
-        raise ValueError('Frac must be between 0 and 1.')
+        raise ValueError("Frac must be between 0 and 1.")
 
     try:
         return {
-            'power': PowerDataset,
-            'gas': GasDataset,
-            'hepmass': HEPMASSDataset,
-            'miniboone': MiniBooNEDataset,
-            'bsds300': BSDS300Dataset
+            "power": PowerDataset,
+            "gas": GasDataset,
+            "hepmass": HEPMASSDataset,
+            "miniboone": MiniBooNEDataset,
+            "bsds300": BSDS300Dataset,
         }[name](split=split, frac=frac)
 
     except KeyError:
-        raise ValueError('Unknown dataset: {}'.format(name))
+        raise ValueError("Unknown dataset: {}".format(name))
 
 
 def get_uci_dataset_range(dataset_name):
@@ -49,9 +49,9 @@ def get_uci_dataset_range(dataset_name):
     :param dataset_name:
     :return:
     """
-    train_dataset = load_uci_dataset(dataset_name, split='train')
-    val_dataset = load_uci_dataset(dataset_name, split='val')
-    test_dataset = load_uci_dataset(dataset_name, split='test')
+    train_dataset = load_uci_dataset(dataset_name, split="train")
+    val_dataset = load_uci_dataset(dataset_name, split="val")
+    test_dataset = load_uci_dataset(dataset_name, split="test")
     train_min, train_max = np.min(train_dataset.data, axis=0), np.max(train_dataset.data, axis=0)
     val_min, val_max = np.min(val_dataset.data, axis=0), np.max(val_dataset.data, axis=0)
     test_min, test_max = np.min(test_dataset.data, axis=0), np.max(test_dataset.data, axis=0)

@@ -119,16 +119,10 @@ def cubic_spline(
     )
     min_something = torch.min(min_something_1, min_something_2)
 
-    derivatives_left = (
-        torch.sigmoid(unnorm_derivatives_left) * 3 * slopes[..., 0][..., None]
-    )
-    derivatives_right = (
-        torch.sigmoid(unnorm_derivatives_right) * 3 * slopes[..., -1][..., None]
-    )
+    derivatives_left = torch.sigmoid(unnorm_derivatives_left) * 3 * slopes[..., 0][..., None]
+    derivatives_right = torch.sigmoid(unnorm_derivatives_right) * 3 * slopes[..., -1][..., None]
 
-    derivatives = min_something * (
-        torch.sign(slopes[..., :-1]) + torch.sign(slopes[..., 1:])
-    )
+    derivatives = min_something * (torch.sign(slopes[..., :-1]) + torch.sign(slopes[..., 1:]))
     derivatives = torch.cat([derivatives_left, derivatives, derivatives_right], dim=-1)
 
     a = (derivatives[..., :-1] + derivatives[..., 1:] - 2 * slopes) / widths.pow(2)
@@ -164,9 +158,7 @@ def cubic_spline(
         depressed_1 = -2.0 * inputs_b_ * delta_1 + delta_2
         depressed_2 = delta_1
 
-        three_roots_mask = (
-            discriminant >= 0
-        )  # Discriminant == 0 might be a problem in practice.
+        three_roots_mask = discriminant >= 0  # Discriminant == 0 might be a problem in practice.
         one_root_mask = discriminant < 0
 
         outputs = torch.zeros_like(inputs)
@@ -174,12 +166,10 @@ def cubic_spline(
         # Deal with one root cases.
 
         p = torchutils.cbrt(
-            (-depressed_1[one_root_mask] + torch.sqrt(-discriminant[one_root_mask]))
-            / 2.0
+            (-depressed_1[one_root_mask] + torch.sqrt(-discriminant[one_root_mask])) / 2.0
         )
         q = torchutils.cbrt(
-            (-depressed_1[one_root_mask] - torch.sqrt(-discriminant[one_root_mask]))
-            / 2.0
+            (-depressed_1[one_root_mask] - torch.sqrt(-discriminant[one_root_mask])) / 2.0
         )
 
         outputs[one_root_mask] = (
@@ -201,9 +191,7 @@ def cubic_spline(
         root_3 = -0.5 * cubic_root_1 + 0.5 * math.sqrt(3) * cubic_root_2
 
         root_scale = 2 * torch.sqrt(-depressed_2[three_roots_mask])
-        root_shift = (
-            -inputs_b_[three_roots_mask] + input_left_cumwidths[three_roots_mask]
-        )
+        root_shift = -inputs_b_[three_roots_mask] + input_left_cumwidths[three_roots_mask]
 
         root_1 = root_1 * root_scale + root_shift
         root_2 = root_2 * root_scale + root_shift
@@ -221,9 +209,7 @@ def cubic_spline(
         roots = torch.stack([root_1, root_2, root_3], dim=-1)
         masks = torch.stack([root1_mask, root2_mask, root3_mask], dim=-1)
         mask_index = torch.argsort(masks, dim=-1, descending=True)[..., 0][..., None]
-        outputs[three_roots_mask] = torch.gather(roots, dim=-1, index=mask_index).view(
-            -1
-        )
+        outputs[three_roots_mask] = torch.gather(roots, dim=-1, index=mask_index).view(-1)
 
         # Deal with a -> 0 (almost quadratic) cases.
 
@@ -236,11 +222,7 @@ def cubic_spline(
 
         shifted_outputs = outputs - input_left_cumwidths
         logabsdet = -torch.log(
-            (
-                3 * inputs_a * shifted_outputs.pow(2)
-                + 2 * inputs_b * shifted_outputs
-                + inputs_c
-            )
+            (3 * inputs_a * shifted_outputs.pow(2) + 2 * inputs_b * shifted_outputs + inputs_c)
         )
     else:
         shifted_inputs = inputs - input_left_cumwidths
@@ -252,11 +234,7 @@ def cubic_spline(
         )
 
         logabsdet = torch.log(
-            (
-                3 * inputs_a * shifted_inputs.pow(2)
-                + 2 * inputs_b * shifted_inputs
-                + inputs_c
-            )
+            (3 * inputs_a * shifted_inputs.pow(2) + 2 * inputs_b * shifted_inputs + inputs_c)
         )
 
     if inverse:

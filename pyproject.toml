@@ -108,8 +108,8 @@ line-ending = "lf"
 quote-style = "double"
 
 [tool.ruff.lint]
-# High-signal rules that are currently clean. Broader style (I/UP/B/F401) and
-# ruff format belong in a later cleanup commit.
+# High-signal rules that are currently clean. Broader style (I/UP/B/F401)
+# belongs in a later cleanup commit.
 select = [
     "E9",  # runtime / syntax errors
     "F63", # assertion issues

@@ -173,19 +173,13 @@ class DiagonalNormalTestDefault(torchtestcase.TorchTestCase):
             dist = normal.DiagonalNormal(2, log_std=torch.ones(2, 1, 2))
 
         with pytest.raises(AssertionError):
-            dist = normal.DiagonalNormal(
-                2, mean=torch.ones(1, 2), log_std=torch.ones(1)
-            )
+            dist = normal.DiagonalNormal(2, mean=torch.ones(1, 2), log_std=torch.ones(1))
 
         with pytest.raises(AssertionError):
-            dist = normal.DiagonalNormal(
-                1, mean=torch.ones(1, 2), log_std=torch.ones(1, 2)
-            )
+            dist = normal.DiagonalNormal(1, mean=torch.ones(1, 2), log_std=torch.ones(1, 2))
 
         dist = normal.DiagonalNormal(2, mean=torch.ones(1, 2), log_std=torch.ones(1, 2))
-        dist = normal.DiagonalNormal(
-            2, mean=torch.ones(1, 2, 1, 1), log_std=torch.ones(1, 2)
-        )
+        dist = normal.DiagonalNormal(2, mean=torch.ones(1, 2, 1, 1), log_std=torch.ones(1, 2))
 
         dist = normal.DiagonalNormal(2, mean=torch.ones(2), log_std=torch.ones(2))
 
@@ -224,9 +218,7 @@ class DiagonalNormalTestDefault(torchtestcase.TorchTestCase):
 
         assert normal.DiagonalNormal(2)._log_std.requires_grad
         assert normal.DiagonalNormal(2, trainable_log_std=True)._log_std.requires_grad
-        assert not normal.DiagonalNormal(
-            2, trainable_log_std=False
-        )._log_std.requires_grad
+        assert not normal.DiagonalNormal(2, trainable_log_std=False)._log_std.requires_grad
 
     def test_sample(self):
         """

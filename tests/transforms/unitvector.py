@@ -36,9 +36,7 @@ class UnitVectorTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features + 1])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.batch_JTJ_logabsdet(
-            inputs=self.inputs, outputs=outputs
-        ).view(-1)
+        logabsdet_ref = torchutils.batch_JTJ_logabsdet(inputs=self.inputs, outputs=outputs).view(-1)
 
         self.assertEqual(logabsdet, logabsdet_ref)
 

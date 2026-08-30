@@ -83,16 +83,12 @@ class TransformOuterCholeskyTest(TransformTest):
         outputs, logabsdet = self.transform(self.inputs)
         self.transform.check_pos_def(outputs)
 
-        self.assert_tensor_is_good(
-            outputs, [self.batch_size, self.matrix_dim, self.matrix_dim]
-        )
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.matrix_dim, self.matrix_dim])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
         #
         self.assertEqual(outputs, self.matrices)
         logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(
-                tril_flatten(outputs).view(self.batch_size, -1), self._inputs
-            )
+            torchutils.batch_jacobian(tril_flatten(outputs).view(self.batch_size, -1), self._inputs)
         )
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -100,9 +96,7 @@ class TransformOuterCholeskyTest(TransformTest):
         self.eps = 1e-5
         inputs_rec, logabsdet_inv = self.transform.inverse(self.matrices)
 
-        self.assert_tensor_is_good(
-            inputs_rec, [self.batch_size, self.matrix_dim, self.matrix_dim]
-        )
+        self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.matrix_dim, self.matrix_dim])
         self.assert_tensor_is_good(logabsdet_inv, [self.batch_size])
 
         triu_rec = triu_flatten(inputs_rec, offset=1)

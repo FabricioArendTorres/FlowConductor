@@ -108,9 +108,7 @@ def quadratic_spline(
     heights = unnorm_heights_exp / unnormalized_area
     heights = min_bin_height + (1 - min_bin_height) * heights
 
-    bin_left_cdf = torch.cumsum(
-        ((heights[..., :-1] + heights[..., 1:]) / 2) * widths, dim=-1
-    )
+    bin_left_cdf = torch.cumsum(((heights[..., :-1] + heights[..., 1:]) / 2) * widths, dim=-1)
     bin_left_cdf[..., -1] = 1.0
     bin_left_cdf = F.pad(bin_left_cdf, pad=(1, 0), mode="constant", value=0.0)
 

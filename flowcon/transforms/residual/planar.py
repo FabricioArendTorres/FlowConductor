@@ -119,17 +119,13 @@ class SylvesterTransform(Transform):
     def _create_R1(self):
         upper = self.upper_entries1.new_zeros(self.features, self.features)
         upper[self.upper_indices[0], self.upper_indices[1]] = self.upper_entries1
-        upper[self.diag_indices[0], self.diag_indices[1]] = torch.tanh(
-            self.log_upper_diag1
-        )
+        upper[self.diag_indices[0], self.diag_indices[1]] = torch.tanh(self.log_upper_diag1)
         return upper
 
     def _create_R2(self):
         upper = self.upper_entries2.new_zeros(self.features, self.features)
         upper[self.upper_indices[0], self.upper_indices[1]] = self.upper_entries2
-        upper[self.diag_indices[0], self.diag_indices[1]] = torch.tanh(
-            self.log_upper_diag2
-        )
+        upper[self.diag_indices[0], self.diag_indices[1]] = torch.tanh(self.log_upper_diag2)
         return upper
 
     def dh_dx(self, x):
@@ -196,9 +192,7 @@ class RadialTransform(Transform):
     def forward(self, inputs, context=None):
         beta = torch.log(1 + torch.exp(self.beta)) - torch.abs(self.alpha)
         dz = inputs - self.z_0
-        r = torch.linalg.vector_norm(
-            dz, dim=list(range(1, self.z_0.dim())), keepdim=True
-        )
+        r = torch.linalg.vector_norm(dz, dim=list(range(1, self.z_0.dim())), keepdim=True)
         h_arr = beta / (torch.abs(self.alpha) + r)
         h_arr_ = -beta * r / (torch.abs(self.alpha) + r) ** 2
         z_ = inputs + h_arr * dz

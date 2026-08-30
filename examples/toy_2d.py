@@ -112,9 +112,9 @@ def plot_model(flow):
     nsamples = 600
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
     axs = axs.flatten()
-    x_min, x_max, y_min, y_max = dict(
-        two_spirals=[-4, 4, -4, 4], checkerboard=[-4, 4, -4, 4]
-    ).get(selected_data, [-4, 4, -4, 4])
+    x_min, x_max, y_min, y_max = dict(two_spirals=[-4, 4, -4, 4], checkerboard=[-4, 4, -4, 4]).get(
+        selected_data, [-4, 4, -4, 4]
+    )
     # x_min = torch.floor(x.min(0)[0][0]) - 1e-1
     # y_min = torch.floor(x.min(0)[0][1]) - 1e-1
     # x_max = torch.ceil(x.max(0)[0][0]) + 1e-1
@@ -140,9 +140,7 @@ def plot_model(flow):
     axs[1].axis("off")
     axs[0].set_aspect("equal", "box")
     axs[1].set_aspect("equal", "box")
-    axs[1].scatter(
-        *samples.detach().cpu().numpy().T, marker="+", alpha=0.1, color="black"
-    )
+    axs[1].scatter(*samples.detach().cpu().numpy().T, marker="+", alpha=0.1, color="black")
     plt.tight_layout()
     # plt.title('iteration {}'.format(i + 1))
     plt.savefig(f"figures/{selected_data}.png")

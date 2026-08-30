@@ -1,7 +1,7 @@
-'''
+"""
 Adapted from Implicit Normalizing Flow (ICLR 2021).
 Link: https://github.com/thu-ml/implicit-normalizing-flows/blob/master/lib/layers/broyden.py
-'''
+"""
 
 import torch
 from torch import nn, nn as nn
@@ -39,15 +39,17 @@ def find_fixed_point_noaccel(f, x0, threshold=1000, eps=1e-5):
         err_values = torch.abs(fx - x) / tol
         cur_err = torch.max(err_values.view(b, -1), dim=1)[0].view(b_shape)
 
-        if torch.all(cur_err < 1.):
+        if torch.all(cur_err < 1.0):
             break
-        alpha = torch.where(torch.logical_and(cur_err >= best_err, i >= best_iter + 30),
-                            alpha * 0.9,
-                            alpha)
+        alpha = torch.where(
+            torch.logical_and(cur_err >= best_err, i >= best_iter + 30), alpha * 0.9, alpha
+        )
         alpha = torch.max(alpha, 0.1 * torch.ones_like(alpha))
-        best_iter = torch.where(torch.logical_or(cur_err < best_err, i >= best_iter + 30),
-                                i * torch.ones(b_shape, dtype=torch.int64, device=x0.device),
-                                best_iter)
+        best_iter = torch.where(
+            torch.logical_or(cur_err < best_err, i >= best_iter + 30),
+            i * torch.ones(b_shape, dtype=torch.int64, device=x0.device),
+            best_iter,
+        )
         best_err = torch.min(best_err, cur_err)
 
         x, x_prev = (1 - alpha) * x + (alpha) * fx, x
@@ -57,8 +59,8 @@ def find_fixed_point_noaccel(f, x0, threshold=1000, eps=1e-5):
             rel_err = torch.max(dx / tol).item()
             abs_err = torch.max(dx).item()
             if rel_err > 3 or abs_err > 3 * max(eps, 1e-9):
-                logger.info('Relative/Absolute error maximum: %.10f/%.10f' % (rel_err, abs_err))
-                logger.info('Iterations exceeded %d for fixed point noaccel.' % (threshold))
+                logger.info("Relative/Absolute error maximum: %.10f/%.10f" % (rel_err, abs_err))
+                logger.info("Iterations exceeded %d for fixed point noaccel." % (threshold))
             break
     return x
 
@@ -84,7 +86,7 @@ def find_fixed_point(f, x0, threshold=1000, eps=1e-5):
             Gn = g(Xn)
             dXn = Gn - Xn
             cur_err = torch.max(torch.abs(dXn) / tol).item()
-            if cur_err <= 1.:
+            if cur_err <= 1.0:
                 break
             if cur_err < best_err:
                 best_err = cur_err
@@ -94,7 +96,7 @@ def find_fixed_point(f, x0, threshold=1000, eps=1e-5):
 
             d2Xn = dXn - dXnm1
             d2Xn_norm = torch.linalg.vector_norm(d2Xn, dim=1)
-            mult = (d2Xn * dXn).sum(dim=1) / (d2Xn_norm ** 2 + 1e-8)
+            mult = (d2Xn * dXn).sum(dim=1) / (d2Xn_norm**2 + 1e-8)
             mult = mult.view(b, 1)
             Xnp1 = Gn - mult * (Gn - Gnm1)
 
@@ -114,15 +116,12 @@ def find_fixed_point(f, x0, threshold=1000, eps=1e-5):
             return Xn.view(x0.shape)
 
 
-
-
 class ParameterGenerator(torch.nn.Module):
     def sample_parameters(self, training=True) -> Tuple[Callable, int]:
         pass
 
 
-
-class Sampler():
+class Sampler:
     def rcdf_fn(self, k, offset):
         pass
 
@@ -131,9 +130,9 @@ class Sampler():
 
     @classmethod
     def build_sampler(cls, n_dist, **kwargs):
-        if n_dist == 'geometric':
+        if n_dist == "geometric":
             return GeometricSampler(kwargs.get("geom_p"))
-        elif n_dist == 'poisson':
+        elif n_dist == "poisson":
             return GeometricSampler(kwargs.get("lamb"))
         else:
             raise NotImplementedError(f"Unknown sampler '{n_dist}'.")
@@ -156,7 +155,7 @@ class GeometricSampler(Sampler):
     @staticmethod
     def geometric_1mcdf(p, k, offset):
         if k <= offset:
-            return 1.
+            return 1.0
         else:
             k = k - offset
         """P(n >= k)"""
@@ -165,7 +164,7 @@ class GeometricSampler(Sampler):
 
 class UnbiasedParameterGenerator(ParameterGenerator):
     geom_p = 0.5
-    geom_p = np.log(geom_p) - np.log(1. - geom_p)
+    geom_p = np.log(geom_p) - np.log(1.0 - geom_p)
 
     def __init__(self, n_exact_terms, n_samples):
         super().__init__()
@@ -205,7 +204,7 @@ class BiasedParameterGenerator(ParameterGenerator):
 
 
 class Sine(nn.Module):
-    def __init__(self, w0=1.):
+    def __init__(self, w0=1.0):
         super().__init__()
         self.w0 = w0
 

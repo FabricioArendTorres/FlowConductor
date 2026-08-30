@@ -11,9 +11,7 @@ class SVDLinearTest(TransformTest):
     def setUp(self):
         self.features = 3
         self.transform = SVDLinear(n_features=self.features)
-        self.transform.bias.data = torch.randn(
-            self.features
-        )  # Just so bias isn't zero.
+        self.transform.bias.data = torch.randn(self.features)  # Just so bias isn't zero.
 
         diagonal = torch.diag(torch.exp(self.transform.log_diagonal))
         orthogonal_1 = self.transform.orthogonal_1.matrix()

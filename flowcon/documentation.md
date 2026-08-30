@@ -3,7 +3,7 @@ The following table provides a rough description.
 
 | <div style="width:150px">Submodule</div>   | Description                                                                                                                                                                                                                                                                                   |
 |--------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`flows`](`flowcon.flows`)                 | Contains the core logic of the Normalizing Flow for evaluating densities, sampling, and conditioning of these.                                                                                                                                                                                |                                                                                                                                                             
+| [`flows`](`flowcon.flows`)                 | Contains the core logic of the Normalizing Flow for evaluating densities, sampling, and conditioning of these.                                                                                                                                                                                |
 | [`distributions`](`flowcon.distributions`) | Contains different base distributions that can be used. The base flow that you will mostly need is [`flows.Flow`](`flowcon.flows.Flow`).                                                                                                                                                                      |
 | [`transforms`](`flowcon.transforms`)       | Contains the invertible layers to be used within a [`flows.Flow`](`flowcon.flows.Flow`). Transforms implement at the very least a forward pass with corresponding log-absolute Jacobian. Most transforms also provide an inverse transform, which might however be more expensive to compute. |
 | [`nn`](`flowcon.nn`)                       | Contains general (non-invertible) neural network layers and architectures. These might be used either for transforms or conditioning.                                                                                                                                                         |
@@ -57,7 +57,7 @@ You can find some basic examples for the usage of this library in `examples/toy_
 Some Flow Architectures that work well
 -----------------------------------------
 There are many papers on Normalizing Flows and thus many possible combination of layers.
-Some work well togethers - other don't. Although you might want to try a range of combinations for your project, we provide you a list of 
+Some work well togethers - other don't. Although you might want to try a range of combinations for your project, we provide you a list of
 basic combinations that usually worked well for us.
 
 ### ActNorm + i-DenseNet + SVD
@@ -65,7 +65,7 @@ basic combinations that usually worked well for us.
 This architecture is based on the invertible DenseNet paper, which is an
 extension of invertible ResNets.
 We extended it by providing a more flexible activation function, a rescaled sine similar to SIREN networks,
-in `flowcon.nn.CSIN`. 
+in `flowcon.nn.CSIN`.
 Compared to the CLipSwish activation in the paper, the CSIN activation is much more flexible
 in lower dimensions.
 We used this architecture in [1]
@@ -73,15 +73,16 @@ We used this architecture in [1]
 ```python
 from flowcon import transforms, nn
 
+
 def build_transform(n_features, num_layers=10) -> transforms.Transform:
     transform_list = []
-    densenet_factory = (transforms.iResBlock.Factory()
-                        .set_logabsdet_estimator(brute_force=True)
-                        .set_densenet(dimension=2,
-                                      densenet_depth=3,
-                                      densenet_growth=16,
-                                      activation_function=nn.CSin(10))
-                        )
+    densenet_factory = (
+        transforms.iResBlock.Factory()
+        .set_logabsdet_estimator(brute_force=True)
+        .set_densenet(
+            dimension=2, densenet_depth=3, densenet_growth=16, activation_function=nn.CSin(10)
+        )
+    )
     for _ in range(num_layers):
         transform_list.append(transforms.ActNorm(features=2))
         transform_list.append(transforms.SVDLinear(features=n_features, num_householder=n_features))
@@ -110,14 +111,16 @@ on previous parameters, makes them powerful density estimators.
 ```python
 from flowcon import transforms
 
+
 def build_transform(n_features=2, num_layers=5) -> transforms.Transform:
     transform_list = []
 
     for _ in range(num_layers):
         transform_list.append(transforms.ActNorm(features=n_features))
         transform_list.append(transforms.ReversePermutation(features=n_features))
-        transform_list.append(transforms.MaskedSumOfSigmoidsTransform(features=n_features,
-                                                                      hidden_features=32))
+        transform_list.append(
+            transforms.MaskedSumOfSigmoidsTransform(features=n_features, hidden_features=32)
+        )
 
     transform = transforms.CompositeTransform(transform_list)
     return transform
@@ -162,7 +165,7 @@ If you want to contribute yourself, feel free to send a pull-request!
 License
 -------
 
-`flowcon` is licensed under the [MIT License](https://opensource.org/license/MIT), 
+`flowcon` is licensed under the [MIT License](https://opensource.org/license/MIT),
 which it inherited from the [nflows](https://github.com/bayesiains/nflows) package it is based on.
 
 Copyright (c) 2020 Conor Durkan, Artur Bekasov, Iain Murray, George Papamakarios
@@ -174,4 +177,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-

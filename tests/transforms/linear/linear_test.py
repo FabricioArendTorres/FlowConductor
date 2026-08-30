@@ -156,9 +156,7 @@ class LinearTest(TransformTest):
         self.transform.logabsdet.reset_mock()
 
         self.transform.train()  # Cache should be invalidated here.
-        self.assertTrue(
-            self.transform.using_cache
-        )  # Using cache should still be enabled.
+        self.assertTrue(self.transform.using_cache)  # Using cache should still be enabled.
         self.transform.eval()
 
         outputs, logabsdet = self.transform(self.inputs)
@@ -179,9 +177,7 @@ class LinearTest(TransformTest):
         self.transform.logabsdet.reset_mock()
 
         self.transform.train()  # Cache should be disabled and invalidated here.
-        self.assertTrue(
-            self.transform.using_cache
-        )  # Using cache should still be enabled.
+        self.assertTrue(self.transform.using_cache)  # Using cache should still be enabled.
         self.transform.eval()
 
         outputs, logabsdet = self.transform.inverse(self.inputs)
@@ -228,9 +224,9 @@ class NaiveLinearTest(TransformTest):
         outputs_ref, logabsdet_ref = self.transform.forward_no_cache(inputs)
         outputs, logabsdet = forward_no_cache_comp(inputs)
 
-        assert (
-            torch._dynamo.explain(forward_no_cache_comp)(inputs).graph_break_count == 0
-        ), "Graph break occured."
+        assert torch._dynamo.explain(forward_no_cache_comp)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
 
         self.assert_tensor_is_good(outputs, [batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [batch_size])
@@ -281,9 +277,9 @@ class NaiveLinearTest(TransformTest):
         inputs = torch.randn(batch_size, self.features)
         outputs, logabsdet = inverse_no_cache_comp(inputs)
 
-        assert (
-            torch._dynamo.explain(inverse_no_cache_comp)(inputs).graph_break_count == 0
-        ), "Graph break occured."
+        assert torch._dynamo.explain(inverse_no_cache_comp)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
         outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
         logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())
 
@@ -375,9 +371,9 @@ class ScalarScaleTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(outputs, self.inputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(
+            -1
+        )
 
         self.assertEqual(logabsdet, logabsdet_ref)
 
@@ -388,9 +384,9 @@ class ScalarScaleTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(inputs_rec, outputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(
+            -1
+        )
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
 
     def test_forward_inverse_are_consistent(self):
@@ -423,9 +419,9 @@ class ScalarShiftTest(TransformTest):
         self.assert_tensor_is_good(outputs, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(outputs, self.inputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(outputs, self.inputs)).view(
+            -1
+        )
 
         self.assertEqual(logabsdet, logabsdet_ref)
         self.assertEqual(logabsdet, torch.zeros_like(logabsdet))
@@ -437,9 +433,9 @@ class ScalarShiftTest(TransformTest):
 
         self.assert_tensor_is_good(inputs_rec, [self.batch_size, self.features])
         self.assert_tensor_is_good(logabsdet_inverse, [self.batch_size])
-        logabsdet_ref = torchutils.logabsdet(
-            torchutils.batch_jacobian(inputs_rec, outputs)
-        ).view(-1)
+        logabsdet_ref = torchutils.logabsdet(torchutils.batch_jacobian(inputs_rec, outputs)).view(
+            -1
+        )
         self.assertEqual(logabsdet_inverse, logabsdet_ref)
         self.assertEqual(logabsdet_inverse, torch.zeros_like(logabsdet_inverse))
 

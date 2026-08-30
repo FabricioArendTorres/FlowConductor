@@ -41,10 +41,9 @@ class LULinearTest(TransformTest):
         forward_no_cache_compiled = torch.compile(self.transform.forward_no_cache)
         outputs, logabsdet = forward_no_cache_compiled(inputs)
 
-        assert (
-            torch._dynamo.explain(forward_no_cache_compiled)(inputs).graph_break_count
-            == 0
-        ), "Graph break occured."
+        assert torch._dynamo.explain(forward_no_cache_compiled)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
 
         outputs_ref = inputs @ self.weight.t() + self.transform.bias
         logabsdet_ref = torch.full([batch_size], self.logabsdet.item())
@@ -76,10 +75,9 @@ class LULinearTest(TransformTest):
         inverse_no_cache_compiled = torch.compile(self.transform.inverse_no_cache)
         outputs, logabsdet = inverse_no_cache_compiled(inputs)
 
-        assert (
-            torch._dynamo.explain(inverse_no_cache_compiled)(inputs).graph_break_count
-            == 0
-        ), "Graph break occured."
+        assert torch._dynamo.explain(inverse_no_cache_compiled)(inputs).graph_break_count == 0, (
+            "Graph break occured."
+        )
 
         outputs_ref = (inputs - self.transform.bias) @ self.weight_inverse.t()
         logabsdet_ref = torch.full([batch_size], -self.logabsdet.item())

@@ -27,17 +27,13 @@ class StandardNormal(BaseDistribution):
 
         self.register_buffer(
             "_log_z",
-            torch.tensor(
-                0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()
-            ),
+            torch.tensor(0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()),
             persistent=True,
         )
 
     def log_prob(self, inputs: torch.Tensor) -> torch.Tensor:
         assert len(inputs.shape) == 2, "Expected tensor of length 2."
-        assert inputs.shape[1] == self.dim, (
-            f"Expected input of shape [None, {self.dim}]"
-        )
+        assert inputs.shape[1] == self.dim, f"Expected input of shape [None, {self.dim}]"
 
         neg_energy = -0.5 * torchutils.sum_except_batch(inputs**2, num_batch_dims=1)
         return neg_energy - self._log_z
@@ -98,18 +94,12 @@ class DiagonalNormal(BaseDistribution):
         assert len(mean.shape) == 1 and mean.shape[0] == self.dim
         assert len(log_std.shape) == 1 and log_std.shape[0] == self.dim
 
-        self._mean = nn.Parameter(
-            mean.reshape(1, self.dim), requires_grad=trainable_mean
-        )
-        self._log_std = nn.Parameter(
-            log_std.reshape(1, self.dim), requires_grad=trainable_log_std
-        )
+        self._mean = nn.Parameter(mean.reshape(1, self.dim), requires_grad=trainable_mean)
+        self._log_std = nn.Parameter(log_std.reshape(1, self.dim), requires_grad=trainable_log_std)
 
         self.register_buffer(
             "_log_z",
-            torch.tensor(
-                0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()
-            ),
+            torch.tensor(0.5 * self.dim * np.log(2 * np.pi), dtype=torch.get_default_dtype()),
             persistent=True,
         )
 

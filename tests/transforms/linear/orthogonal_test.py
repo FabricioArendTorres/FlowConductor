@@ -16,9 +16,7 @@ class BatchwiseParameterizedHouseholderTest(TransformTest):
         self.seed = 1236
 
         self.ref_householder = orthogonal.OrthogonalHouseholder(self.features)
-        self.batch_q_vectors = torch.randn(
-            self.batch_size, self.features, self.features
-        )
+        self.batch_q_vectors = torch.randn(self.batch_size, self.features, self.features)
 
         self.eps = 1e-05
 
@@ -33,9 +31,7 @@ class BatchwiseParameterizedHouseholderTest(TransformTest):
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
         for i in range(self.batch_size):
-            ref_householder = orthogonal.ParametrizedHouseHolder(
-                self.batch_q_vectors[i]
-            )
+            ref_householder = orthogonal.ParametrizedHouseHolder(self.batch_q_vectors[i])
             ref_output, ref_logabsdet = ref_householder.forward(inputs)
             self.assertEqual(outputs[i], ref_output[i])
             self.assertEqual(logabsdet[i], ref_logabsdet[i])
@@ -49,9 +45,7 @@ class BatchwiseParameterizedHouseholderTest(TransformTest):
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
 
         for i in range(self.batch_size):
-            ref_householder = orthogonal.ParametrizedHouseHolder(
-                self.batch_q_vectors[i]
-            )
+            ref_householder = orthogonal.ParametrizedHouseHolder(self.batch_q_vectors[i])
             ref_output, ref_logabsdet = ref_householder.inverse(inputs)
             self.assertEqual(outputs[i], ref_output[i])
             self.assertEqual(logabsdet[i], ref_logabsdet[i])
@@ -61,22 +55,16 @@ class BatchwiseParameterizedHouseholderTest(TransformTest):
 
         matrices = transform.matrix()
 
-        self.assert_tensor_is_good(
-            matrices, [self.batch_size, self.features, self.features]
-        )
+        self.assert_tensor_is_good(matrices, [self.batch_size, self.features, self.features])
 
         self.eps = 1e-05
         for i in range(self.batch_size):
-            ref_householder = orthogonal.ParametrizedHouseHolder(
-                self.batch_q_vectors[i]
-            )
+            ref_householder = orthogonal.ParametrizedHouseHolder(self.batch_q_vectors[i])
             self.assertEqual(matrices[i], ref_householder.matrix())
 
         identity = torch.eye(self.features, self.features)
         identity = torch.repeat_interleave(identity[None, ...], self.batch_size, 0)
-        self.assertEqual(
-            matrices @ torch.transpose(matrices, dim0=-2, dim1=-1), identity
-        )
+        self.assertEqual(matrices @ torch.transpose(matrices, dim0=-2, dim1=-1), identity)
 
     def test_forward_inverse_are_consistent(self):
         self.eps = 1e-5
@@ -154,9 +142,7 @@ class CaleyTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix.t())
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_inverse(self):
         features = 10
@@ -172,9 +158,7 @@ class CaleyTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix)
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_matrix(self):
         for features in [2, 6, 11]:
@@ -239,9 +223,7 @@ class OrthogonalHouseholderTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix.t())
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_inverse(self):
         features = 10
@@ -257,9 +239,7 @@ class OrthogonalHouseholderTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix)
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_matrix(self):
         for features in [2, 6, 11]:
@@ -324,9 +304,7 @@ class OrthogonalHouseholderGEQRTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix.t())
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_inverse(self):
         features = 10
@@ -342,9 +320,7 @@ class OrthogonalHouseholderGEQRTest(TransformTest):
                 self.assert_tensor_is_good(logabsdet, [batch_size])
                 self.eps = 1e-5
                 self.assertEqual(outputs, inputs @ matrix)
-                self.assertEqual(
-                    logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size)
-                )
+                self.assertEqual(logabsdet, torchutils.logabsdet(matrix) * torch.ones(batch_size))
 
     def test_matrix(self):
         for features in [2, 6, 11]:

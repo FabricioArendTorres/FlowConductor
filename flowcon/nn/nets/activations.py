@@ -41,7 +41,6 @@ dir_path = Path(__file__).resolve().parent
 
 
 class FullSort(nn.Module):
-
     def forward(self, x):
         return torch.sort(x, 1)[0]
 
@@ -50,6 +49,7 @@ class MaxMin(nn.Module):
     """
     Module that computes max and min values of input tensor.
     """
+
     def forward(self, x):
         b, d = x.shape
         max_vals = torch.max(x.view(b, d // 2, 2), 2)[0]
@@ -58,13 +58,15 @@ class MaxMin(nn.Module):
 
 
 class LipschitzCube(nn.Module):
-
     def forward(self, x):
-        return (x >= 1).to(x) * (x - 2 / 3) + (x <= -1).to(x) * (x + 2 / 3) + ((x > -1) * (x < 1)).to(x) * x ** 3 / 3
+        return (
+            (x >= 1).to(x) * (x - 2 / 3)
+            + (x <= -1).to(x) * (x + 2 / 3)
+            + ((x > -1) * (x < 1)).to(x) * x**3 / 3
+        )
 
 
 class SwishFn(torch.autograd.Function):
-
     @staticmethod
     def forward(ctx, x, beta):
         beta_sigm = torch.sigmoid(beta * x)
@@ -82,7 +84,6 @@ class SwishFn(torch.autograd.Function):
 
 
 class Swish(nn.Module):
-
     def __init__(self):
         super(Swish, self).__init__()
         self.beta = nn.Parameter(torch.tensor([0.5]))
@@ -102,6 +103,7 @@ class Sin(nn.Module):
     def build_clone(self):
         return copy.deepcopy(self)
 
+
 class CSin(nn.Module):
     def __init__(self, w0=1):
         super(CSin, self).__init__()
@@ -117,10 +119,9 @@ class CSin(nn.Module):
 
 
 class LeakyLSwish(nn.Module):
-
     def __init__(self):
         super(LeakyLSwish, self).__init__()
-        self.alpha = nn.Parameter(torch.tensor([-3.]))
+        self.alpha = nn.Parameter(torch.tensor([-3.0]))
         self.beta = nn.Parameter(torch.tensor([0.5]))
 
     def forward(self, x):
@@ -129,7 +130,6 @@ class LeakyLSwish(nn.Module):
 
 
 class CLipSwish(nn.Module):
-
     def __init__(self):
         super(CLipSwish, self).__init__()
         self.swish = Swish()
@@ -141,12 +141,9 @@ class CLipSwish(nn.Module):
 
 
 class LipSwish(nn.Module):
-
     def __init__(self):
         super(LipSwish, self).__init__()
         self.swish = Swish()
 
     def forward(self, x):
         return self.swish(x).div_(1.004)
-
-

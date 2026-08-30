@@ -18,9 +18,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         batch_size = 10
         input_shape = [2, 3, 4]
         flow = base.Flow(
-            transform=Sequential(
-                (AffineScalarTransform(scale=2.0), FlattenTransform())
-            ),
+            transform=Sequential((AffineScalarTransform(scale=2.0), FlattenTransform())),
             distribution=StandardNormal(prod(input_shape)),
         )
         inputs = torch.randn(batch_size, *input_shape)
@@ -32,9 +30,7 @@ class FlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2, 3, 4]
         flow = base.Flow(
-            transform=Sequential(
-                (AffineScalarTransform(scale=2.0), FlattenTransform())
-            ),
+            transform=Sequential((AffineScalarTransform(scale=2.0), FlattenTransform())),
             distribution=StandardNormal(prod(input_shape)),
         )
         flow.log_prob(torch.rand(1, *input_shape))
@@ -105,9 +101,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
     def test_log_prob(self):
         input_shape = [2, 3, 4]
         flow = base.ConditionalFlow(
-            transform=Sequential(
-                (AffineScalarTransform(scale=2.0), FlattenTransform())
-            ),
+            transform=Sequential((AffineScalarTransform(scale=2.0), FlattenTransform())),
             distribution=StandardNormal(prod(input_shape)),
         )
         inputs = torch.randn(self.mb_size, *input_shape)
@@ -121,9 +115,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         num_samples = 10
         input_shape = [2, 3, 4]
         flow = base.ConditionalFlow(
-            transform=Sequential(
-                (AffineScalarTransform(scale=2.0), FlattenTransform())
-            ),
+            transform=Sequential((AffineScalarTransform(scale=2.0), FlattenTransform())),
             distribution=StandardNormal(prod(input_shape)),
         )
         x = torch.rand(self.mb_size, *input_shape)
@@ -180,9 +172,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         self.assertEqual(samples_c.shape, samples.shape)
 
         samples2 = flow.sample_multi(num_samples, context=self.context)
-        samples2_compiled = torch.compile(flow.sample_multi)(
-            num_samples, context=self.context
-        )
+        samples2_compiled = torch.compile(flow.sample_multi)(num_samples, context=self.context)
 
         self.assertEqual(
             samples2.shape,
@@ -214,9 +204,7 @@ class ConditionalFlowTest(torchtestcase.TorchTestCase):
         samples_multi, log_prob_multi = flow.sample_and_log_prob_multi(
             num_samples=num_samples, context=self.context
         )
-        self.assertEqual(
-            samples_multi.shape, torch.Size([self.mb_size, num_samples, input_dim])
-        )
+        self.assertEqual(samples_multi.shape, torch.Size([self.mb_size, num_samples, input_dim]))
         self.assertEqual(log_prob_multi.shape, torch.Size([self.mb_size, num_samples]))
 
 

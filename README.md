@@ -8,7 +8,7 @@
 FlowConductor provides a collection of [normalizing flows](https://arxiv.org/abs/1912.02762) in  [PyTorch](https://pytorch.org).
 It's core logic and transformations were originally based on the [nflows package](https://github.com/bayesiains/nflows).
 The main focus lies in implementing more flow layers from the literature in one consistent framework, and adding support for conditional normalizing flows.
-In the original nflows package, conditional networks were restricted to using a conditional base distribution. 
+In the original nflows package, conditional networks were restricted to using a conditional base distribution.
 In `FlowConductor`, nearly every layer can be conditional :).
 In particular, we support conditional transformations based on hypernetworks.
 
@@ -88,6 +88,7 @@ $ docker run --rm -it -v .:/flowc flowc python examples/toy_2d.py
 $ uv pip install -e ".[dev,examples]"
 $ pre-commit install
 $ ruff check
+$ ruff format --check
 $ pyrefly check
 $ pytest
 ```
@@ -102,10 +103,12 @@ As the core is based on `nflows`, its usage is similar. To define a flow:
 from flowcon import transforms, distributions, flows
 
 # Define an invertible transformation.
-transform = transforms.CompositeTransform([
-  transforms.MaskedAffineAutoregressiveTransform(features=2, hidden_features=4),
-  transforms.RandomPermutation(features=2)
-])
+transform = transforms.CompositeTransform(
+    [
+        transforms.MaskedAffineAutoregressiveTransform(features=2, hidden_features=4),
+        transforms.RandomPermutation(features=2),
+    ]
+)
 
 # Define a base distribution.
 base_distribution = distributions.StandardNormal(shape=[2])
@@ -135,8 +138,8 @@ Added Layers / Flwos:
 - [Cholesky Outer Product for flows on symmetric positive definite matrices](https://arxiv.org/abs/2306.07255)
 - [Lipschitz Constrained invertible DenseNets](https://arxiv.org/abs/2010.02125)
   In particular, we provide three ways to condition these of these transformations without affecting the invertibility.
-- Transformations for which the inverse is only known to exist, but not available: 
-  - [(Conditional) Planar Flow](https://arxiv.org/abs/1912.02762) 
+- Transformations for which the inverse is only known to exist, but not available:
+  - [(Conditional) Planar Flow](https://arxiv.org/abs/1912.02762)
   - [(Conditional) Sylvester Flow](https://arxiv.org/abs/1803.05649)
 - Conditional Versions of existing non-conditional transformations from nflows. Can be found for imports at `nflows.transforms.conditional.*`:
     - LU Transform

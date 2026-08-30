@@ -49,27 +49,21 @@ def load_miniboone():
 
         return data_train, data_validate, data_test
 
-    return load_data_normalised(
-        path=os.path.join(utils.get_data_root(), 'miniboone', 'data.npy')
-    )
+    return load_data_normalised(path=os.path.join(utils.get_data_root(), "miniboone", "data.npy"))
 
 
 def save_splits():
     train, val, test = load_miniboone()
-    splits = (
-        ('train', train),
-        ('val', val),
-        ('test', test)
-    )
+    splits = (("train", train), ("val", val), ("test", test))
     for split in splits:
         name, data = split
-        file = os.path.join(utils.get_data_root(), 'miniboone', '{}.npy'.format(name))
+        file = os.path.join(utils.get_data_root(), "miniboone", "{}.npy".format(name))
         np.save(file, data)
 
 
 class MiniBooNEDataset(Dataset):
-    def __init__(self, split='train', frac=None):
-        path = os.path.join(utils.get_data_root(), 'miniboone', '{}.npy'.format(split))
+    def __init__(self, split="train", frac=None):
+        path = os.path.join(utils.get_data_root(), "miniboone", "{}.npy".format(split))
         self.data = np.load(path).astype(np.float32)
         self.n, self.dim = self.data.shape
         if frac is not None:
@@ -83,7 +77,7 @@ class MiniBooNEDataset(Dataset):
 
 
 def main():
-    dataset = MiniBooNEDataset(split='train')
+    dataset = MiniBooNEDataset(split="train")
     print(type(dataset.data))
     print(dataset.data.shape)
     print(dataset.data.min(), dataset.data.max())
@@ -91,5 +85,5 @@ def main():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

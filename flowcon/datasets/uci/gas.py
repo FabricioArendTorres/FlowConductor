@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from torch.utils.data import Dataset
 import flowcon.datasets.uci.utils as utils
 
+
 def load_gas():
     import pandas as pd
 
@@ -46,26 +47,22 @@ def load_gas():
         return data_train, data_validate, data_test
 
     return load_data_and_clean_and_split(
-        file=os.path.join(utils.data_dir, 'gas', 'ethylene_CO.pickle')
+        file=os.path.join(utils.data_dir, "gas", "ethylene_CO.pickle")
     )
 
 
 def save_splits():
     train, val, test = load_gas()
-    splits = (
-        ('train', train),
-        ('val', val),
-        ('test', test)
-    )
+    splits = (("train", train), ("val", val), ("test", test))
     for split in splits:
         name, data = split
-        file = os.path.join(utils.data_dir, 'gas', '{}.npy'.format(name))
+        file = os.path.join(utils.data_dir, "gas", "{}.npy".format(name))
         np.save(file, data)
 
 
 class GasDataset(Dataset):
-    def __init__(self, split='train', frac=None):
-        path = os.path.join(utils.data_dir, 'gas', '{}.npy'.format(split))
+    def __init__(self, split="train", frac=None):
+        path = os.path.join(utils.data_dir, "gas", "{}.npy".format(split))
         self.data = np.load(path).astype(np.float32)
         self.n, self.dim = self.data.shape
         if frac is not None:
@@ -80,7 +77,7 @@ class GasDataset(Dataset):
 
 def main():
     save_splits()
-    dataset = GasDataset(split='train')
+    dataset = GasDataset(split="train")
     print(type(dataset.data))
     print(dataset.data.shape)
     print(dataset.data.min(), dataset.data.max())
@@ -94,5 +91,5 @@ def main():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

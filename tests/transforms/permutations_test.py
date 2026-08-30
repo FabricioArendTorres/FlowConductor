@@ -73,9 +73,7 @@ class FillTriangularTest(TransformTest):
     def test_forward(self):
         outputs, logabsdet = self.transform(self.inputs)
 
-        self.assert_tensor_is_good(
-            outputs, [self.batch_size, self.matrix_dim, self.matrix_dim]
-        )
+        self.assert_tensor_is_good(outputs, [self.batch_size, self.matrix_dim, self.matrix_dim])
         self.assert_tensor_is_good(logabsdet, [self.batch_size])
         self.assertEqual(logabsdet, torch.zeros([self.batch_size]))
         triu = torch.triu(outputs, diagonal=1)
@@ -100,19 +98,13 @@ class FillTriangularTest(TransformTest):
         self.assertEqual(logabsdet_inv, torch.zeros([self.batch_size]))
 
         with self.assertRaises(Exception) as context:
-            self.transform(
-                torch.randn(self.batch_size, self.matrix_dim - 1, self.matrix_dim)
-            )
+            self.transform(torch.randn(self.batch_size, self.matrix_dim - 1, self.matrix_dim))
 
         with self.assertRaises(Exception) as context:
-            self.transform(
-                torch.randn(self.batch_size, self.matrix_dim - 1, self.matrix_dim - 1)
-            )
+            self.transform(torch.randn(self.batch_size, self.matrix_dim - 1, self.matrix_dim - 1))
 
         with self.assertRaises(Exception) as context:
-            self.transform(
-                torch.randn(self.batch_size, self.matrix_dim + 1, self.matrix_dim + 1)
-            )
+            self.transform(torch.randn(self.batch_size, self.matrix_dim + 1, self.matrix_dim + 1))
 
     def test_forward_inverse_are_consistent(self):
         self.assert_forward_inverse_are_consistent(self.transform, self.inputs)

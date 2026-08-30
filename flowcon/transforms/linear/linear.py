@@ -98,9 +98,7 @@ class Linear(Transform):
 
     def _update_inverse_cache(self) -> None:
         if self.cache.is_inverse_empty() and self.cache.is_logabsdet_empty():
-            self.cache.inverse, self.cache.logabsdet = (
-                self.weight_inverse_and_forwardlogabsdet()
-            )
+            self.cache.inverse, self.cache.logabsdet = self.weight_inverse_and_forwardlogabsdet()
 
         elif self.cache.is_inverse_empty():
             self.cache.inverse = self.weight_inverse()
@@ -143,15 +141,11 @@ class Linear(Transform):
         """
         return self.weight_inverse(), self.logabsdet()
 
-    def forward_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Applies `forward` method without using the cache."""
         raise NotImplementedError()
 
-    def inverse_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def inverse_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Applies `inverse` method without using the cache."""
         raise NotImplementedError()
 
@@ -207,9 +201,7 @@ class NaiveLinear(Linear):
             stdv = 1.0 / np.sqrt(n_features)
             init.uniform_(self._weight, -stdv, stdv)
 
-    def forward_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Cost:
             output = O(D^2N)
@@ -234,9 +226,7 @@ class NaiveLinear(Linear):
         logabsdet_T = logabsdet_T * outputs.new_ones(batch_size)
         return outputs, logabsdet_T
 
-    def inverse_no_cache(
-        self, inputs: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    def inverse_no_cache(self, inputs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Cost:
             output = O(D^3 + D^2N)
@@ -261,9 +251,7 @@ class NaiveLinear(Linear):
         lu, lu_pivots = cast(
             tuple[torch.Tensor, torch.Tensor], torch.linalg.lu_factor(self._weight)
         )
-        outputs = cast(
-            torch.Tensor, torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t()
-        )
+        outputs = cast(torch.Tensor, torch.linalg.lu_solve(lu, lu_pivots, outputs.t()).t())
         # The linear-system solver returns the LU decomposition of the weights, which we
         # can use to obtain the log absolute determinant directly.
         logabsdet_Tinv = -torch.sum(torch.log(torch.abs(torch.diag(lu))))

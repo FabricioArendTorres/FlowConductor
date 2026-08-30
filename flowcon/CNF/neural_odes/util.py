@@ -18,9 +18,13 @@ def sample_gaussian_like(y):
 
 
 def divergence_bf(dx, y, **unused_kwargs):
-    sum_diag = 0.
+    sum_diag = 0.0
     for i in range(y.shape[1]):
-        sum_diag += torch.autograd.grad(dx[:, i].sum(), y, create_graph=True)[0].contiguous()[:, i].contiguous()
+        sum_diag += (
+            torch.autograd.grad(dx[:, i].sum(), y, create_graph=True)[0]
+            .contiguous()[:, i]
+            .contiguous()
+        )
     return sum_diag.contiguous()
 
 
@@ -39,15 +43,15 @@ def _get_minibatch_jacobian(y, x):
     # Compute Jacobian row by row.
     jac = []
     for j in range(y.shape[1]):
-        dy_j_dx = torch.autograd.grad(y[:, j], x, torch.ones_like(y[:, j]), retain_graph=True,
-                                      create_graph=True)[0].view(x.shape[0], -1)
+        dy_j_dx = torch.autograd.grad(
+            y[:, j], x, torch.ones_like(y[:, j]), retain_graph=True, create_graph=True
+        )[0].view(x.shape[0], -1)
         jac.append(torch.unsqueeze(dy_j_dx, 1))
     jac = torch.cat(jac, 1)
     return jac
 
 
 class Lambda(nn.Module):
-
     def __init__(self, f):
         super(Lambda, self).__init__()
         self.f = f

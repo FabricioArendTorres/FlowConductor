@@ -29,7 +29,9 @@ def diffeq_wrapper(layer):
 class ReshapeDiffEq(nn.Module):
     def __init__(self, input_shape, net):
         super(ReshapeDiffEq, self).__init__()
-        assert len(signature(net.forward).parameters) == 2, "use diffeq_wrapper before reshape_wrapper."
+        assert len(signature(net.forward).parameters) == 2, (
+            "use diffeq_wrapper before reshape_wrapper."
+        )
         self.input_shape = input_shape
         self.net = net
 

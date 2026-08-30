@@ -52,10 +52,17 @@ class GaussianDataset(PlaneDataset):
 
 class EightGaussianDataset(PlaneDataset):
     def _create_data(self):
-        scale = 4.
-        centers = [(1, 0), (-1, 0), (0, 1), (0, -1), (1. / np.sqrt(2), 1. / np.sqrt(2)),
-                   (1. / np.sqrt(2), -1. / np.sqrt(2)), (-1. / np.sqrt(2),
-                                                         1. / np.sqrt(2)), (-1. / np.sqrt(2), -1. / np.sqrt(2))]
+        scale = 4.0
+        centers = [
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1.0 / np.sqrt(2), 1.0 / np.sqrt(2)),
+            (1.0 / np.sqrt(2), -1.0 / np.sqrt(2)),
+            (-1.0 / np.sqrt(2), 1.0 / np.sqrt(2)),
+            (-1.0 / np.sqrt(2), -1.0 / np.sqrt(2)),
+        ]
         centers = np.array([(scale * x, scale * y) for x, y in centers])
 
         dataset = []
@@ -67,16 +74,16 @@ class EightGaussianDataset(PlaneDataset):
         dataset = points / 1.414
         self.data = torch.tensor(dataset, dtype=torch.float32)
         self.label = torch.tensor(idx, dtype=torch.float32)
-        self.min_label = 0.
-        self.max_label = 7.
+        self.min_label = 0.0
+        self.max_label = 7.0
 
 
 class CrescentDataset(PlaneDataset):
     def _create_data(self):
         x1 = torch.randn(self.num_points)
-        x2_mean = 0.5 * x1 ** 2 - 1
+        x2_mean = 0.5 * x1**2 - 1
         x2_var = torch.exp(torch.Tensor([-2]))
-        x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
+        x2 = x2_mean + x2_var**0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x2, x1)).t()
 
 
@@ -87,8 +94,8 @@ class TwoMoonsDataset(PlaneDataset):
         data = data * 2 + np.array([-1, -0.2])
         self.data = torch.tensor(data, dtype=torch.float32)
         self.label = torch.tensor(label, dtype=torch.float32)
-        self.min_label = 0.
-        self.max_label = 1.
+        self.min_label = 0.0
+        self.max_label = 1.0
 
 
 class SwissRollDataset(PlaneDataset):
@@ -98,8 +105,8 @@ class SwissRollDataset(PlaneDataset):
         data /= 5
         self.data = torch.tensor(data, dtype=torch.float32)
         self.label = torch.tensor(label, dtype=torch.float32)
-        self.min_label = 0.
-        self.max_label = 15.
+        self.min_label = 0.0
+        self.max_label = 15.0
 
 
 class PinWheelDataset(PlaneDataset):
@@ -111,9 +118,10 @@ class PinWheelDataset(PlaneDataset):
         rate = 0.25
         rads = np.linspace(0, 2 * np.pi, num_classes, endpoint=False)
 
-        features = np.random.randn(num_classes * num_per_class, 2) \
-                   * np.array([radial_std, tangential_std])
-        features[:, 0] += 1.
+        features = np.random.randn(num_classes * num_per_class, 2) * np.array(
+            [radial_std, tangential_std]
+        )
+        features[:, 0] += 1.0
         labels = np.repeat(np.arange(num_classes), num_per_class)
 
         angles = rads[labels] + rate * np.exp(features[:, 0])
@@ -127,16 +135,16 @@ class PinWheelDataset(PlaneDataset):
         label_permuted = label_permuted / label_permuted.max()
         self.data = torch.tensor(x_permuted, dtype=torch.float32)  # , label_permuted
         self.label = torch.tensor(label_permuted, dtype=torch.float32)  # , label_permuted
-        self.min_label = 0.
-        self.max_label = 1.
+        self.min_label = 0.0
+        self.max_label = 1.0
 
 
 class CrescentCubedDataset(PlaneDataset):
     def _create_data(self):
         x1 = torch.randn(self.num_points)
-        x2_mean = 0.2 * x1 ** 3
+        x2_mean = 0.2 * x1**3
         x2_var = torch.ones(x1.shape)
-        x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
+        x2 = x2_mean + x2_var**0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x2, x1)).t()
 
 
@@ -145,16 +153,16 @@ class SineWaveDataset(PlaneDataset):
         x1 = torch.randn(self.num_points)
         x2_mean = torch.sin(5 * x1)
         x2_var = torch.exp(-2 * torch.ones(x1.shape))
-        x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
+        x2 = x2_mean + x2_var**0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x1, x2)).t()
 
 
 class AbsDataset(PlaneDataset):
     def _create_data(self):
         x1 = torch.randn(self.num_points)
-        x2_mean = torch.abs(x1) - 1.
+        x2_mean = torch.abs(x1) - 1.0
         x2_var = torch.exp(-3 * torch.ones(x1.shape))
-        x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
+        x2 = x2_mean + x2_var**0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x1, x2)).t()
 
 
@@ -163,26 +171,28 @@ class SignDataset(PlaneDataset):
         x1 = torch.randn(self.num_points)
         x2_mean = torch.sign(x1) + x1
         x2_var = torch.exp(-3 * torch.ones(x1.shape))
-        x2 = x2_mean + x2_var ** 0.5 * torch.randn(self.num_points)
+        x2 = x2_mean + x2_var**0.5 * torch.randn(self.num_points)
         self.data = torch.stack((x1, x2)).t()
 
 
 class TwoCircles(PlaneDataset):
     def _create_data(self):
-        data, label = sklearn.datasets.make_circles(n_samples=self.num_points, factor=.5, noise=0.08)
+        data, label = sklearn.datasets.make_circles(
+            n_samples=self.num_points, factor=0.5, noise=0.08
+        )
         data = data.astype("float32")
         data *= 3
         self.data = torch.tensor(data, dtype=torch.float32)
         self.label = torch.tensor(label, dtype=torch.float32)
 
-        self.min_label = 0.
-        self.max_label = 1.
+        self.min_label = 0.0
+        self.max_label = 1.0
 
 
 class FourCircles(PlaneDataset):
     def __init__(self, num_points, flip_axes=False):
         if num_points % 4 != 0:
-            raise ValueError('Number of data points must be a multiple of four')
+            raise ValueError("Number of data points must be a multiple of four")
         super().__init__(num_points, flip_axes)
 
     @staticmethod
@@ -196,15 +206,9 @@ class FourCircles(PlaneDataset):
 
     def _create_data(self):
         num_per_circle = self.num_points // 4
-        centers = [
-            [-1, -1],
-            [-1, 1],
-            [1, -1],
-            [1, 1]
-        ]
+        centers = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
         self.data = torch.cat(
-            [self.create_circle(num_per_circle) - torch.Tensor(center)
-             for center in centers]
+            [self.create_circle(num_per_circle) - torch.Tensor(center) for center in centers]
         )
 
 
@@ -245,22 +249,23 @@ class DiamondDataset(PlaneDataset):
         #         [1 / np.sqrt(2), 1 / np.sqrt(2)]
         #     ])
         #     self.data = self.data @ rotation_matrix
-        means = np.array([
-            (x + 1e-3 * np.random.rand(), y + 1e-3 * np.random.rand())
-            for x in np.linspace(-self.bound, self.bound, self.width)
-            for y in np.linspace(-self.bound, self.bound, self.width)
-        ])
+        means = np.array(
+            [
+                (x + 1e-3 * np.random.rand(), y + 1e-3 * np.random.rand())
+                for x in np.linspace(-self.bound, self.bound, self.width)
+                for y in np.linspace(-self.bound, self.bound, self.width)
+            ]
+        )
 
         covariance_factor = self.std * np.eye(2)
 
-        index = np.random.choice(range(self.width ** 2), size=self.num_points, replace=True)
+        index = np.random.choice(range(self.width**2), size=self.num_points, replace=True)
         noise = np.random.randn(self.num_points, 2)
         self.data = means[index] + noise @ covariance_factor
         if rotate:
-            rotation_matrix = np.array([
-                [1 / np.sqrt(2), -1 / np.sqrt(2)],
-                [1 / np.sqrt(2), 1 / np.sqrt(2)]
-            ])
+            rotation_matrix = np.array(
+                [[1 / np.sqrt(2), -1 / np.sqrt(2)], [1 / np.sqrt(2), 1 / np.sqrt(2)]]
+            )
             self.data = self.data @ rotation_matrix
         self.data = self.data.astype(np.float32)
         self.data = torch.Tensor(self.data)
@@ -295,10 +300,15 @@ class ConcentricRingsDataset(PlaneDataset):
         circ1_x = np.cos(linspace1) * 0.25
         circ1_y = np.sin(linspace1) * 0.25
 
-        X = np.vstack([
-            np.hstack([circ4_x, circ3_x, circ2_x, circ1_x]),
-            np.hstack([circ4_y, circ3_y, circ2_y, circ1_y])
-        ]).T * 3.0
+        X = (
+            np.vstack(
+                [
+                    np.hstack([circ4_x, circ3_x, circ2_x, circ1_x]),
+                    np.hstack([circ4_y, circ3_y, circ2_y, circ1_y]),
+                ]
+            ).T
+            * 3.0
+        )
         X = util_shuffle(X)
 
         # Add noise
@@ -313,7 +323,7 @@ class TestGridDataset(PlaneDataset):
         self.shape = [num_points_per_axis] * 2
         self.X = None
         self.Y = None
-        super().__init__(num_points=num_points_per_axis ** 2)
+        super().__init__(num_points=num_points_per_axis**2)
 
     def _create_data(self):
         x = np.linspace(self.bounds[0][0], self.bounds[0][1], self.num_points_per_axis)
@@ -332,12 +342,13 @@ class CheckerboardDataset(PlaneDataset):
 
 
 def _test():
-    device = torch.device('cuda')
-    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+    device = torch.device("cuda")
+    torch.set_default_tensor_type("torch.cuda.FloatTensor")
     dataset = DiamondDataset(num_points=int(1e6), width=20, bound=2.5, std=0.04)
 
     from flowcon.utils import torchutils
     from matplotlib import pyplot as plt
+
     data = torchutils.tensor_to_np(dataset.data)
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     # ax.scatter(data[:, 0], data[:, 1], s=2, alpha=0.5)
@@ -353,5 +364,5 @@ def _test():
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

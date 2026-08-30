@@ -14,9 +14,7 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         x = torch.randn(24, 5)
         self.assertEqual(torchutils.split_leading_dim(x, [-1]), x)
         self.assertEqual(torchutils.split_leading_dim(x, [2, -1]), x.view(2, 12, 5))
-        self.assertEqual(
-            torchutils.split_leading_dim(x, [2, 3, -1]), x.view(2, 3, 4, 5)
-        )
+        self.assertEqual(torchutils.split_leading_dim(x, [2, 3, -1]), x.view(2, 3, 4, 5))
         with self.assertRaises(Exception):
             self.assertEqual(torchutils.split_leading_dim(x, []), x)
         with self.assertRaises(Exception):
@@ -41,9 +39,7 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         self.assertEqual(y, x)
         y = torchutils.split_leading_dim(torchutils.merge_leading_dims(x, 3), [2, 3, 4])
         self.assertEqual(y, x)
-        y = torchutils.split_leading_dim(
-            torchutils.merge_leading_dims(x, 4), [2, 3, 4, 5]
-        )
+        y = torchutils.split_leading_dim(torchutils.merge_leading_dims(x, 4), [2, 3, 4, 5])
         self.assertEqual(y, x)
 
     def test_repeat_rows(self):
@@ -107,7 +103,14 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
         self.eps = 1e-6
         x = torch.randn(2, 3, 4, 5)
         y = torchutils.sum_except_batch(x, num_batch_dims=1)
-        self.assertEqual(y.shape, torch.Size([2, ]))
+        self.assertEqual(
+            y.shape,
+            torch.Size(
+                [
+                    2,
+                ]
+            ),
+        )
         self.assertEqual(y, x.sum(-1).sum(-1).sum(-1))
 
         with self.assertRaises(TypeError):
@@ -142,7 +145,8 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
             def __init__(self, feature_size, num_layers):
                 super().__init__()
                 self.layers = torch.nn.Sequential(
-                    *[torch.nn.Linear(feature_size, feature_size) for _ in range(num_layers)])
+                    *[torch.nn.Linear(feature_size, feature_size) for _ in range(num_layers)]
+                )
                 self.random = torch.nn.Parameter(torch.randn(1), requires_grad=True)
                 self.random2 = torch.nn.Parameter(torch.randn(1), requires_grad=False)
 
@@ -162,13 +166,13 @@ class TorchUtilsTest(torchtestcase.TorchTestCase):
             self.assertEqual(y.requires_grad, condition)
             self.assertEqual(x.requires_grad, condition)
 
-
     def test_sample_rademacher_like(self):
         x = torch.randn(2, 3, 4, 5)
         y = torchutils.sample_rademacher_like(x)
         self.assertEqual(y.shape, x.shape)
         self.assertEqual(y.dtype, x.dtype)
         self.assertEqual(y.device, x.device)
+
 
 if __name__ == "__main__":
     unittest.main()

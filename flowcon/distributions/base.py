@@ -25,9 +25,7 @@ class BaseDistribution(nn.Module):
             raise TypeError("Dimension of BaseDistribution must be a positive integer.")
         self._dim = dim
 
-    def sample_and_log_prob(
-        self, num_samples: int = 1
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def sample_and_log_prob(self, num_samples: int = 1) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Generates samples from the distribution together with their log probability.
 

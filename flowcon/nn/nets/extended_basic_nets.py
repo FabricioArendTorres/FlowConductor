@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class ExtendedSequential(nn.Sequential):
     def build_clone(self):
         modules = []
@@ -27,16 +28,21 @@ class ExtendedLinear(nn.Linear):
             # weight = self.compute_weight(update=False).detach().requires_grad_(False)
             if self.bias is not None:
                 bias = self.bias.detach().requires_grad_(False)
-            m = nn.Linear(self.in_features, self.out_features, bias=self.bias is not None, device=self.weight.device)
+            m = nn.Linear(
+                self.in_features,
+                self.out_features,
+                bias=self.bias is not None,
+                device=self.weight.device,
+            )
             m.weight.data.copy_(weight)
             if self.bias is not None:
                 m.bias.data.copy_(bias)
             return m
 
     def build_jvp_net(self, x):
-        '''
+        """
         Bias is omitted in contrast to self.build_clone().
-        '''
+        """
         with torch.no_grad():
             # weight = self.compute_weight(update=False).detach().requires_grad_(False)
             weight = self.weight.detach().requires_grad_(False)

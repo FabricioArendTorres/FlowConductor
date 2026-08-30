@@ -24,6 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import torch
 import torch.nn.functional as F
 
@@ -35,16 +36,16 @@ class LipschitzDenseLayer(torch.nn.Module):
         self.lip_coeff = lip_coeff
 
         if learnable_concat:
-            self.K1_unnormalized = torch.nn.Parameter(torch.tensor([1.]))
-            self.K2_unnormalized = torch.nn.Parameter(torch.tensor([1.]))
+            self.K1_unnormalized = torch.nn.Parameter(torch.tensor([1.0]))
+            self.K2_unnormalized = torch.nn.Parameter(torch.tensor([1.0]))
         else:
-            self.register_buffer("K1_unnormalized", torch.tensor([1.]))
-            self.register_buffer("K2_unnormalized", torch.tensor([1.]))
+            self.register_buffer("K1_unnormalized", torch.tensor([1.0]))
+            self.register_buffer("K2_unnormalized", torch.tensor([1.0]))
 
     def get_eta1_eta2(self, beta=0.1):
         eta1 = F.softplus(self.K1_unnormalized) + beta
         eta2 = F.softplus(self.K2_unnormalized) + beta
-        divider = torch.sqrt(eta1 ** 2 + eta2 ** 2)
+        divider = torch.sqrt(eta1**2 + eta2**2)
 
         eta1_normalized = (eta1 / divider) * self.lip_coeff
         eta2_normalized = (eta2 / divider) * self.lip_coeff
@@ -72,7 +73,9 @@ class LipschitzDenseLayer(torch.nn.Module):
 
         with torch.no_grad():
             eta1_normalized, eta2_normalized = self.get_eta1_eta2()
-            return LipschitzDenseLayerClone(self.network.build_clone(), eta1_normalized, eta2_normalized)
+            return LipschitzDenseLayerClone(
+                self.network.build_clone(), eta1_normalized, eta2_normalized
+            )
 
     def build_jvp_net(self, x, concat=True):
         class LipschitzDenseLayerJVP(torch.nn.Module):
@@ -93,5 +96,8 @@ class LipschitzDenseLayer(torch.nn.Module):
                 y = torch.cat([x * eta1_normalized, out * eta2_normalized], dim=1)
                 return LipschitzDenseLayerJVP(network, eta1_normalized, eta2_normalized), y
             else:
-                return LipschitzDenseLayerJVP(network, eta1_normalized,
-                                              eta2_normalized), x * eta1_normalized, out * eta2_normalized
+                return (
+                    LipschitzDenseLayerJVP(network, eta1_normalized, eta2_normalized),
+                    x * eta1_normalized,
+                    out * eta2_normalized,
+                )

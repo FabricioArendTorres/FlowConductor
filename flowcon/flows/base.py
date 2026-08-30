@@ -114,9 +114,7 @@ class Flow(Module):
         samples_x, _ = self._transform.inverse(samples_z)
         return samples_x
 
-    def sample_and_log_prob(
-        self, num_samples: int
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def sample_and_log_prob(self, num_samples: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
 
         Generates samples from the flow, together with their log probabilities.
@@ -316,9 +314,7 @@ class ConditionalFlow(Module):
 
         return samples
 
-    def sample_and_log_prob(
-        self, context: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def sample_and_log_prob(self, context: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Generates samples `p(x|context)` from the flow by sampling z from the base distribution
         and transforming it to x with the inverse transform.
@@ -351,9 +347,7 @@ class ConditionalFlow(Module):
             embedded_context.shape[0]
         )
         # `samples_x` has shape `[mb_size, ...]`
-        samples_x, logabsdet_Tinv = self._transform.inverse(
-            samples_z, context=embedded_context
-        )
+        samples_x, logabsdet_Tinv = self._transform.inverse(samples_z, context=embedded_context)
 
         # reciprocal in log space
         logabsdet_T = -logabsdet_Tinv
@@ -410,17 +404,13 @@ class ConditionalFlow(Module):
 
         # Split the context dimension from sample dimension.
         # shape [mb_size, num_samples, ...]
-        samples_x = torchutils.split_leading_dim(
-            samples_x, shape=[mb_size, num_samples]
-        )
+        samples_x = torchutils.split_leading_dim(samples_x, shape=[mb_size, num_samples])
 
         # reciprocal in log space
         logabsdet_T = -logabsdet_Tinv
         log_prob_x = log_prob_z + logabsdet_T
 
-        log_prob_x = torchutils.split_leading_dim(
-            log_prob_x, shape=[mb_size, num_samples]
-        )
+        log_prob_x = torchutils.split_leading_dim(log_prob_x, shape=[mb_size, num_samples])
 
         return samples_x, log_prob_x
 

@@ -64,7 +64,8 @@ def linear_spline(
         bin_boundaries = (
             torch.linspace(0, 1, num_bins + 1)
             .view([1] * inputs.dim() + [-1])
-            .expand(*inputs.shape, -1).to(cdf.device)
+            .expand(*inputs.shape, -1)
+            .to(cdf.device)
         )
 
         slopes = (cdf[..., 1:] - cdf[..., :-1]) / (

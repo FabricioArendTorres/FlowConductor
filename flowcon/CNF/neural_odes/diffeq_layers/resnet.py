@@ -29,7 +29,7 @@ class ResNet(container.SequentialDiffEq):
 
     def __repr__(self):
         return (
-            '{name}({dim}, intermediate_dim={intermediate_dim}, n_resblocks={n_resblocks})'.format(
+            "{name}({dim}, intermediate_dim={intermediate_dim}, n_resblocks={n_resblocks})".format(
                 name=self.__class__.__name__, **self.__dict__
             )
         )

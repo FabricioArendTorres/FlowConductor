@@ -25,13 +25,16 @@ class MonotonicTransform(Transform, ABC):
             forward_function = self.forward
 
         with torch.enable_grad():
-            x_guess = self.bisection_inverse(z, context=context,
-                                             forward_function=forward_function)[0].requires_grad_(True)
+            x_guess = self.bisection_inverse(z, context=context, forward_function=forward_function)[
+                0
+            ].requires_grad_(True)
             for i in range(2):
                 f = forward_function(x_guess, context=context)[0] - z
                 df_dx = torchutils.gradient(f, x_guess).view(f.shape)
                 x_guess = x_guess - f / (df_dx + 1e-7)
-        return x_guess, -self.forward_logabsdet(x_guess, context=context, forward_function=forward_function).reshape(-1)
+        return x_guess, -self.forward_logabsdet(
+            x_guess, context=context, forward_function=forward_function
+        ).reshape(-1)
 
     def bisection_inverse(self, z, context=None, forward_function=None):
         if forward_function is None:
@@ -80,7 +83,9 @@ class MonotonicTransform(Transform, ABC):
 
         x = (x_max + x_min) / 2
         # z_pred, _ = self.forward(x_middle, context)
-        return x, -self.forward_logabsdet(x, context=context, forward_function=forward_function).squeeze()
+        return x, -self.forward_logabsdet(
+            x, context=context, forward_function=forward_function
+        ).squeeze()
 
     def calc_diffs(self, z, z_max, z_min):
         diff = z - z_max

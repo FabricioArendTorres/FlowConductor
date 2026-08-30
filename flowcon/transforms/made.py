@@ -26,9 +26,7 @@ class MaskedLinear(nn.Linear):
         is_output,
         bias=True,
     ):
-        super().__init__(
-            in_features=len(in_degrees), out_features=out_features, bias=bias
-        )
+        super().__init__(in_features=len(in_degrees), out_features=out_features, bias=bias)
         mask, degrees = self._get_mask_and_degrees(
             in_degrees=in_degrees,
             out_features=out_features,

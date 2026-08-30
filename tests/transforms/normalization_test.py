@@ -77,9 +77,7 @@ class BatchNormTest(TransformTest):
         features = 100
         batch_size = 50
         inputs = torch.randn(batch_size, features)
-        transforms = [
-            norm.BatchNorm(features=features, affine=affine) for affine in [True, False]
-        ]
+        transforms = [norm.BatchNorm(features=features, affine=affine) for affine in [True, False]]
         self.eps = 1e-6
         for transform in transforms:
             with self.subTest(transform=transform):

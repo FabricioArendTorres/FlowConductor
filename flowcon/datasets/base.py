@@ -6,6 +6,7 @@ from .plane import *
 
 from torch.utils import data
 
+
 def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
     """Loads and returns a plane dataset.
 
@@ -41,26 +42,26 @@ def load_plane_dataset(name, num_points, flip_axes=False, return_label=False):
 
     try:
         return {
-            'gaussian': GaussianDataset,
-            'crescent': CrescentDataset,
-            'crescent_cubed': CrescentCubedDataset,
-            'sine_wave': SineWaveDataset,
-            'abs': AbsDataset,
-            'sign': SignDataset,
-            'four_circles': FourCircles,
-            'diamond': DiamondDataset,
-            'two_spirals': TwoSpiralsDataset,
-            'checkerboard': CheckerboardDataset,
+            "gaussian": GaussianDataset,
+            "crescent": CrescentDataset,
+            "crescent_cubed": CrescentCubedDataset,
+            "sine_wave": SineWaveDataset,
+            "abs": AbsDataset,
+            "sign": SignDataset,
+            "four_circles": FourCircles,
+            "diamond": DiamondDataset,
+            "two_spirals": TwoSpiralsDataset,
+            "checkerboard": CheckerboardDataset,
             "eight_gaussians": EightGaussianDataset,
-            'two_circles': TwoCircles,
-            'two_moons': TwoMoonsDataset,
-            'pinwheel': PinWheelDataset,
-            'swissroll': SwissRollDataset,
-            'rings': ConcentricRingsDataset
+            "two_circles": TwoCircles,
+            "two_moons": TwoMoonsDataset,
+            "pinwheel": PinWheelDataset,
+            "swissroll": SwissRollDataset,
+            "rings": ConcentricRingsDataset,
         }[name](num_points=num_points, flip_axes=flip_axes, return_label=return_label)
 
     except KeyError:
-        raise ValueError('Unknown dataset: {}'.format(name))
+        raise ValueError("Unknown dataset: {}".format(name))
 
 
 def batch_generator(loader, num_batches=int(1e10)):
@@ -88,12 +89,10 @@ class InfiniteLoader(data.DataLoader):
             num_epochs: int or None, number of epochs to iterate over the dataset.
                 If None, defaults to infinity.
         """
-        super().__init__(
-            *args, **kwargs
-        )
+        super().__init__(*args, **kwargs)
         self.finite_iterable = super().__iter__()
         self.counter = 0
-        self.num_epochs = float('inf') if num_epochs is None else num_epochs
+        self.num_epochs = float("inf") if num_epochs is None else num_epochs
 
     def __next__(self):
         try:
