@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flowcon"
-version = "1.0.0"
+version = "0.1.0"
 description = "Normalizing flows in PyTorch. An extension of nflows."
 readme = "README.md"
 license = { file = "LICENSE.md" }
