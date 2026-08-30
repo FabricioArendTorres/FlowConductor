@@ -1,6 +1,16 @@
 # data location
 flowcon/datasets/uci/data/
 
+# uv / virtualenvs
+.venv/
+.uv/
+uv.lock
+
+# Tooling caches
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.pyrefly_cache/
 
 # Development files and python cache
 /*.pyc

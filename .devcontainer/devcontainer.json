@@ -1,40 +1,45 @@
 {
-    "name": "Docker Development",
-    "image": "pytorch/pytorch:latest",
+    "name": "FlowConductor",
+    "image": "mcr.microsoft.com/devcontainers/python:3.10",
     "remoteUser": "vscode",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:1": {
-            "username": "vscode",
-            "userUid": "1000",
-            "userGid": "1000"
-        },
         "ghcr.io/devcontainers/features/git:1": {}
     },
-    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y curl g++ openssh-client && pip install --no-cache -e .[all]",
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "remoteEnv": {
+        "VIRTUAL_ENV": "/home/vscode/.venv",
+        "UV_PROJECT_ENVIRONMENT": "/home/vscode/.venv",
+        "UV_TORCH_BACKEND": "cpu",
+        "UV_LINK_MODE": "hardlink",
+        "PATH": "/home/vscode/.venv/bin:/home/vscode/.local/bin:${containerEnv:PATH}"
+    },
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-python.python",
                 "ms-vscode-remote.vscode-remote-extensionpack",
                 "charliermarsh.ruff",
+                "meta.pyrefly",
                 "ms-python.vscode-pylance",
                 "njpwerner.autodocstring"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "bash",
                 "editor.formatOnSave": true,
+                "editor.defaultFormatter": "charliermarsh.ruff",
                 "ruff.enable": true,
-                "python.defaultInterpreterPath": "/opt/conda/bin/python",
-                "python.analysis.typeCheckingMode": "strict",
+                "ruff.nativeServer": "on",
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.codeActionsOnSave": {
+                        "source.fixAll.ruff": "explicit",
+                        "source.organizeImports.ruff": "explicit"
+                    }
+                },
+                "python.defaultInterpreterPath": "/home/vscode/.venv/bin/python",
+                "python.analysis.typeCheckingMode": "off",
                 "python.analysis.autoImportCompletions": true,
                 "python.analysis.useLibraryCodeForTypes": true,
-                "python.analysis.diagnosticSeverityOverrides": {
-                    "reportUnknownMemberType": "none",
-                    "reportUnknownArgumentType": "none",
-                    "reportUnknownVariableType": "warning",
-                    "reportUnknownLambdaType": "warning",
-                    "reportGeneralTypeIssues": "warning"
-                },
                 "autoDocstring.format": "numpy",
                 "autoDocstring.startOnNewLine": true
             }
@@ -42,8 +47,8 @@
     },
     "mounts": [
         "source=${localWorkspaceFolder},target=/flowc,type=bind",
-        "source=${env:USERPROFILE}\\.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
-        "source=${env:USERPROFILE}\\.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
     ],
     "workspaceFolder": "/flowc"
 }

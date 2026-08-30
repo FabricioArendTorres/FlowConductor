@@ -12,26 +12,27 @@ The following table provides a rough description.
 
 Install
 ----
-FlowConductor is installable via `pip`.
-We recommend using a virtual environment, where you set up your pytorch version beforehand.
-You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
-for any version after 1.13.
+FlowConductor is installable via `pip` or [uv](https://docs.astral.sh/uv/).
+We recommend setting up your PyTorch version first (CPU or CUDA). CI tests PyTorch 1.13 and later.
 
-You may either install the latest release from pipy:
-```
-$  pip install flowcon
-```
+Latest release:
 
-or install it directly from github via pip 
 ```
-$  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+$ pip install flowcon
 ```
 
-Of course, you may also just download the repo and install it locally
+From GitHub:
+
+```
+$ pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+```
+
+From a local checkout, with uv:
+
 ```
 $ git clone https://github.com/FabricioArendTorres/FlowConductor
 $ cd FlowConductor
-$ pip install . 
+$ uv sync
 ```
 
 

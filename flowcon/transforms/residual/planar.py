@@ -101,9 +101,7 @@ class SylvesterTransform(Transform):
         self.log_upper_diag2 = nn.Parameter(torch.zeros(features))
 
         # Q
-        self.Q_orth = OrthogonalCaley(
-            n_features=features, n_transforms=self.num_householder
-        ).to(device=device)
+        self.Q_orth = OrthogonalCaley(n_features=features).to(device=device)
 
         # bias
         self.bias = nn.Parameter(torch.zeros(features))

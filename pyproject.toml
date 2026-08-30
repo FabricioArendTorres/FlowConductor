@@ -1,71 +1,153 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flowcon"
+version = "1.0.0"
+description = "Normalizing flows in PyTorch. An extension of nflows."
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Fabricio Arend Torres" },
+    { name = "Marcello Massimo Negri" },
+    { name = "Jonathan Aellen" },
+]
+keywords = ["normalizing-flows", "pytorch", "deep-learning", "density-estimation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 2 - Pre-Alpha",
+]
+dependencies = [
+    "numpy",
+    "torch",
+    "ninja",
+    "h5py",
+    "umnn",
+    "einops",
+    "torchdiffeq",
+]
+
+[project.optional-dependencies]
+dev = [
+    "parameterized",
+    "pre-commit",
+    "pyrefly",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "ruff",
+    "torchtestcase",
+]
+examples = [
+    "matplotlib",
+    "pandas",
+    "scikit-learn",
+]
+docs = [
+    "pdoc3",
+]
+all = [
+    "flowcon[dev,examples,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/FabricioArendTorres/FlowConductor"
+Repository = "https://github.com/FabricioArendTorres/FlowConductor"
+Issues = "https://github.com/FabricioArendTorres/FlowConductor/issues"
+
+[dependency-groups]
+dev = [
+    "parameterized",
+    "pre-commit",
+    "pyrefly",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "ruff",
+    "torchtestcase",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["flowcon"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/flowcon",
+    "/tests",
+    "/README.md",
+    "/LICENSE.md",
+]
+
+[tool.uv]
+package = true
+default-groups = ["dev"]
+
 [tool.ruff]
-# Enable autofixing (use `ruff check --fix` to apply)
-fix = true
-
-# Set the line length to match Black (if used)
 line-length = 100
-
-# Target Python version
-target-version = "py310" # Adjust based on your project's Python version
-
-# Exclude files or directories
+target-version = "py310"
 exclude = [
-  ".git",
-  "__pycache__",
-  "build",
-  "dist",
-  ".venv",
-  "migrations",
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
 ]
 
 [tool.ruff.format]
-# Enable Ruff's formatter (if not using Black)
 indent-style = "space"
 line-ending = "lf"
 quote-style = "double"
 
 [tool.ruff.lint]
-fixable = ["ALL"]
-ignore = [
-  "ANN401", # Allow Any hints (consistent with mypy)
-  "ANN204", # untyped init 
-]
+# High-signal rules that are currently clean. Broader style (I/UP/B/F401) and
+# ruff format belong in a later cleanup commit.
 select = [
-  "E",
-  "F",
-  "I",
-  "B", # Common linting rules
-  "ANN", # Type annotations (matches mypy)
-  "PYI", # Mypy-style checks
+    "E9",  # runtime / syntax errors
+    "F63", # assertion issues
+    "F7",  # statement syntax
+    "F82", # undefined names
+]
+ignore = [
+    "E501",
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/*.py" = ["ANN"] # Ignore annotation warnings in test files
+[tool.ruff.lint.isort]
+known-first-party = ["flowcon"]
 
-[tool.mypy]
-python_version = "3.10" # Adjust based on your Python version
-# Core settings
-allow_untyped_init = true 
-disallow_untyped_calls = false # Allow calls to untyped functions (useful for PyTorch ops)
-disallow_untyped_defs = true # Enforce type hints for all functions
-strict_equality = true # Disallow `==` between incompatible types
-warn_return_any = true # Warn when a function returns `Any`
-warn_unused_ignores = true # Ensure `# type: ignore` is necessary
+[tool.pyrefly]
+python-version = "3.10"
+project-includes = ["flowcon"]
+project-excludes = [
+    "tests/**",
+    "examples/**",
+    "**/__pycache__/**",
+]
+search-path = ["."]
+# High-confidence diagnostics only while the codebase is still partially typed.
+preset = "basic"
 
-# Allow dynamically typed attributes in classes (useful for PyTorch models)
-allow_redefinition = true # Common in PyTorch training loops
-allow_untyped_globals = false 
-exclude = ["tests/"] 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = [
+    "expensive: long-running tests skipped in the default suite",
+]
 
-# PyTorch-specific considerations
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = "torch.*"
+[tool.coverage.run]
+source = ["flowcon"]
+branch = true
+omit = [
+    "tests/*",
+    "**/__pycache__/*",
+]
 
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = "torchvision.*"
-
-[[tool.mypy.overrides]]
-disallow_untyped_calls = false
-module = "torch.nn.*"
+[tool.coverage.report]
+skip_empty = true

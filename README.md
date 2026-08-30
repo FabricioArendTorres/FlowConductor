@@ -20,58 +20,79 @@ The bijective layers we additionally provide includes but are not limited to Pla
 
 
 ## Install
-### PIP
-FlowConductor is installable via `pip`.
-We recommend using a virtual environment, where you set up your pytorch version beforehand.
-You can check out in `./docker` which pytorch versions we test for, but in general there shouldn't be any complications
-for any version after 1.13.
 
-You may either install the latest release from pipy:
-```
-$  pip install flowcon
-```
+Install PyTorch first (CPU or CUDA), then install FlowConductor into that environment.
+Dependencies are unpinned so the library stays usable across PyTorch builds.
+CI currently tests the versions listed under Docker below.
 
-or install it directly from github via pip 
-```
-$  pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
-```
+### uv (recommended)
 
-Of course, you may also just download the repo and install it locally
+[uv](https://docs.astral.sh/uv/) is the project package manager.
+
 ```
 $ git clone https://github.com/FabricioArendTorres/FlowConductor
 $ cd FlowConductor
-$ pip install . 
+$ uv pip install -e ".[examples]"
 ```
 
+From GitHub without cloning:
+
+```
+$ uv pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+```
+
+### pip
+
+```
+$ pip install flowcon
+```
+
+or from GitHub:
+
+```
+$ pip install git+https://github.com/FabricioArendTorres/FlowConductor.git
+```
+
+or from a local checkout:
+
+```
+$ git clone https://github.com/FabricioArendTorres/FlowConductor
+$ cd FlowConductor
+$ pip install .
+```
 
 ### Docker
-We provide some basic Dockerfiles in `./docker`, which are very simple extensions of the pytorch docker images.
-The dockerfiles we list are the ones used for testing, so you can be sure they work.
-If you are unfamiliar with Docker, you can use our package with it as follows (assuming it is at least installed).
 
-This also works on Windows (cpu at least)!
+A single parameterized image lives at `docker/Dockerfile`. Pass a `pytorch/pytorch` tag as `PYTORCH_TAG`:
 
 ```
 $ git clone https://github.com/FabricioArendTorres/FlowConductor
 $ cd FlowConductor
 
-# Build the docker image, see the ./docker dir for different versions.
-$ docker build -f ./docker/Dockerfile-pytorchlatest -t flowc-pytorchlatest .
+$ docker build -f docker/Dockerfile --build-arg PYTORCH_TAG=latest -t flowc .
 
-# you can run the tests with
-docker run flowc-pytorchlatest pytest /flowc
+$ docker run --rm flowc pytest tests
 ```
 
-For working with this container, you may either choose to adapt our Dockerfiles, 
-or simply bind the current directory when starting the container interactively.
-For the latter, you can run a script (here `examples/toy_2d.py`) with
+Tags we test in CI: `1.13.1-cuda11.6-cudnn8-runtime`, `2.1.2-cuda12.1-cudnn8-runtime`, `2.2.2-cuda12.1-cudnn8-runtime`, and `latest`.
 
-```$ docker run --rm -it -v .:/app flowc-pytorchlatest python examples/toy_2d.py```
-Or you may swap an interactive shell within the container with
+To work interactively with the repo mounted:
+
 ```
-$ docker run --rm -it -v .:/app flowc-pytorchlatest
-$ python examples/toy_2d.py
+$ docker run --rm -it -v .:/flowc flowc python examples/toy_2d.py
 ```
+
+### Development
+
+```
+$ uv pip install -e ".[dev,examples]"
+$ pre-commit install
+$ ruff check
+$ pyrefly check
+$ pytest
+```
+
+The devcontainer is a normal Python 3.10 image with uv. It is not the PyTorch CI image: uv owns the editor venv (CPU torch). Official `pytorch/pytorch` tags are used in CI via `docker/Dockerfile`.
 
 ## Package Usage
 
