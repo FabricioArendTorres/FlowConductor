@@ -46,10 +46,13 @@ dev = [
     "ruff",
     "torchtestcase",
 ]
+datasets = [
+    "scikit-learn",
+]
 examples = [
+    "flowcon[datasets]",
     "matplotlib",
     "pandas",
-    "scikit-learn",
 ]
 docs = [
     "pdoc3",

@@ -7,9 +7,16 @@ import numpy as np
 import torch
 
 from torch.utils.data import Dataset
-import sklearn.datasets
-import flowcon.utils as utils
-from sklearn.utils import shuffle as util_shuffle
+
+
+def _sklearn_datasets():
+    try:
+        import sklearn.datasets as sk_datasets
+    except ImportError as exc:
+        raise ImportError(
+            "This dataset requires scikit-learn. Install it with: pip install 'flowcon[datasets]'"
+        ) from exc
+    return sk_datasets
 
 
 class PlaneDataset(Dataset):
@@ -89,7 +96,7 @@ class CrescentDataset(PlaneDataset):
 
 class TwoMoonsDataset(PlaneDataset):
     def _create_data(self):
-        data, label = sklearn.datasets.make_moons(n_samples=self.num_points, noise=0.1)
+        data, label = _sklearn_datasets().make_moons(n_samples=self.num_points, noise=0.1)
         data = data.astype("float32")
         data = data * 2 + np.array([-1, -0.2])
         self.data = torch.tensor(data, dtype=torch.float32)
@@ -100,7 +107,7 @@ class TwoMoonsDataset(PlaneDataset):
 
 class SwissRollDataset(PlaneDataset):
     def _create_data(self):
-        data, label = sklearn.datasets.make_swiss_roll(n_samples=self.num_points, noise=1.0)
+        data, label = _sklearn_datasets().make_swiss_roll(n_samples=self.num_points, noise=1.0)
         data = data.astype("float32")[:, [0, 2]]
         data /= 5
         self.data = torch.tensor(data, dtype=torch.float32)
@@ -177,7 +184,7 @@ class SignDataset(PlaneDataset):
 
 class TwoCircles(PlaneDataset):
     def _create_data(self):
-        data, label = sklearn.datasets.make_circles(
+        data, label = _sklearn_datasets().make_circles(
             n_samples=self.num_points, factor=0.5, noise=0.08
         )
         data = data.astype("float32")
@@ -309,7 +316,7 @@ class ConcentricRingsDataset(PlaneDataset):
             ).T
             * 3.0
         )
-        X = util_shuffle(X)
+        X = X[np.random.permutation(len(X))]
 
         # Add noise
         X = X + np.random.normal(scale=0.08, size=X.shape)

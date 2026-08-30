@@ -19,6 +19,7 @@ jobs:
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           enable-cache: true
+          python-version: "3.11"
 
       - name: Ruff
         run: uvx ruff@0.16.5 check flowcon tests examples
@@ -27,7 +28,9 @@ jobs:
         run: uvx ruff@0.16.5 format --check
 
       - name: Pyrefly
-        run: uvx pyrefly check
+        env:
+          UV_TORCH_BACKEND: cpu
+        run: uv run --extra datasets pyrefly check
 
   test:
     name: Test (pytorch ${{ matrix.name }})
