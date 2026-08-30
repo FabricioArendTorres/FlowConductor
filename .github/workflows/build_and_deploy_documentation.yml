@@ -19,7 +19,7 @@ jobs:
         uses: astral-sh/setup-uv@v10
         with:
           enable-cache: true
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install project
         env:
