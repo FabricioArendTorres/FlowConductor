@@ -1,7 +1,16 @@
 {
     "name": "Docker Development",
     "image": "pytorch/pytorch:latest",
-    "postCreateCommand": "apt-get update && apt-get install -y g++ && apt-get install -y openssh-client && pip install --no-cache -e .[all]",
+    "remoteUser": "vscode",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:1": {
+            "username": "vscode",
+            "userUid": "1000",
+            "userGid": "1000"
+        },
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    "postCreateCommand": "sudo apt-get update && sudo apt-get install -y curl g++ openssh-client && pip install --no-cache -e .[all]",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -15,7 +24,7 @@
                 "terminal.integrated.defaultProfile.linux": "bash",
                 "editor.formatOnSave": true,
                 "ruff.enable": true,
-                "python.defaultInterpreterPath": "/usr/bin/python3",
+                "python.defaultInterpreterPath": "/opt/conda/bin/python",
                 "python.analysis.typeCheckingMode": "strict",
                 "python.analysis.autoImportCompletions": true,
                 "python.analysis.useLibraryCodeForTypes": true,
@@ -27,22 +36,14 @@
                     "reportGeneralTypeIssues": "warning"
                 },
                 "autoDocstring.format": "numpy",
-                "autoDocstring.startOnNewLine": true,
+                "autoDocstring.startOnNewLine": true
             }
         }
     },
-    "features": {
-        "ghcr.io/devcontainers/features/git:1": {}
-    },
     "mounts": [
         "source=${localWorkspaceFolder},target=/flowc,type=bind",
-        // mount ssh and gitconfig to within the container.
-        // WINDOWS PATHS 
-        "source=${env:USERPROFILE}\\.ssh,target=/root/.ssh,type=bind,consistency=cached",
-        "source=${env:USERPROFILE}\\.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached"
-        // LINUX PATHS
-        // "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-        // "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
+        "source=${env:USERPROFILE}\\.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+        "source=${env:USERPROFILE}\\.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
     ],
-    "workspaceFolder": "/flowc",
+    "workspaceFolder": "/flowc"
 }
